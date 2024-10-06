@@ -20,7 +20,7 @@ from django.urls import path, include
 from core import settings
 
 urlpatterns = [
-    path('', include('images.urls')),
+    path('', include('soundscape.urls')),
     path('admin/', admin.site.urls),
 ]
 
