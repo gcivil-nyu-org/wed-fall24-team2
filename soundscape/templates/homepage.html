@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Mapbox GL JS map</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #map {
+        width: 80%;
+        height: 80%;
+      }
+
+      .app-container {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column; /* Stack map and button vertically */
+        align-items: center; /* Center items horizontally */
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+      }
+
+      #clear-storage {
+        margin: 10px; /* Space between the map and button */
+        padding: 10px 15px;
+        background-color: white;
+        border: 1px solid #ccc;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <div id="map"></div>
+      <button id="clear-storage">Clear Markers</button>
+    </div>
+    <script src="{% static 'js/mapUtils.js'%}"></script>
+    <script src="{% static 'js/map.js'%}"></script>
+    <script>
+      mapboxgl.accessToken = '{{ mapbox_access_token }}';
+
+      let map;
+      let existingMarkers = [];
+
+      // Use the browser's geolocation API to get the user's location and initialize map
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => successLocation(position, map, existingMarkers),
+          (error) => errorLocation(error, map, existingMarkers),
+          {
+            enableHighAccuracy: true, // Option to use GPS for more accurate location
+          }
+        );
+      }
+
+      // Clear local storage on button click
+      document
+        .getElementById('clear-storage')
+        .addEventListener('click', function () {
+          localStorage.clear();
+          existingMarkers = [];
+          window.location.reload();
+          alert('All markers have been cleared!');
+        });
+    </script>
+  </body>
+</html>
