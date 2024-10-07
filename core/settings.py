@@ -11,9 +11,20 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+import environ
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Take environment variables from .env file
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# MAPBOX_ACCESS_TOKEN
+MAPBOX_ACCESS_TOKEN=env('MAPBOX_ACCESS_TOKEN')
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'soundscape.apps.SoundscapeConfig',
     'django_tables2',
     'crispy_forms',
     'data_collection',
