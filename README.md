@@ -28,7 +28,15 @@ Obtain an [API Key](https://www.mapbox.com/) from Mapbox. Then create a ".env" f
 # this is the ".env" file:
 MAPBOX_ACCESS_TOKEN="__________"
 ```
+Add database configuration to the ".env" file to access your local database:
+```sh
+...
 
+DB_ENGINE='__________'
+DB_NAME='__________'
+DB_USER='__________'
+DB_PASSWORD='__________'
+```
 ## Usage
 
 Run the app
