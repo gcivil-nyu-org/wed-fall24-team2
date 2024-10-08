@@ -1,0 +1,15 @@
+<!-- templates/top_borough.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Most Raucous Borough </title>
+</head>
+<body>
+<h1> Borough with Most Noise</h1>
+{% if top_borough %}
+<p>The noisiest borough is <strong>{{ top_borough.borough }}</strong> with <strong>{{ top_borough.incident_count }}</strong> incidents.</p>
+{% else %}
+<p>No incident data available.</p>
+{% endif %}
+</body>
+</html>
