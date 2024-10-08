@@ -59,3 +59,5 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR('The specified CSV file does not exist.'))
         except Exception as e:
             self.stderr.write(self.style.ERROR(f'An error occurred: {e}'))
+
+#todo  run this script using data in S3 as source

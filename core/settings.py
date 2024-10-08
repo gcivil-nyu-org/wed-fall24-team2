@@ -103,10 +103,10 @@ if 'RDS_DB_NAME' in os.environ:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'nyc_ss_db',
-            'USER': 'dp3754',
-            'PASSWORD': 'dp3754',
+            'ENGINE': '',
+            'NAME': '',
+            'USER': '',
+            'PASSWORD': '',
             'HOST': 'localhost',
             'PORT': '5432',
         }
