@@ -1,10 +1,16 @@
 branch-defaults:
   test-db-prod:
-    environment: prod-db-test
+    environment: my-test-env
     group_suffix: null
+
+environment-defaults:
+  my-test-env:
+    branch: null
+    repository: null
+
 global:
   application_name: prod-db-test
-  branch: test-db-prod
+  branch: test-db-prod  # This should be the branch you want to deploy
   default_ec2_keyname: prod-test-db-eb-keypair
   default_platform: Python 3.11 running on 64bit Amazon Linux 2023
   default_region: us-east-1
@@ -12,8 +18,7 @@ global:
   instance_profile: null
   platform_name: null
   platform_version: null
-  profile: new-profile
+  profile: new-account
   repository: null
   sc: git
   workspace_type: Application
-
