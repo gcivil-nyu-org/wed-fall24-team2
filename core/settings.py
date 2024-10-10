@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'soundscape.apps.SoundscapeConfig',
+    'chatroom.apps.ChatroomConfig',
     'django_tables2',
     'crispy_forms',
     'data_collection',
@@ -102,13 +103,13 @@ if 'RDS_DB_NAME' in os.environ:
 #For local DB, enter your own creds:
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': '',
-            'NAME': '',
-            'USER': '',
-            'PASSWORD': '',
+        "default": {
+            'ENGINE': env('DB_ENGINE'),
+            'NAME': env('DB_NAME'),
+            'USER': env('DB_USER'),
+            'PASSWORD': env('DB_PASSWORD'),
             'HOST': 'localhost',
-            'PORT': '5432',
+            'PORT': 5432
         }
     }
 
