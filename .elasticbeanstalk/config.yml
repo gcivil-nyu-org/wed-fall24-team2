@@ -1,11 +1,12 @@
 branch-defaults:
   test-db-prod:
     environment: sprint-5-test-env
+    group_suffix: null
 global:
   application_name: sprint-5-test
   branch: null
   default_ec2_keyname: prod-test-db-eb-keypair
-  default_platform: Python 3.12 running on 64bit Amazon Linux 2023
+  default_platform: Python 3.8 running on 64bit Amazon Linux 2
   default_region: us-east-1
   include_git_submodules: true
   instance_profile: null
