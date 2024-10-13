@@ -101,17 +101,17 @@ if 'RDS_DB_NAME' in os.environ:
         }
     }
 #For local DB, enter your own creds:
-else:
-    DATABASES = {
-        "default": {
-            'ENGINE': env('DB_ENGINE'),
-            'NAME': env('DB_NAME'),
-            'USER': env('DB_USER'),
-            'PASSWORD': env('DB_PASSWORD'),
-            'HOST': 'localhost',
-            'PORT': 5432
-        }
-    }
+# else:
+#     DATABASES = {
+#         "default": {
+#             'ENGINE': env('DB_ENGINE'),
+#             'NAME': env('DB_NAME'),
+#             'USER': env('DB_USER'),
+#             'PASSWORD': env('DB_PASSWORD'),
+#             'HOST': 'localhost',
+#             'PORT': 5432
+#         }
+#     }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

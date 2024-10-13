@@ -3,7 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Mapbox GL JS map</title>
+    <title>Soundscape Explorer</title>
     <meta
       name="viewport"
       content="initial-scale=1,maximum-scale=1,user-scalable=no"
@@ -40,12 +40,128 @@
         justify-content: center;
       }
 
+      .chatroom-marker {
+        background-image: url('./static/images/chatroom.png'); /* Path to your PNG file */
+        background-size: contain; /* Ensures the image fits inside the div */
+        width: 30px;
+        height: 30px;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
       #clear-storage {
         margin: 10px; /* Space between the map and button */
         padding: 10px 15px;
         background-color: white;
         border: 1px solid #ccc;
         cursor: pointer;
+      }
+
+      .chat-container {
+        max-width: 900px;
+        width: 600px;
+        margin: 10px auto;
+        border-radius: 8px;
+        overflow: auto;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        max-height: 400px;
+      }
+      .chat-header {
+        background-color: #007bff;
+        color: #ffffff;
+        padding: 10px;
+        text-align: center;
+        font-size: 1rem;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .chat-messages {
+        flex: 1;
+        padding: 10px;
+        overflow-y: auto;
+        background-color: #e9ecef;
+      }
+      .chat-message {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        background-color: #f1f3f5;
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-message.user {
+        background-color: #cce5ff;
+        align-self: flex-end;
+      }
+      .message-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 0.75rem;
+        color: #555;
+      }
+      .username {
+        font-weight: bold;
+        color: #007bff;
+      }
+      .timestamp {
+        color: #888;
+      }
+      .message-text {
+        font-size: 0.75rem;
+      }
+      .delete-btn {
+        background-color: transparent;
+        border: none;
+        color: grey;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-left: 15px;
+        align-self: flex-end;
+      }
+      .delete-btn:hover {
+        color: #ff4d4f;
+      }
+      .chat-input {
+        display: flex;
+        padding: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .chat-input input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        outline: none;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .chat-input input:focus {
+        border-color: #007bff;
+      }
+      .chat-input button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        border-radius: 30px;
+        margin-left: 15px;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      .chat-input button:hover {
+        background-color: #0056b3;
+      }
+
+      .mapboxgl-popup-content {
+        width: fit-content; /* Set your desired width */
+        height: fit-content; /* You can set a fixed height if needed */
+        max-height: 500px;
       }
     </style>
   </head>
@@ -55,6 +171,7 @@
       <button id="clear-storage">Clear Markers</button>
     </div>
     <script src="{% static 'js/mapUtils.js'%}"></script>
+    <script src="{% static 'js/chatroom.js'%}"></script>
     <script src="{% static 'js/map.js'%}"></script>
     <script>
       mapboxgl.accessToken = '{{ mapbox_access_token }}';
