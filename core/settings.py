@@ -24,8 +24,7 @@ env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # MAPBOX_ACCESS_TOKEN
-MAPBOX_ACCESS_TOKEN=env('MAPBOX_ACCESS_TOKEN')
-
+MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN', env('MAPBOX_ACCESS_TOKEN', default=None))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
