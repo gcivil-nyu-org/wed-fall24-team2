@@ -25,8 +25,8 @@
         align-items: center;
       }
       #map {
-        width: 80%;
-        height: 80%;
+        width: 100%;
+        height: 100%;
       }
 
       .app-container {
@@ -47,14 +47,6 @@
         height: 30px;
         background-repeat: no-repeat;
         background-position: center;
-      }
-
-      #clear-storage {
-        margin: 10px; /* Space between the map and button */
-        padding: 10px 15px;
-        background-color: white;
-        border: 1px solid #ccc;
-        cursor: pointer;
       }
 
       .chat-container {
@@ -168,7 +160,6 @@
   <body>
     <div class="app-container">
       <div id="map"></div>
-      <button id="clear-storage">Clear Markers</button>
     </div>
     <script src="{% static 'js/mapUtils.js'%}"></script>
     <script src="{% static 'js/chatroom.js'%}"></script>
@@ -189,16 +180,6 @@
           }
         );
       }
-
-      // Clear local storage on button click
-      document
-        .getElementById('clear-storage')
-        .addEventListener('click', function () {
-          localStorage.clear();
-          existingMarkers = [];
-          window.location.reload();
-          alert('All markers have been cleared!');
-        });
     </script>
   </body>
 </html>
