@@ -1,21 +1,21 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Mapbox GL JS map</title>
-    <meta
-      name="viewport"
-      content="initial-scale=1,maximum-scale=1,user-scalable=no"
-    />
-    <link
-      href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css"
-      rel="stylesheet"
-    />
+    <title>SoundScape Explorer</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    
+    <!-- Mapbox GL JS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+    
+    <!-- Mapbox Search JS -->
+    <link href="https://api.mapbox.com/mapbox-assembly/v1.3.0/assembly.min.css" rel="stylesheet">
+    <script id="search-js" defer src="https://api.mapbox.com/search-js/v1.0.0-beta.22/web.js"></script>
+
     <style>
-      body,
-      html {
+      body, html {
         margin: 0;
         padding: 0;
         height: 100%;
@@ -24,6 +24,7 @@
         justify-content: center;
         align-items: center;
       }
+
       #map {
         width: 80%;
         height: 80%;
@@ -33,19 +34,28 @@
         margin: 0;
         padding: 0;
         display: flex;
-        flex-direction: column; /* Stack map and button vertically */
-        align-items: center; /* Center items horizontally */
+        flex-direction: column;
+        align-items: center;
         width: 100%;
         height: 100%;
         justify-content: center;
       }
 
       #clear-storage {
-        margin: 10px; /* Space between the map and button */
+        margin: 10px;
         padding: 10px 15px;
         background-color: white;
         border: 1px solid #ccc;
         cursor: pointer;
+      }
+
+      /* Floating search bar */
+      .mapboxgl-ctrl-geocoder {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 50%;
+        z-index: 1;
       }
     </style>
   </head>
@@ -54,34 +64,62 @@
       <div id="map"></div>
       <button id="clear-storage">Clear Markers</button>
     </div>
-    <script src="{% static 'js/mapUtils.js'%}"></script>
-    <script src="{% static 'js/map.js'%}"></script>
+
+    <!-- Load custom JavaScript -->
+    <script src="{% static 'js/mapUtils.js' %}"></script>
+    <script src="{% static 'js/map.js' %}"></script>
+
     <script>
+      // Set the access token for Mapbox
       mapboxgl.accessToken = '{{ mapbox_access_token }}';
 
-      let map;
-      let existingMarkers = [];
+      // Initialize the Mapbox map object
+      const map = new mapboxgl.Map({
+        container: 'map', // The ID of the element to attach the map to
+        style: 'mapbox://styles/mapbox/streets-v12', // The style URL
+        center: [-74.5, 40], // Initial center [longitude, latitude]
+        zoom: 9, // Initial zoom level
+      });
 
-      // Use the browser's geolocation API to get the user's location and initialize map
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => successLocation(position, map, existingMarkers),
-          (error) => errorLocation(error, map, existingMarkers),
-          {
-            enableHighAccuracy: true, // Option to use GPS for more accurate location
-          }
-        );
-      }
+      // Load the search box after the search-js script has loaded
+      const searchJS = document.getElementById('search-js');
+      searchJS.onload = function () {
+        // Initialize the search box
+        const searchBox = new MapboxSearchBox();
+        searchBox.accessToken = mapboxgl.accessToken;
+
+        // Set options for the search box
+        searchBox.options = {
+          types: 'address,poi',
+          proximity: [-74.5, 40], // Proximity for more relevant results
+        };
+
+        searchBox.marker = true; // Show markers for search results
+        searchBox.mapboxgl = mapboxgl;
+
+        // Add the search box to the map
+        map.addControl(searchBox);
+        
+        // Event listener for search results
+        searchBox.on('result', function (e) {
+          const result = e.result;
+          console.log('Selected Location:', result); // Log for debugging
+          const { center } = result.geometry;
+          
+          // Fly to the searched location
+          map.flyTo({
+            center: center,
+            zoom: 12,
+          });
+        });
+      };
 
       // Clear local storage on button click
-      document
-        .getElementById('clear-storage')
-        .addEventListener('click', function () {
-          localStorage.clear();
-          existingMarkers = [];
-          window.location.reload();
-          alert('All markers have been cleared!');
-        });
+      document.getElementById('clear-storage').addEventListener('click', function () {
+        localStorage.clear();
+        alert('All markers have been cleared!');
+        window.location.reload(); // Reload the page to reflect cleared markers
+      });
     </script>
   </body>
 </html>
