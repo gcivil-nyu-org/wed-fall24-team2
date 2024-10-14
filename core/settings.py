@@ -26,6 +26,14 @@ env = environ.Env()
 # MAPBOX_ACCESS_TOKEN
 MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN')
 
+# Freesound access token
+FREESOUND_API_KEY = os.getenv('FREESOUND_API_KEY')
+
+# AWS secret keys
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -53,6 +61,7 @@ INSTALLED_APPS = [
     'django_tables2',
     'crispy_forms',
     'data_collection',
+    'sounddata_s3',
 ]
 
 MIDDLEWARE = [
@@ -96,7 +105,7 @@ DATABASES = {
          'USER':'postgres',
          'PASSWORD':'postgres',
          'HOST':'database-1.c1aisqasc3u5.us-east-1.rds.amazonaws.com',
-         'PORT':'5432'
+         'PORT':'5440'
      }
 }
 
