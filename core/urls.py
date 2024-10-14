@@ -23,6 +23,7 @@ urlpatterns = [
     path('data/', include('data_collection.urls')),
     path('', include('soundscape.urls')),
     path('admin/', admin.site.urls),
+    path("sound/", include("sounddata_s3.urls")),
 ]
 
 if settings.DEBUG:
