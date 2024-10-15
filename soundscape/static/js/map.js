@@ -308,23 +308,24 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
       center: centerCoordinates,
       zoom: 12,
     });
-    // register onClick function on map
+    // Register onClick function on map
     map.on('click', function (e) {
       const coordinates = e.lngLat;
-      if (
-        isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)
-      ) {
+      if (isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)) {
         return;
       }
       addMarker(coordinates.lng, coordinates.lat, map);
-
       saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
     });
   }
+  
   addControls(map);
+  
+  // Load markers and add chatroom markers, then add search box
   loadMarkers(existingMarkers, map);
   addChatroomMarkers(map);
 }
+
 
 function successLocation(position, map, existingMarkers) {
   const { latitude, longitude } = position.coords;
