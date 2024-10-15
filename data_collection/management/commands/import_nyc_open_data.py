@@ -30,9 +30,10 @@ class Command(BaseCommand):
         row_limit = 1000
 
         # Check if we're running in production (DEBUG=False)
-        is_production = (
-            not settings.DEBUG
-        )  # hardcode as True; testing production behavior
+        # is_production = (
+        #     not settings.DEBUG
+        # )
+        # hardcode as True; testing production behavior
 
         if not os.path.exists(csv_file):
             self.stdout.write(
