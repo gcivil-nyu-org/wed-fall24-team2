@@ -13,6 +13,13 @@
       rel="stylesheet"
     />
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-assembly/v1.3.0/assembly.min.css" rel="stylesheet">
+
+    <!-- Mapbox Search JS -->
+    <link href="https://api.mapbox.com/mapbox-assembly/v1.3.0/assembly.min.css" rel="stylesheet">
+    <script id="search-js" defer src="https://api.mapbox.com/search-js/v1.0.0-beta.22/web.js"></script>
+
+
     <style>
       body,
       html {
@@ -158,18 +165,21 @@
     </style>
   </head>
   <body>
+
     <div class="app-container">
       <div id="map"></div>
     </div>
+    
     <script src="{% static 'js/mapUtils.js'%}"></script>
     <script src="{% static 'js/chatroom.js'%}"></script>
     <script src="{% static 'js/map.js'%}"></script>
+    
     <script>
       mapboxgl.accessToken = '{{ mapbox_access_token }}';
-
+  
       let map;
       let existingMarkers = [];
-
+  
       // Use the browser's geolocation API to get the user's location and initialize map
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -180,6 +190,9 @@
           }
         );
       }
+      
     </script>
+    
   </body>
+  
 </html>
