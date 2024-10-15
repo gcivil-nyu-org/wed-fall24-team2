@@ -100,7 +100,7 @@ if 'RDS_DB_NAME' in os.environ:
             'PORT': os.environ['RDS_PORT'],
         }
     }
-#For local DB, enter your own creds:
+# For local DB, enter your own creds:
 else:
     DATABASES = {
         "default": {
