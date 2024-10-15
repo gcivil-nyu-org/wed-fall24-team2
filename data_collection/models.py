@@ -1,5 +1,5 @@
-
 from django.db import models
+
 
 class NYCIncidentData(models.Model):
     unique_key = models.CharField(max_length=100, primary_key=True)
