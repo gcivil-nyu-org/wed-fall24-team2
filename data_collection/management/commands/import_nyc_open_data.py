@@ -4,7 +4,7 @@ from data_collection.models import NYCIncidentData
 from datetime import datetime
 import os
 import boto3
-from django.conf import settings
+# from django.conf import settings
 from django.utils.timezone import make_aware
 import pytz
 
