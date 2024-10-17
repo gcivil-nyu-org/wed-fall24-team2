@@ -1,9 +1,11 @@
 from django.db import models
 
+
 class Explorer(models.Model):
     name = models.CharField(max_length=50)
     email = models.CharField(max_length=50)
     password = models.CharField(max_length=20)
+
 
 class Chatroom(models.Model):
     name = models.CharField(max_length=50)
@@ -18,8 +20,11 @@ class Chatroom(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class Message(models.Model):
     text = models.CharField(max_length=400)
     chatroom = models.ForeignKey(Chatroom, on_delete=models.CASCADE)
-    explorer = models.ForeignKey(Explorer, null=True, blank=True, on_delete=models.SET_NULL)
+    explorer = models.ForeignKey(
+        Explorer, null=True, blank=True, on_delete=models.SET_NULL
+    )

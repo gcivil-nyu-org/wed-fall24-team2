@@ -1,11 +1,24 @@
 asgiref==3.8.1
+black==24.8.0
+click==8.1.7
 Django==4.1.1
 django-crispy-forms==1.14.0
 django-environ==0.11.2
 django-tables2==2.4.1
 environ==1.0
+flake8==7.1.1
+mccabe==0.7.0
+mypy-extensions==1.0.0
+packaging==24.1
+pathspec==0.12.1
 Pillow==9.2.0
+platformdirs==4.3.6
 psycopg2-binary==2.9.3
+pycodestyle==2.12.1
+pyflakes==3.2.0
 sqlparse==0.5.1
+<<<<<<< HEAD
 boto3==1.26.0
 git+https://github.com/MTG/freesound-python.git
+=======
+>>>>>>> 30eca40caef29b46304a09e6392eeb4796cd5535
