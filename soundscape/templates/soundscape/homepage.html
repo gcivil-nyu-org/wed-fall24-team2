@@ -69,7 +69,7 @@
       }
 
       #home {
-        background-color: #f4f4f4;
+        background-color: #c07f16;
       }
 
       #signup {
@@ -77,6 +77,9 @@
       }
 
       #login {
+        background-color: #f4f4f4;
+      }
+      #About {
         background-color: #f4f4f4;
       }
 
@@ -222,8 +225,8 @@
             </div>
             <div class="nav-right">
                 <ul>
-                    <li><a href="signup">Signup</a></li>
-                    <li><a href="login">Login</a></li>
+                    <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
+                    <li><a href="{% url 'soundscape:login' %}">Login</a></li>
                 </ul>
             </div>
         </nav>
@@ -254,5 +257,6 @@
         );
       }
     </script>
+  
   </body>
 </html>
