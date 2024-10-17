@@ -15,19 +15,18 @@ def homepage(request):
 
 
 def about(request):
-    return render(request, 'soundscape/about.html')
+    return render(request, "soundscape/about.html")
+
 
 def signup(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = SignupForm(request.POST)
 
         if form.is_valid():
             form.save()
 
-            return redirect('/login/')
+            return redirect("/login/")
     else:
         form = SignupForm()
 
-    return render(request, 'soundscape/signup.html', {
-        'form': form
-    })
+    return render(request, "soundscape/signup.html", {"form": form})
