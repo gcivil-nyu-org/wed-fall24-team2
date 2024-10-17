@@ -266,17 +266,17 @@ function addControls(map) {
     map.addControl(search);
 
     /* GEOLOCATION */
-    map.addControl(
-      new mapboxgl.GeolocateControl({
-        positionOptions: {
-          enableHighAccuracy: true,
-        },
-        // When active the map will receive updates to the device's location as it changes.
-        trackUserLocation: true,
-        // Draw an arrow next to the location dot to indicate which direction the device is heading.
-        showUserHeading: true,
-      })
-    );
+    // map.addControl(
+    //   new mapboxgl.GeolocateControl({
+    //     positionOptions: {
+    //       enableHighAccuracy: true,
+    //     },
+    //     // When active the map will receive updates to the device's location as it changes.
+    //     trackUserLocation: true,
+    //     // Draw an arrow next to the location dot to indicate which direction the device is heading.
+    //     showUserHeading: true,
+    //   })
+    // );
 
     /* NAVIGATION CONTROL */
     map.addControl(new mapboxgl.NavigationControl());
@@ -318,12 +318,13 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
       saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
     });
   }
-  
-  addControls(map);
-  
+
+
+
   // Load markers and add chatroom markers, then add search box
   loadMarkers(existingMarkers, map);
   addChatroomMarkers(map);
+    addControls(map);
 }
 
 
@@ -333,10 +334,10 @@ function successLocation(position, map, existingMarkers) {
 }
 
 function errorLocation(error, map, existingMarkers) {
-  alert(
-    'Unable to retrieve your location. Initializing map at default location. ' +
-      error
-  );
+  // alert(
+  //   'Unable to retrieve your location. Initializing map at default location. ' +
+  //     error
+  // );
   // Optional: Set a default location (e.g., NYC) if geolocation fails
   initializeMap([-74.006, 40.7128], map, existingMarkers); // Default center (New York City)
 }
