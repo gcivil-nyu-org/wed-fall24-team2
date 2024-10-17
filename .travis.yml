@@ -25,4 +25,4 @@ deploy:
   env: $EB_ENV_NAME
   bucket_name: "elasticbeanstalk-us-east-1-783764603041"
   on:
-    branch: main
+    branch: develop
