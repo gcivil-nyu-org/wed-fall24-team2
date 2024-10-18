@@ -7,16 +7,22 @@ from django.conf import settings
 from freesound import FreesoundClient
 import os
 import environ
+from dotenv import load_dotenv
+
 
 class Command(BaseCommand):
+    load_dotenv()
     help = 'Seed database with noise complaint data and sound files (limited to 10 rows)'
 
     def handle(self, *args, **kwargs):
 
         local_csv_path = '/Users/manavparikh/Desktop/Fall24/Software Engineering/Project/wed-fall24-team2/nyc_complaints_data.csv'
 
-        AWS_ACCESS_KEY_ID = 'AKIA3M7ACYCQTNHBNZHG'
-        AWS_SCRET_ACCESS_KEY = 'PrSS+CusjZzZw3RipgBRU+lRL80F9JsxUy0cNTFI'
+        AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+        AWS_SCRET_ACCESS_KEY = os.getenv('AWS_SCRET_ACCESS_KEY')
+
+        print(AWS_ACCESS_KEY_ID)
+        print(AWS_SCRET_ACCESS_KEY)
 
         # Initialize AWS S3
         s3_client = boto3.client(
@@ -29,9 +35,9 @@ class Command(BaseCommand):
 
         # Initialize Freesound API client
         #FREESOUND_API_KEY = os.getenv('FREESOUND_API_KEY')
-        FREESOUND_API_KEY = 'cAixq3uYVCYWFPk6YQ1ABhkqVjlimZH1IINWzBQk'
+        FREESOUND_API_KEY = os.getenv('FREESOUND_API_KEY')
         freesound_client = FreesoundClient()
-        # print(FREESOUND_API_KEY)
+        print(FREESOUND_API_KEY)
         
         freesound_client.set_token(FREESOUND_API_KEY, "token")
 
