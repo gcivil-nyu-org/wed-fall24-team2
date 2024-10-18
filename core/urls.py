@@ -21,11 +21,11 @@ from django.urls import path, include
 from core import settings
 
 urlpatterns = [
-    path('data/', include('data_collection.urls')),
-    path('', include('soundscape.urls')),
-    path('admin/', admin.site.urls),
+    path("data/", include("data_collection.urls")),
+    path("", include("soundscape.urls")),
+    path("admin/", admin.site.urls),
     path("sound/", include("sounddata_s3.urls")),
-    path('chatroom/', include('chatroom.urls'))
+    path("chatroom/", include("chatroom.urls")),
 ]
 
 if settings.DEBUG:

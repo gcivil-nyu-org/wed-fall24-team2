@@ -28,11 +28,11 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 MAPBOX_ACCESS_TOKEN = os.getenv("MAPBOX_ACCESS_TOKEN")
 
 # Freesound access token
-FREESOUND_API_KEY = os.getenv('FREESOUND_API_KEY')
+FREESOUND_API_KEY = os.getenv("FREESOUND_API_KEY")
 
 # AWS secret keys
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
 
 # Quick-start development settings - unsuitable for production
@@ -51,18 +51,18 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'soundscape.apps.SoundscapeConfig',
-    'chatroom.apps.ChatroomConfig',
-    'django_tables2',
-    'crispy_forms',
-    'data_collection',
-    'sounddata_s3',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "soundscape.apps.SoundscapeConfig",
+    "chatroom.apps.ChatroomConfig",
+    "django_tables2",
+    "crispy_forms",
+    "data_collection",
+    "sounddata_s3",
 ]
 
 MIDDLEWARE = [
@@ -136,12 +136,12 @@ if "RDS_DB_NAME" in os.environ:
 else:
     DATABASES = {
         "default": {
-            'ENGINE': env('DB_ENGINE'),
-            'NAME': env('DB_NAME'),
-            'USER': env('DB_USER'),
-            'PASSWORD': env('DB_PASSWORD'),
-            'HOST': env('DB_HOST'),
-            'PORT': 5432
+            "ENGINE": env("DB_ENGINE"),
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": env("DB_HOST"),
+            "PORT": 5432,
         }
     }
 
@@ -169,7 +169,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = "America/New_York"
 
 USE_I18N = True
 
