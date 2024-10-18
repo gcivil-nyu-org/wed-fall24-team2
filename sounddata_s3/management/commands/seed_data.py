@@ -50,7 +50,7 @@ class Command(BaseCommand):
 
             # Limit to the first 10 rows
             for i, row in enumerate(reader):
-                if i >= 1:
+                if i >= 50:
                     break
 
                 unique_key = row['Unique Key']

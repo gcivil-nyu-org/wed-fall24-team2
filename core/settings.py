@@ -99,16 +99,16 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-         'NAME':'postgres',
-         'USER':'postgres',
-         'PASSWORD':'postgres',
-         'HOST':'database-1.c1aisqasc3u5.us-east-1.rds.amazonaws.com',
-         'PORT':'5440'
-     }
-}
+# DATABASES = {
+#      'default': {
+#          'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#          'NAME':'postgres',
+#          'USER':'postgres',
+#          'PASSWORD':'postgres',
+#          'HOST':'database-1.c1aisqasc3u5.us-east-1.rds.amazonaws.com',
+#          'PORT':'5440'
+#      }
+# }
 
 # if 'RDS_DB_NAME' in os.environ:
 #     DATABASES = {
@@ -122,40 +122,28 @@ DATABASES = {
 #         }
 #     }
 # #For local DB, enter your own creds:
-# if "RDS_DB_NAME" in os.environ:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.postgresql_psycopg2",
-#             "NAME": os.environ["RDS_DB_NAME"],
-#             "USER": os.environ["RDS_USERNAME"],
-#             "PASSWORD": os.environ["RDS_PASSWORD"],
-#             "HOST": os.environ["RDS_HOSTNAME"],
-#             "PORT": os.environ["RDS_PORT"],
-#         }
-#     }
-# else:
-    # DATABASES = {
-    #  'default': {
-    #      'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #      'NAME':'postgres',
-    #      'USER':'postgres',
-    #      'PASSWORD':'postgres',
-    #      'HOST':'database-1.c1aisqasc3u5.us-east-1.rds.amazonaws.com',
-    #      'PORT':'5440'
-    #  }
-#}
-# For local DB, enter your own creds:
-# else:
-#     DATABASES = {
-#         "default": {
-#             'ENGINE': env('DB_ENGINE'),
-#             'NAME': env('DB_NAME'),
-#             'USER': env('DB_USER'),
-#             'PASSWORD': env('DB_PASSWORD'),
-#             'HOST': 'localhost',
-#             'PORT': 5433
-#         }
-#     }
+if "RDS_DB_NAME" in os.environ:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": os.environ["RDS_DB_NAME"],
+            "USER": os.environ["RDS_USERNAME"],
+            "PASSWORD": os.environ["RDS_PASSWORD"],
+            "HOST": os.environ["RDS_HOSTNAME"],
+            "PORT": os.environ["RDS_PORT"],
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            'ENGINE': env('DB_ENGINE'),
+            'NAME': env('DB_NAME'),
+            'USER': env('DB_USER'),
+            'PASSWORD': env('DB_PASSWORD'),
+            'HOST': env('DB_HOST'),
+            'PORT': 5432
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
