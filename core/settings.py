@@ -142,6 +142,9 @@ else:
             "PASSWORD": os.getenv("DB_PASSWORD"),
             "HOST": os.getenv("DB_HOST"),
             "PORT": 5432,
+            "TEST": {
+                "NAME": "test1",  # Add this to specify a test database
+            },
         }
     }
 
