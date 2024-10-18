@@ -3,10 +3,12 @@ import boto3
 import requests
 from django.core.management.base import BaseCommand
 from sounddata_s3.models import NYCSoundFile  # Replace with your actual model
-from django.conf import settings
+
+# from django.conf import settings
 from freesound import FreesoundClient
 import os
-import environ
+
+# import environ
 from dotenv import load_dotenv
 
 
@@ -41,8 +43,8 @@ class Command(BaseCommand):
         freesound_client.set_token(FREESOUND_API_KEY, "token")
 
         # Read the CSV from S3 bucket
-        bucket_name = "nyc-soundscape-data"
-        file_key = "nyc_complaints_data.csv"
+        # bucket_name = "nyc-soundscape-data"
+        # file_key = "nyc_complaints_data.csv"
 
         with open(local_csv_path, mode="r", encoding="utf-8") as csv_file:
             reader = csv.DictReader(csv_file)
