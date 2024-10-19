@@ -105,12 +105,12 @@ if "RDS_DB_NAME" in os.environ:
 else:
     DATABASES = {
         "default": {
-            'ENGINE': env('DB_ENGINE'),
-            'NAME': env('DB_NAME'),
-            'USER': env('DB_USER'),
-            'PASSWORD': env('DB_PASSWORD'),
-            'HOST': 'localhost',
-            'PORT': 5432
+            "ENGINE": env("DB_ENGINE"),
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": "localhost",
+            "PORT": 5432,
         }
     }
 
@@ -171,5 +171,4 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-LOGIN_REDIRECT_URL = '/'
-
+LOGIN_REDIRECT_URL = "/"

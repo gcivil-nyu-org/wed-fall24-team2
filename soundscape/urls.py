@@ -17,6 +17,7 @@ urlpatterns = [
         ),
         name="login",
     ),
-    path('logout/', LogoutView.as_view(next_page='/'), name='logout'),  # Redirect to homepage after logout
-
+    path(
+        "logout/", LogoutView.as_view(next_page="/"), name="logout"
+    ),  # Redirect to homepage after logout
 ]
