@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-
+from django.forms.models import model_to_dict
 
 from .forms import SignupForm
-from django.forms.models import model_to_dict
-import os, json
 from chatroom.models import Chatroom
+
+import os, json
 
 
 def homepage(request):
