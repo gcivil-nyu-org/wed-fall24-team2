@@ -4,7 +4,8 @@ from django.forms.models import model_to_dict
 from .forms import SignupForm
 from chatroom.models import Chatroom
 
-import os, json
+import os
+import json
 
 
 def homepage(request):
