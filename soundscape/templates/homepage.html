@@ -166,6 +166,9 @@
       <div id="map"></div>
     </div>
     
+    <script>
+      var NYC_NEIGHBORHOODS = JSON.parse('{{ chatrooms|escapejs }}');
+    </script>
     <script src="{% static 'js/mapUtils.js'%}"></script>
     <script src="{% static 'js/chatroom.js'%}"></script>
     <script src="{% static 'js/map.js'%}"></script>
