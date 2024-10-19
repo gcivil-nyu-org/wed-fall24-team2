@@ -10,5 +10,5 @@ class Command(BaseCommand):
                 username='admin', 
                 password='admin0000'
             )
-        print('Superuser has been created')
+        self.stdout.write(self.style.SUCCESS('Superuser has been created'))
 
