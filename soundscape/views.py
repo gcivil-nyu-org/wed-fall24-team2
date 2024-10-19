@@ -13,8 +13,10 @@ def homepage(request):
         "soundscape/homepage.html",
         {
             "mapbox_access_token": os.environ.get("MAPBOX_ACCESS_TOKEN"),
-            "chatrooms": json.dumps([model_to_dict(chatroom) for chatroom in Chatroom.objects.all()])
-        }
+            "chatrooms": json.dumps(
+                [model_to_dict(chatroom) for chatroom in Chatroom.objects.all()]
+            ),
+        },
     )
 
 

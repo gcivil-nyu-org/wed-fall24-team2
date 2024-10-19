@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Explorer(models.Model):
     name = models.CharField(max_length=50)
     email = models.CharField(max_length=50)
@@ -24,5 +25,7 @@ class Chatroom(models.Model):
 class Message(models.Model):
     text = models.CharField(max_length=400)
     chatroom = models.ForeignKey(Chatroom, on_delete=models.CASCADE)
-    explorer = models.ForeignKey(Explorer, null=True, blank=True, on_delete=models.SET_NULL)
+    explorer = models.ForeignKey(
+        Explorer, null=True, blank=True, on_delete=models.SET_NULL
+    )
     timestamp = models.DateTimeField(auto_now_add=True)
