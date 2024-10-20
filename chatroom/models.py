@@ -1,10 +1,11 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 
-class Explorer(models.Model):
-    name = models.CharField(max_length=50)
-    email = models.CharField(max_length=50)
-    password = models.CharField(max_length=20)
+class Explorer(AbstractUser):
+    email = models.CharField(max_length=50, unique=True)
+    username = models.CharField(max_length=150, unique=True) 
+    REQUIRED_FIELDS = ['email']
 
 
 class Chatroom(models.Model):
