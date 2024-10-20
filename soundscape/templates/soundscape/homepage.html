@@ -28,55 +28,6 @@
         justify-content: center;
         align-items: center;
       }
-
-      .navbar {
-        background-color: #333;
-        color: white;
-        padding: 15px 0;
-        position: -webkit-sticky;
-        position: sticky;
-        top: 0;
-        width: 100vw;
-        z-index: 1000;
-        display: flex;
-        justify-content: space-between;
-      }
-
-      .navbar ul {
-        list-style-type: none;
-        text-align: center;
-      }
-
-      .navbar ul li {
-        display: inline;
-        margin-right: 20px;
-      }
-
-      .navbar ul li:first-child{
-        margin-left: 20px;
-      }
-
-      .navbar ul li a {
-        color: white;
-        text-decoration: none;
-        font-size: 18px;
-      }
-
-      #home {
-        background-color: #c07f16;
-      }
-
-      #signup {
-        background-color: #f4f4f4;
-      }
-
-      #login {
-        background-color: #f4f4f4;
-      }
-      #About {
-        background-color: #f4f4f4;
-      }
-
       #map {
         width: 100%;
         height: 100%;
@@ -208,10 +159,82 @@
         height: fit-content;
         max-height: 500px;
       }
+      .user-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.navbar {
+    background-color: white;
+    color: black;
+    padding: 8px 16px;
+    position: sticky;
+    top: 0;
+    width: 100vw;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar ul {
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar ul li {
+    margin-right: 20px;
+}
+
+.navbar ul li:last-child {
+    margin-right: 0;
+}
+
+.navbar a {
+    color: #A527CF;
+    text-decoration: none; 
+    font-size: 16px; 
+    font-weight: 600; 
+    padding: 8px 12px; 
+    border-radius: 12px;
+    transition: background-color 0.3s, color 0.3s; 
+}
+
+.navbar a:hover {
+    background-color: #f0f0f0;
+    color: #9370DB;
+}
+
+.user-info {
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+        align-items: center; /* Center-align the image and username */
+    }
+
+    .user-icon {
+        width: 30px;
+        height: 25px;
+        
+        margin-bottom: 0px; /* Add space between the image and username */
+    }
+
+    .username {
+        font-size: 10px;
+        font-weight: 500;
+        color: #090000;
+        margin-bottom: 0px;
+    }
+
     </style>
   </head>
   <body>
-    <nav class="navbar">
+    <div class="navbar">
       <div class="nav-left">
           <ul>
               <li><a href="">Home</a></li>
@@ -219,11 +242,22 @@
       </div>
       <div class="nav-right">
           <ul>
-              <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
-              <li><a href="{% url 'soundscape:login' %}">Login</a></li>
+              {% if user.is_authenticated %}
+                  <li class="user-info">
+                      <img src="{% static 'images/user-icon.png' %}" alt="User Icon" class="user-icon">
+                      <div class="username">{{ username }}</div>
+                  </li>
+                  <li><a href="{% url 'soundscape:logout' %}">Logout</a></li>
+              {% else %}
+                  <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
+                  <li><a href="{% url 'soundscape:login' %}">Login</a></li>
+              {% endif %}
           </ul>
       </div>
-    </nav>
+  </div>
+  
+    
+  
 
     <div class="app-container">
       <div id="map"></div>

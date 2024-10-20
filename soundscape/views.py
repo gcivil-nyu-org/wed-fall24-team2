@@ -17,6 +17,7 @@ def homepage(request):
             "chatrooms": json.dumps(
                 [model_to_dict(chatroom) for chatroom in Chatroom.objects.all()]
             ),
+            "username": request.user.username,
         },
     )
 
