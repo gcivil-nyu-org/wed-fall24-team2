@@ -27,6 +27,14 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 # MAPBOX_ACCESS_TOKEN
 MAPBOX_ACCESS_TOKEN = os.getenv("MAPBOX_ACCESS_TOKEN")
 
+# Freesound access token
+FREESOUND_API_KEY = os.getenv("FREESOUND_API_KEY")
+
+# AWS secret keys
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -54,6 +62,7 @@ INSTALLED_APPS = [
     "django_tables2",
     "crispy_forms",
     "data_collection",
+    "sounddata_s3",
 ]
 
 MIDDLEWARE = [
@@ -90,6 +99,17 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# DATABASES = {
+#      'default': {
+#          'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#          'NAME':'postgres',
+#          'USER':'postgres',
+#          'PASSWORD':'postgres',
+#          'HOST':'database-1.c1aisqasc3u5.us-east-1.rds.amazonaws.com',
+#          'PORT':'5440'
+#      }
+# }
+
 if "RDS_DB_NAME" in os.environ:
     DATABASES = {
         "default": {
@@ -101,18 +121,20 @@ if "RDS_DB_NAME" in os.environ:
             "PORT": os.environ["RDS_PORT"],
         }
     }
-# For local DB, enter your own creds:
-# else:
-#     DATABASES = {
-#         "default": {
-#             'ENGINE': env('DB_ENGINE'),
-#             'NAME': env('DB_NAME'),
-#             'USER': env('DB_USER'),
-#             'PASSWORD': env('DB_PASSWORD'),
-#             'HOST': 'localhost',
-#             'PORT': 5432
-#         }
-#     }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": os.getenv("DB_ENGINE"),
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": 5432,
+            "TEST": {
+                "NAME": "test1",  # Add this to specify a test database
+            },
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -138,7 +160,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/New_York"
 
 USE_I18N = True
 
@@ -171,3 +193,4 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+LOGIN_REDIRECT_URL = "/"

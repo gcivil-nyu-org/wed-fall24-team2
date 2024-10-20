@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html>
     <head>
         <meta charset="utf-8">
@@ -8,24 +7,101 @@
         <script src="https://cdn.tailwindcss.com"></script>
 
         <title>{% block title %}{% endblock %} | SoundScape</title>
+
+        <style>
+            body {
+                font-size: 14px;
+                background-color: #f9f9fc;
+                color: #333;
+                font-family: 'Helvetica', 'Arial', sans-serif;
+            }
+
+            .navbar {
+    background-color: white;
+    color: black;
+    padding: 8px 16px;
+    position: sticky;
+    top: 0;
+    width: 100vw;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar ul {
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar ul li {
+    margin-right: 20px;
+}
+
+.navbar ul li:last-child {
+    margin-right: 0;
+}
+
+.navbar a {
+    color: #A527CF;
+    text-decoration: none; 
+    font-size: 16px; 
+    font-weight: 600; 
+    padding: 8px 12px; 
+    border-radius: 12px;
+    transition: background-color 0.3s, color 0.3s; 
+}
+
+.navbar a:hover {
+    background-color: #f0f0f0;
+    color: #9370DB;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.username {
+    font-size: 10px;
+    font-weight: 500;
+    color: #090000;
+}
+            .page-content {
+                padding: 20px;
+            }
+        </style>
     </head>
 
     <body>
-        <nav class="py-6 px-6 flex justify-between items-center border-b border-gray-200">
-            <a href="/" class="px-6 py-3 text-lg font-semibold bg-purple-500 text-white rounded-xl hover:bg-gray-700">Home</a>
+        <nav class="navbar">
+            <a href="/" class="home-link">Home</a>
 
-            <div class="space-x-6">
-
+            <div class="auth-links">
                 {% if request.user.is_authenticated %}
-                    <a href="{% url 'conversation:inbox' %}" class="px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Inbox</a>
+                    <a href="{% url 'soundscape:homepage' %}" class="user-info">
+                        <span class="user-icon"></span> {{ request.user.username }}
+                    </a>
+                    <a href="{% url 'soundscape:logout' %}" class="logout-link">Log out</a>
                 {% else %}
-                    <a href="{% url 'soundscape:signup' %}" class="px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Sign up</a>
-                    <a href="{% url 'soundscape:login' %}" class="px-6 py-3 text-lg font-semibold bg-gray-500 text-white rounded-xl hover:bg-gray-700">Log in</a>
+                    <a href="{% url 'soundscape:signup' %}" class="signup-link">Sign up</a>
+                    <a href="{% url 'soundscape:login' %}" class="login-link">Log in</a>
                 {% endif %}
             </div>
         </nav>
 
-        <div class="px-6 py-6">
+        <div class="page-content">
             {% block content %}
             {% endblock %}
         </div>
