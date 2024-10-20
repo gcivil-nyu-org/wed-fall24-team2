@@ -10,13 +10,13 @@ class Explorer(models.Model):
 class Chatroom(models.Model):
     name = models.CharField(max_length=50)
     address = models.CharField(max_length=255, null=True, blank=True)
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    country = models.CharField(max_length=100)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    state = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
     zipcode = models.CharField(max_length=10, null=True, blank=True)
     description = models.TextField(max_length=400, null=True, blank=True)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
 
     def __str__(self):
         return self.name
@@ -28,3 +28,4 @@ class Message(models.Model):
     explorer = models.ForeignKey(
         Explorer, null=True, blank=True, on_delete=models.SET_NULL
     )
+    timestamp = models.DateTimeField(auto_now_add=True)

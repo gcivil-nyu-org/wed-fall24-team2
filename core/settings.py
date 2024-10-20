@@ -121,6 +121,7 @@ if "RDS_DB_NAME" in os.environ:
             "PORT": os.environ["RDS_PORT"],
         }
     }
+<<<<<<< HEAD
 else:
     DATABASES = {
         "default": {
@@ -135,6 +136,20 @@ else:
             },
         }
     }
+=======
+# For local DB, enter your own creds:
+# else:
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": env("DB_ENGINE"),
+#             "NAME": env("DB_NAME"),
+#             "USER": env("DB_USER"),
+#             "PASSWORD": env("DB_PASSWORD"),
+#             "HOST": "localhost",
+#             "PORT": 5432,
+#         }
+#     }
+>>>>>>> d1400e36c8a4eb89c4e7af2512a57c485ec6d41f
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -193,3 +208,4 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+LOGIN_REDIRECT_URL = "/"
