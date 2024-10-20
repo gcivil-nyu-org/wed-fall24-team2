@@ -28,4 +28,4 @@ class Message(models.Model):
     explorer = models.ForeignKey(
         Explorer, null=True, blank=True, on_delete=models.SET_NULL
     )
-    timestamp = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
