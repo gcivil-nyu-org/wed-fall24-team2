@@ -4,7 +4,10 @@ from django.contrib.auth.models import AbstractUser
 
 class Explorer(AbstractUser):
     email = models.CharField(max_length=50, unique=True)
-    username = models.CharField(max_length=150, unique=True) 
+    username = models.CharField(max_length=150, unique=True, default='default_username')  # Set default username
+
+    def __str__(self):
+        return self.username
     REQUIRED_FIELDS = ['email']
 
 
