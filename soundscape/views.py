@@ -12,17 +12,18 @@ import json
 
 
 def homepage(request):
-
     sound_data = NYCSoundFile.objects.all()
-    
+
     sound_data_list = []
     for sound in sound_data:
-        sound_data_list.append({
-            'unique_key': sound.unique_key,
-            'latitude': sound.latitude,
-            'longitude': sound.longitude,
-            'sound_file_url': sound.sound_file_url
-        })
+        sound_data_list.append(
+            {
+                "unique_key": sound.unique_key,
+                "latitude": sound.latitude,
+                "longitude": sound.longitude,
+                "sound_file_url": sound.sound_file_url,
+            }
+        )
 
     sound_data_json = json.dumps(sound_data_list)
 
@@ -35,7 +36,7 @@ def homepage(request):
                 [model_to_dict(chatroom) for chatroom in Chatroom.objects.all()]
             ),
             "username": request.user.username,
-            "sound_data": sound_data_json
+            "sound_data": sound_data_json,
         },
     )
 
