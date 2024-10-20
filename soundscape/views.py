@@ -5,7 +5,7 @@ from .forms import SignupForm
 from chatroom.models import Chatroom
 
 from sounddata_s3.models import NYCSoundFile
-from data_collection.models import NYCIncidentData
+# from data_collection.models import NYCIncidentData
 
 import os
 import json
