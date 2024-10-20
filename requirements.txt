@@ -18,4 +18,4 @@ pycodestyle==2.12.1
 pyflakes==3.2.0
 sqlparse==0.5.1
 boto3==1.26.0
-git+https://github.com/MTG/freesound-python.git
+# git+https://github.com/MTG/freesound-python.git
