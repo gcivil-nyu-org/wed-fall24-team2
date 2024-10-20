@@ -42,3 +42,5 @@ node_modules/
 # Environment variables
 .env
 
+nyc_complaints_data.csv
+
