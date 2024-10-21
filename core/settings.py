@@ -122,11 +122,13 @@ if "RDS_DB_NAME" in os.environ:
             "PORT": os.environ["RDS_PORT"],
         }
     }
-elif 'test' in sys.argv:
+elif "test" in sys.argv:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),  # This will create a test SQLite database file
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(
+                BASE_DIR, "db.sqlite3"
+            ),  # This will create a test SQLite database file
         }
     }
 else:
