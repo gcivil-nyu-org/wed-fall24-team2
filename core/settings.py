@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 import os
 import environ
+import sys
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -119,6 +120,13 @@ if "RDS_DB_NAME" in os.environ:
             "PASSWORD": os.environ["RDS_PASSWORD"],
             "HOST": os.environ["RDS_HOSTNAME"],
             "PORT": os.environ["RDS_PORT"],
+        }
+    }
+elif 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),  # This will create a test SQLite database file
         }
     }
 else:
