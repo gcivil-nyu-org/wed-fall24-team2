@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 import os
 import environ
+import sys
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -135,6 +136,15 @@ if "RDS_DB_NAME" in os.environ:
             "PORT": os.environ["RDS_PORT"],
         }
     }
+elif "test" in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(
+                BASE_DIR, "db.sqlite3"
+            ),  # This will create a test SQLite database file
+        }
+    }
 else:
     DATABASES = {
         "default": {
@@ -208,3 +218,4 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/"
+AUTH_USER_MODEL = "soundscape.Explorer"
