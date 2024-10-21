@@ -54,9 +54,7 @@ class HomepageViewTest(TestCase):
             response.context["chatrooms"], json.dumps(expected_chatroom_data)
         )
 
-        self.assertEqual(
-            response.context["username"], ""
-        )
+        self.assertEqual(response.context["username"], "")
 
     def tearDown(self):
         NYCSoundFile.objects.all().delete()
