@@ -110,11 +110,9 @@ function addChatroomMarkers(map) {
 }
 
 function addSoundMarkers(map) {
-  console.log(SOUND_DATA);
   SOUND_DATA.forEach((sound) => {
     const el = document.createElement('div');
     el.className = 'sound-marker';
-    console.log(sound);
     const popup = new mapboxgl.Popup({
       offset: 25,
     }).setHTML(`
