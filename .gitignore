@@ -44,3 +44,4 @@ node_modules/
 
 nyc_complaints_data.csv
 
+.flake8

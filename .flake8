@@ -1,3 +1,4 @@
 [flake8]
-exclude = env
-max-line-length = 100
+exclude = venv, env, .git, __pycache__, staticfiles, .eggs, *.egg-info, dist, build
+max-line-length = 88
+ignore = E501
