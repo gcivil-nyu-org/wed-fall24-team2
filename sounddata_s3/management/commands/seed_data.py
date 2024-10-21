@@ -80,7 +80,7 @@ class Command(BaseCommand):
 
                     self.stdout.write(
                         self.style.SUCCESS(
-                            f"Processed row {i+1}: {unique_key} and {sound_descriptor} - Sound URL: {sound}"
+                            f"Processed row {i + 1}: {unique_key} and {sound_descriptor} - Sound URL: {sound}"
                         )
                     )
                 else:

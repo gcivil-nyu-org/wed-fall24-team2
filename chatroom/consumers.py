@@ -44,6 +44,7 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
 
     async def chat_message(self, event):
         logger.info(f"Chat message event received: {event}")
+        message = event["message"]  # Added to fix the undefined 'message'
         username = event["username"]
         timestamp = event["timestamp"]
 
