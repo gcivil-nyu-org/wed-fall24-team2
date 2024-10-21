@@ -10,7 +10,7 @@ from . import consumers
 # ]
 
 # URLs that handle the WebSocket connection are placed here.
-websocket_urlpatterns=[
+websocket_urlpatterns = [
     re_path(
         r"ws/chatroom/(?P<chatroom_name>\w+)/$", consumers.ChatRoomConsumer.as_asgi()
     ),
@@ -18,10 +18,6 @@ websocket_urlpatterns=[
 
 application = ProtocolTypeRouter(
     {
-        "websocket": AuthMiddlewareStack(
-            URLRouter(
-                websocket_urlpatterns
-            )
-        ),
+        "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
     }
 )

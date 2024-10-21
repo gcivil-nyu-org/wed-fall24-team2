@@ -96,7 +96,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 # Define the ASGI application for Channels
-ASGI_APPLICATION = 'core.asgi.application'
+ASGI_APPLICATION = "core.asgi.application"
 
 # Channel layer configuration to use Redis
 CHANNEL_LAYERS = {
@@ -106,7 +106,7 @@ CHANNEL_LAYERS = {
             "hosts": [
                 (
                     os.getenv("REDIS_URL", "localhost"),
-                    int(os.getenv("REDIS_PORT", 6379))
+                    int(os.getenv("REDIS_PORT", 6379)),
                 )
             ],
         },
