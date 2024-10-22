@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import Explorer
+from django.contrib.auth.models import User
 
 
 class LoginForm(AuthenticationForm):
@@ -24,7 +24,7 @@ class LoginForm(AuthenticationForm):
 
 class SignupForm(UserCreationForm):
     class Meta:
-        model = Explorer
+        model = User
         fields = ("username", "email", "password1", "password2")
 
     username = forms.CharField(
