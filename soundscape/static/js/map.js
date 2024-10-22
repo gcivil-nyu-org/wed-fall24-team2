@@ -69,8 +69,8 @@ function addControls(map) {
     search.options = {
       types: 'address,poi',
       proximity: map.getCenter().toArray(),
-      marker: true
-    }
+      marker: true,
+    };
     map.addControl(search);
 
     /* GEOLOCATION */
@@ -98,11 +98,93 @@ function addChatroomMarkers(map) {
     const popup = new mapboxgl.Popup({
       offset: 25,
     }).setHTML(getChatroomComponent(neighborhood));
-    existingMarkers.push({ lng: neighborhood.longitude, lat: neighborhood.latitude });
+    existingMarkers.push({
+      lng: neighborhood.longitude,
+      lat: neighborhood.latitude,
+    });
     new mapboxgl.Marker(el)
       .setLngLat([neighborhood.longitude, neighborhood.latitude])
       .setPopup(popup)
       .addTo(map);
+  });
+}
+
+function addSoundMarkers(map) {
+  SOUND_DATA.forEach((sound) => {
+    const el = document.createElement('div');
+    el.className = 'sound-marker';
+    const popup = new mapboxgl.Popup({
+      offset: 25,
+    }).setHTML(`
+          <div>
+            <audio id="audio-${sound.unique_key}" controls>
+                <source src=${encodeURI(
+                  sound.sound_file_url
+                )} type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+          </div>
+        `);
+    existingMarkers.push({
+      lng: sound.longitude,
+      lat: sound.latitude,
+    });
+    new mapboxgl.Marker(el)
+      .setLngLat([sound.longitude, sound.latitude])
+      .setPopup(popup)
+      .addTo(map);
+  });
+}
+
+function addHeatmapLayer(map) {
+  map.on('load', () => {
+    map.addSource('heatmap-data', {
+      type: 'geojson',
+      data: SOUND_GEOJSON_DATA
+    })
+    map.addLayer({
+      id: 'heatmap',
+      type: 'heatmap',
+      source: 'heatmap-data',
+      paint: {
+        // Set the heatmap weight based on the 'weight' property
+        'heatmap-weight': [
+          'coalesce', // Use 'coalesce' to provide a default value
+          ['get', 'weight'], // Get the 'weight' property
+          0, // Default weight if 'weight' is not present
+        ],
+        'heatmap-intensity': {
+          stops: [
+            [0, 0],
+            [6, 2],
+          ],
+        },
+        'heatmap-color': [
+          'interpolate',
+          ['linear'],
+          ['heatmap-density'],
+          0,
+          'rgba(33,102,172,0)',
+          0.2,
+          'rgba(103,169,207,0.5)',
+          0.4,
+          'rgba(209,229,240,0.7)',
+          0.6,
+          'rgba(253,219,199,0.8)',
+          0.8,
+          'rgba(239,138,98,1)',
+          1,
+          'rgba(178,24,43,1)',
+        ],
+        'heatmap-radius': {
+          stops: [
+            [10, 30],
+            [20, 50],
+          ],
+        },
+        'heatmap-opacity': 0.8,
+      },
+    });
   });
 }
 
@@ -119,7 +201,9 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
     // Register onClick function on map
     map.on('click', function (e) {
       const coordinates = e.lngLat;
-      if (isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)) {
+      if (
+        isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)
+      ) {
         return;
       }
       addMarker(coordinates.lng, coordinates.lat, map);
@@ -127,14 +211,13 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
     });
   }
 
-
-
   // Load markers and add chatroom markers, then add search box
   loadMarkers(existingMarkers, map);
   addChatroomMarkers(map);
-    addControls(map);
+  addSoundMarkers(map);
+  addControls(map);
+  addHeatmapLayer(map);
 }
-
 
 function successLocation(position, map, existingMarkers) {
   const { latitude, longitude } = position.coords;
