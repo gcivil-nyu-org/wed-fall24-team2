@@ -41,7 +41,7 @@ import json
 
 
 def homepage(request):
-    API_URL = "https://data.cityofnewyork.us/resource/hbc2-s6te.json?complaint_type=Noise - Residential"
+    API_URL = "https://data.cityofnewyork.us/resource/hbc2-s6te.json"
     APP_TOKEN = os.environ.get("NYC_OPEN_DATA_APP_TOKEN")
     headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
 
@@ -57,6 +57,7 @@ def homepage(request):
             params = {
                 "$limit": min(BATCH_SIZE, TOTAL_ROWS - offset),
                 "$offset": offset,
+                '$where': "starts_with(complaint_type, 'Noise')",
             }
 
             response = requests.get(API_URL, params=params, headers=headers)
