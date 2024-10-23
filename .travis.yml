@@ -8,8 +8,8 @@ install:
 env:
   global:
     - AWS_DEFAULT_REGION="us-east-1"
-    - EB_APP_NAME="soundscape-explorer-app"
-    - EB_ENV_NAME="soundscape-explorer"
+    - EB_APP_NAME="soundscape-explorer-nyc"
+    - EB_ENV_NAME="Soundscape-explorer-nyc-env "
 before_script:
   - black --check .
   - flake8 --max-line-length=88 --ignore=E501
