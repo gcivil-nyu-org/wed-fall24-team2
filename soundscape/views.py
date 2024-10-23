@@ -39,10 +39,11 @@ import json
 #         },
 #     )
 
+
 def homepage(request):
     API_URL = "https://data.cityofnewyork.us/resource/hbc2-s6te.json"
     APP_TOKEN = os.environ.get("NYC_OPEN_DATA_APP_TOKEN")
-    headers = {'X-App-Token': APP_TOKEN} if APP_TOKEN else {}
+    headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
 
     BATCH_SIZE = 1000  # Socrata's max limit per request
     TOTAL_ROWS = 2000
@@ -54,8 +55,8 @@ def homepage(request):
 
         for offset in batch_offsets:
             params = {
-                '$limit': min(BATCH_SIZE, TOTAL_ROWS - offset),
-                '$offset': offset,
+                "$limit": min(BATCH_SIZE, TOTAL_ROWS - offset),
+                "$offset": offset,
             }
 
             response = requests.get(API_URL, params=params, headers=headers)
@@ -66,7 +67,7 @@ def homepage(request):
                 break
 
             all_data.extend(batch_data)
-            if len(batch_data) < params['$limit']:
+            if len(batch_data) < params["$limit"]:
                 break
 
         return render(
@@ -93,7 +94,7 @@ def homepage(request):
                 ),
                 "username": request.user.username,
                 "sound_data": json.dumps([]),  # Empty data on error
-                "error_message": str(e)
+                "error_message": str(e),
             },
         )
 
