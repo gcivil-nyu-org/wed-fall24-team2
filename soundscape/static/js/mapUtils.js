@@ -26,12 +26,9 @@ function convertToGeoJSON(data) {
         type: 'Point',
         coordinates: [item.longitude, item.latitude],
       },
-      properties: {
-        unique_key: item.unique_key,
-        sound_file_url: item.sound_file_url,
-        //TODO: find out how to assign correct weights
-        weight: Math.floor(Math.random() * 10) + 1,
-      },
+      properties:{
+        weight: 1
+      }
     })),
   };
 }
