@@ -28,6 +28,9 @@ def homepage(request):
 
     sound_data_json = json.dumps(sound_data_list)
 
+    print(sound_data_json)
+    print("hello")
+
     return render(
         request,
         "soundscape/homepage.html",
