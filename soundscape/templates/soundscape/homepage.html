@@ -13,9 +13,15 @@
       rel="stylesheet"
     />
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
-        <!-- Mapbox Search JS -->
-        <link href="https://api.mapbox.com/mapbox-assembly/v1.3.0/assembly.min.css" rel="stylesheet">
-        <script id="search-js" src="https://api.mapbox.com/search-js/v1.0.0-beta.22/web.js"></script>
+    <!-- Mapbox Search JS -->
+    <link
+      href="https://api.mapbox.com/mapbox-assembly/v1.3.0/assembly.min.css"
+      rel="stylesheet"
+    />
+    <script
+      id="search-js"
+      src="https://api.mapbox.com/search-js/v1.0.0-beta.22/web.js"
+    ></script>
     <style>
       body,
       html {
@@ -53,6 +59,20 @@
         background-position: center;
       }
 
+      .sound-marker {
+        background-image: url('./static/images/listen_to_sound.png');
+        background-size: contain;
+        width: 20px;
+        height: 20px;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      .sound-information{
+        display: flex;
+        flex-direction: column;
+      }
+
       .chat-container {
         max-width: 900px;
         width: 600px;
@@ -67,7 +87,7 @@
         max-height: 400px;
       }
       .chat-header {
-        background-color: #007bff;
+        background-color: #a527cf;
         color: #ffffff;
         padding: 10px;
         text-align: center;
@@ -90,7 +110,7 @@
         flex-direction: column;
       }
       .chat-message.user {
-        background-color: #cce5ff;
+        background-color: #e5b3e6;
         align-self: flex-end;
       }
       .message-header {
@@ -120,7 +140,7 @@
         align-self: flex-end;
       }
       .delete-btn:hover {
-        color: #ff4d4f;
+        color: #a527cf;
       }
       .chat-input {
         display: flex;
@@ -138,11 +158,11 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       }
       .chat-input input:focus {
-        border-color: #007bff;
+        border-color: #a527cf;
       }
       .chat-input button {
         padding: 10px 20px;
-        background-color: #007bff;
+        background-color: #a527cf;
         color: #ffffff;
         border: none;
         border-radius: 30px;
@@ -151,131 +171,141 @@
         font-size: 1rem;
       }
       .chat-input button:hover {
-        background-color: #0056b3;
+        background-color: #a527cf;
       }
 
       .mapboxgl-popup-content {
         width: fit-content;
         height: fit-content;
         max-height: 500px;
+        border-radius: 10px;
+        padding: 10px;
       }
+
+      .mapboxgl-popup-close-button{
+        margin-right: 8px;
+        font-weight: bold;
+      }
+
       .user-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
 
-.navbar {
-    background-color: white;
-    color: black;
-    padding: 8px 16px;
-    position: sticky;
-    top: 0;
-    width: 100vw;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+      .navbar {
+        background-color: white;
+        color: black;
+        padding: 8px 16px;
+        position: sticky;
+        top: 0;
+        width: 100vw;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
 
-.navbar ul {
-    list-style-type: none;
-    display: flex;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-}
+      .navbar ul {
+        list-style-type: none;
+        display: flex;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+      }
 
-.navbar ul li {
-    margin-right: 20px;
-}
+      .navbar ul li {
+        margin-right: 20px;
+      }
 
-.navbar ul li:last-child {
-    margin-right: 0;
-}
+      .navbar ul li:last-child {
+        margin-right: 0;
+      }
 
-.navbar a {
-    color: #A527CF;
-    text-decoration: none; 
-    font-size: 16px; 
-    font-weight: 600; 
-    padding: 8px 12px; 
-    border-radius: 12px;
-    transition: background-color 0.3s, color 0.3s; 
-}
+      .navbar a {
+        color: #a527cf;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 12px;
+        transition: background-color 0.3s, color 0.3s;
+      }
 
-.navbar a:hover {
-    background-color: #f0f0f0;
-    color: #9370DB;
-}
+      .navbar a:hover {
+        background-color: #f0f0f0;
+        color: #9370db;
+      }
 
-.user-info {
+      .user-info {
         display: flex;
         flex-direction: column; /* Stack items vertically */
         align-items: center; /* Center-align the image and username */
-    }
+      }
 
-    .user-icon {
+      .user-icon {
         width: 30px;
         height: 25px;
-        
-        margin-bottom: 0px; /* Add space between the image and username */
-    }
 
-    .username {
+        margin-bottom: 0px; /* Add space between the image and username */
+      }
+
+      .username {
         font-size: 10px;
         font-weight: 500;
         color: #090000;
         margin-bottom: 0px;
-    }
-
+      }
     </style>
   </head>
   <body>
     <div class="navbar">
       <div class="nav-left">
-          <ul>
-              <li><a href="">Home</a></li>
-          </ul>
+        <ul>
+          <li><a href="">Home</a></li>
+        </ul>
       </div>
       <div class="nav-right">
-          <ul>
-              {% if user.is_authenticated %}
-                  <li class="user-info">
-                      <img src="{% static 'images/user-icon.png' %}" alt="User Icon" class="user-icon">
-                      <div class="username">{{ username }}</div>
-                  </li>
-                  <li><a href="{% url 'soundscape:logout' %}">Logout</a></li>
-              {% else %}
-                  <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
-                  <li><a href="{% url 'soundscape:login' %}">Login</a></li>
-              {% endif %}
-          </ul>
+        <ul>
+          {% if user.is_authenticated %}
+          <li class="user-info">
+            <img
+              src="{% static 'images/user-icon.png' %}"
+              alt="User Icon"
+              class="user-icon"
+            />
+            <div class="username">{{ username }}</div>
+          </li>
+          <li><a href="{% url 'soundscape:logout' %}">Logout</a></li>
+          {% else %}
+          <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
+          <li><a href="{% url 'soundscape:login' %}">Login</a></li>
+          {% endif %}
+        </ul>
       </div>
-  </div>
-  
-    
-  
+    </div>
 
     <div class="app-container">
       <div id="map"></div>
     </div>
-    
-    <script>
-      var NYC_NEIGHBORHOODS = JSON.parse('{{ chatrooms|escapejs }}');
-    </script>
     <script src="{% static 'js/mapUtils.js'%}"></script>
     <script src="{% static 'js/chatroom.js'%}"></script>
     <script src="{% static 'js/map.js'%}"></script>
-    
+    <script>
+      var NYC_NEIGHBORHOODS = JSON.parse('{{ chatrooms|escapejs }}');
+      var SOUND_DATA = JSON.parse('{{sound_data|escapejs}}');
+      var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA)
+    </script>
+
+
     <script>
       mapboxgl.accessToken = '{{ mapbox_access_token }}';
-  
+
       let map;
       let existingMarkers = [];
-  
+
       // Use the browser's geolocation API to get the user's location and initialize map
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -286,9 +316,6 @@
           }
         );
       }
-      
     </script>
-    
   </body>
-  
 </html>

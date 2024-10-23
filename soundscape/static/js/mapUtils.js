@@ -16,3 +16,19 @@ function getDistance(lat1, lng1, lat2, lng2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in meters
 }
+
+function convertToGeoJSON(data) {
+  return {
+    type: 'FeatureCollection',
+    features: data.map((item) => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [item.longitude, item.latitude],
+      },
+      properties:{
+        weight: 1
+      }
+    })),
+  };
+}
