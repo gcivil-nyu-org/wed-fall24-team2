@@ -57,6 +57,7 @@ def homepage(request):
             params = {
                 "$limit": min(BATCH_SIZE, TOTAL_ROWS - offset),
                 "$offset": offset,
+                "$where": "starts_with(complaint_type, 'Noise')",
             }
 
             response = requests.get(API_URL, params=params, headers=headers)
