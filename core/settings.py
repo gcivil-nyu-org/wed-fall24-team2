@@ -34,6 +34,8 @@ FREESOUND_API_KEY = os.getenv("FREESOUND_API_KEY")
 # AWS secret keys
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
 
 
 # Quick-start development settings - unsuitable for production
@@ -64,6 +66,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "data_collection",
     "sounddata_s3",
+    "soundscape_user",
 ]
 
 MIDDLEWARE = [
