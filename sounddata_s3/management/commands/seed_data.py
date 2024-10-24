@@ -146,7 +146,7 @@ class Command(BaseCommand):
             return None
 
     def upload_sound_to_s3(self, client, sound_url, unique_key):
-        AWS_S3_BUCKET_NAME = "nyc-sound-files"
+        AWS_S3_BUCKET_NAME = "nyc-soundscape-sound-files"
         try:
             response = requests.get(sound_url)
             sound_data = response.content
