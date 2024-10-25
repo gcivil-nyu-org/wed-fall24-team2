@@ -62,6 +62,7 @@
 
 .form-group {
     margin-bottom: 15px;
+    position: relative;
 }
 
 .form-label {
@@ -94,5 +95,135 @@
 .submit-button:hover {
     background-color: #8415a3;
 }
+
+/* Validation styles */
+.validation-message {
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+.error-message {
+    color: #dc3545;
+}
+
+.success-message {
+    color: #198754;
+}
+
+input.error {
+    border-color: #dc3545 !important;
+    border-width: 2px !important;
+}
+
+input.success {
+    border-color: #198754 !important;
+    border-width: 2px !important;
+}
+
+/* Style form inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
 </style>
+
+<script>
+const formValidation = {
+    init() {
+        this.form = document.querySelector('form');
+        const formGroups = document.querySelectorAll('.form-group');
+
+        this.emailInput = formGroups[1].querySelector('input');
+        this.password1Input = formGroups[2].querySelector('input');
+        this.password2Input = formGroups[3].querySelector('input');
+
+        this.attachEventListeners();
+    },
+
+    attachEventListeners() {
+        this.emailInput.addEventListener('input', () => this.validateEmail());
+        this.password1Input.addEventListener('input', () => {
+            this.validatePassword();
+            if (this.password2Input.value) this.validatePasswordMatch();
+        });
+        this.password2Input.addEventListener('input', () => this.validatePasswordMatch());
+
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+    },
+
+    validateEmail() {
+        const email = this.emailInput.value;
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        this.updateValidation(
+            this.emailInput,
+            isValid,
+            isValid ? 'Email is valid' : 'Please enter a valid email address'
+        );
+        return isValid;
+    },
+
+    validatePassword() {
+        const password = this.password1Input.value;
+        const hasNumber = /\d/.test(password);
+        const hasLetter = /[a-zA-Z]/.test(password);
+        const hasMinLength = password.length >= 8;
+        const isValid = hasNumber && hasLetter && hasMinLength;
+
+        this.updateValidation(
+            this.password1Input,
+            isValid,
+            isValid ? 'Password meets requirements' : 'Password must be at least 8 characters and contain both letters and numbers'
+        );
+        return isValid;
+    },
+
+    validatePasswordMatch() {
+        const isValid = this.password1Input.value === this.password2Input.value;
+
+        this.updateValidation(
+            this.password2Input,
+            isValid,
+            isValid ? 'Passwords match' : 'Passwords do not match'
+        );
+        return isValid;
+    },
+
+    updateValidation(input, isValid, message) {
+        const container = input.closest('.form-group');
+        let messageElement = container.querySelector('.validation-message');
+
+        if (!messageElement) {
+            messageElement = document.createElement('span');
+            messageElement.className = 'validation-message';
+            container.appendChild(messageElement);
+        }
+
+        input.classList.remove('error', 'success');
+        input.classList.add(isValid ? 'success' : 'error');
+        messageElement.textContent = message;
+        messageElement.className = `validation-message ${isValid ? 'success-message' : 'error-message'}`;
+    },
+
+    handleSubmit(e) {
+        const isUsernameValid = this.validateUsername();
+        const isEmailValid = this.validateEmail();
+        const isPasswordValid = this.validatePassword();
+        const isPasswordMatchValid = this.validatePasswordMatch();
+
+        if (!(isUsernameValid && isEmailValid && isPasswordValid && isPasswordMatchValid)) {
+            e.preventDefault();
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => formValidation.init());
+</script>
 {% endblock %}
