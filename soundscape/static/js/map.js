@@ -9,6 +9,26 @@ function loadMarkers(existingMarkers, map) {
   existingMarkers = markers;
 }
 
+function fetchAndDisplaySounds(lat, lng) {
+  console.log("heeh")
+  fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data, "here sound?")
+          if (data.sounds && data.sounds.length > 0) {  // Check if there are sounds
+              const soundsList = data.sounds.map(sound => 
+                  `<li>${sound.user_name} - ${sound.sound_descriptor} (<a href="${sound.listen_link}" target="_blank">Listen</a>)</li>`
+              ).join('');
+              document.getElementById('sounds-list').innerHTML = soundsList;
+          } else {
+              document.getElementById('sounds-list').innerHTML = '<p>No sounds yet.</p>';
+          }
+      })
+      .catch(error => console.error('Error loading sounds:', error));
+}
+
+
+
 function addMarker(lng, lat, map) {
   const currentZoom = map.getZoom();
   const currentCenter = map.getCenter();
@@ -25,25 +45,97 @@ function addMarker(lng, lat, map) {
   }
 
   const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-          <div>
-            <h3>Sound</h3>
-            <button id="popup-hear-sound-btn">Listen</button>
-            <button id="popup-upload-sound-btn">Upload</button>
-          </div>
-        `);
+  <div style="font-family: Arial, sans-serif; width: 250px; color: #333;">
+    <h3 style="margin: 0 0 10px; font-size: 18px;">Sound</h3>
+    <div style="margin-bottom: 10px;">
+      <button id="popup-hear-sound-btn" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Listen</button>
+      <button id="popup-upload-sound-btn" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Upload</button>
+    </div>
+    <h4 style="font-size: 16px; margin: 10px 0;">Uploaded Sounds:</h4>
+    <ul id="sounds-list" style="list-style-type: none; padding-left: 0; margin: 0;"></ul>
+    <div id="upload-sound-form" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
+      <form id="sound-upload-form">
+        <input type="file" id="sound-file" accept="audio/*" required style="margin-bottom: 10px;"/>
+        <br/>
+        <label for="sound-descriptor" style="margin-bottom: 5px; display: block;">Sound Descriptor:</label>
+        <select id="sound-descriptor" required style="width: 100%; padding: 5px; margin-bottom: 10px;">
+          <option value="">Select a descriptor</option>
+          <option value="noise">Noise</option>
+          <option value="nature">Nature</option>
+          <option value="people">People</option>
+          <option value="subway">Subway</option>
+        </select>
+        <input type="hidden" id="latitude" value="${lat}"/>
+        <input type="hidden" id="longitude" value="${lng}"/>
+        <button type="submit" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer;">Submit</button>
+      </form>
+    </div>
+  </div>
+`);
+
+      
+
   const marker = new mapboxgl.Marker()
     .setLngLat([lng, lat])
     .setPopup(popup)
     .addTo(map);
 
   popup.on('open', () => {
+    fetchAndDisplaySounds(lat, lng);
+
     document
       .getElementById('popup-hear-sound-btn')
       .addEventListener('click', function () {
-        alert('Button inside popup clicked!');
+        alert('Playing sound at this location!');
+      });
+
+    document
+      .getElementById('popup-upload-sound-btn')
+      .addEventListener('click', function () {
+        document.getElementById('upload-sound-form').style.display = 'block';
+      });
+
+    document
+      .getElementById('sound-upload-form')
+      .addEventListener('submit', function (event) {
+        event.preventDefault();
+        const soundFile = document.getElementById('sound-file').files[0];
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+        const soundDescriptor = document.getElementById('sound-descriptor').value;
+
+        // Handle the file upload and form data submission
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('sound_file', soundFile);
+        formData.append('latitude', latitude);
+        formData.append('longitude', longitude);
+        formData.append('sound_descriptor', soundDescriptor);
+
+        fetch('/soundscape_user/upload/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken
+          },
+          body: formData,
+        })
+          .then(response => response.json())
+          .then(data => {
+            alert('Sound uploaded successfully!');
+            document.getElementById('upload-sound-form').style.display = 'none';
+
+            fetchAndDisplaySounds(lat, lng);
+          })
+          .catch(error => {
+            alert('Error uploading sound');
+            console.error('Error:', error);
+          });
       });
   });
 }
+
+
+
 
 function isDuplicateMarker(lng, lat, existingMarkers) {
   const threshold = 0.0005;

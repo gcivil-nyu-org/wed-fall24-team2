@@ -279,9 +279,15 @@
             <div class="username">{{ username }}</div>
           </li>
           <li><a href="{% url 'soundscape:logout' %}">Logout</a></li>
+          <script>
+            username = "{{ username }}"; // Storing the username in a JavaScript variable
+          </script>
           {% else %}
           <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
           <li><a href="{% url 'soundscape:login' %}">Login</a></li>
+          <script>
+            username = "Anonymous"; // If the user is not logged in, set username to null
+          </script>
           {% endif %}
         </ul>
       </div>
@@ -290,6 +296,9 @@
     <div class="app-container">
       <div id="map"></div>
     </div>
+    <script>
+      const csrfToken = "{{ csrf_token }}";
+    </script>
     <script src="{% static 'js/mapUtils.js'%}"></script>
     <script src="{% static 'js/chatroom.js'%}"></script>
     <script src="{% static 'js/map.js'%}"></script>
