@@ -1,1 +1,0 @@
-web: daphne -p 8000 core.asgi:application
