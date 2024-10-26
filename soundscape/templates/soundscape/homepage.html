@@ -62,10 +62,15 @@
       .sound-marker {
         background-image: url('./static/images/listen_to_sound.png');
         background-size: contain;
-        width: 30px;
-        height: 30px;
+        width: 20px;
+        height: 20px;
         background-repeat: no-repeat;
         background-position: center;
+      }
+
+      .sound-information {
+        display: flex;
+        flex-direction: column;
       }
 
       .chat-container {
@@ -177,7 +182,7 @@
         padding: 10px;
       }
 
-      .mapboxgl-popup-close-button{
+      .mapboxgl-popup-close-button {
         margin-right: 8px;
         font-weight: bold;
       }
@@ -278,6 +283,7 @@
           <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
           <li><a href="{% url 'soundscape:login' %}">Login</a></li>
           {% endif %}
+          <li>{% include 'soundscape/filter_panel.html' %}</li>
         </ul>
       </div>
     </div>
@@ -291,9 +297,8 @@
     <script>
       var NYC_NEIGHBORHOODS = JSON.parse('{{ chatrooms|escapejs }}');
       var SOUND_DATA = JSON.parse('{{sound_data|escapejs}}');
-      var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA)
+      var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
     </script>
-
 
     <script>
       mapboxgl.accessToken = '{{ mapbox_access_token }}';

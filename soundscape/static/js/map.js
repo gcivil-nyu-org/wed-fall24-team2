@@ -111,28 +111,29 @@ function addChatroomMarkers(map) {
 
 function addSoundMarkers(map) {
   SOUND_DATA.forEach((sound) => {
-    const el = document.createElement('div');
-    el.className = 'sound-marker';
-    const popup = new mapboxgl.Popup({
-      offset: 25,
-    }).setHTML(`
-          <div>
-            <audio id="audio-${sound.unique_key}" controls>
-                <source src=${encodeURI(
-                  sound.sound_file_url
-                )} type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio>
+    if (sound.longitude && sound.latitude) {
+      const el = document.createElement('div');
+      el.className = 'sound-marker';
+      const popup = new mapboxgl.Popup({
+        offset: 25,
+      }).setHTML(`
+          <div class="sound-information">
+             <span>Description: ${sound.descriptor}</span>
+             <span>Status: ${sound.status}</span>
+             <span>Date Reported: ${new Intl.DateTimeFormat('en-US').format(
+               new Date(sound.created_date)
+             )}</span>
           </div>
         `);
-    existingMarkers.push({
-      lng: sound.longitude,
-      lat: sound.latitude,
-    });
-    new mapboxgl.Marker(el)
-      .setLngLat([sound.longitude, sound.latitude])
-      .setPopup(popup)
-      .addTo(map);
+      existingMarkers.push({
+        lng: sound.longitude,
+        lat: sound.latitude,
+      });
+      new mapboxgl.Marker(el)
+        .setLngLat([sound.longitude, sound.latitude])
+        .setPopup(popup)
+        .addTo(map);
+    }
   });
 }
 
@@ -140,8 +141,8 @@ function addHeatmapLayer(map) {
   map.on('load', () => {
     map.addSource('heatmap-data', {
       type: 'geojson',
-      data: SOUND_GEOJSON_DATA
-    })
+      data: SOUND_GEOJSON_DATA,
+    });
     map.addLayer({
       id: 'heatmap',
       type: 'heatmap',
@@ -164,17 +165,17 @@ function addHeatmapLayer(map) {
           ['linear'],
           ['heatmap-density'],
           0,
-          'rgba(33,102,172,0)',
+          'rgba(0,0,0,0)',
           0.2,
-          'rgba(103,169,207,0.5)',
+          'rgba(255,237,160,0.5)',
           0.4,
-          'rgba(209,229,240,0.7)',
+          'rgba(255,217,105,0.7)',
           0.6,
-          'rgba(253,219,199,0.8)',
+          'rgba(255,182,72,0.8)',
           0.8,
-          'rgba(239,138,98,1)',
+          'rgba(255,120,50,1)',
           1,
-          'rgba(178,24,43,1)',
+          'rgba(255,50,0,1)',
         ],
         'heatmap-radius': {
           stops: [

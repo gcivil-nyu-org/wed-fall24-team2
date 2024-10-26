@@ -96,9 +96,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
+# Define the ASGI application for Channels
+ASGI_APPLICATION = "core.asgi.application"
 
-# Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+# Channel layer configuration to use Redis
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                (
+                    os.getenv("REDIS_URL", "localhost"),
+                    int(os.getenv("REDIS_PORT", 6379)),
+                )
+            ],
+        },
+    },
+}
 
 # DATABASES = {
 #      'default': {
@@ -204,4 +218,3 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/"
-AUTH_USER_MODEL = "soundscape.Explorer"
