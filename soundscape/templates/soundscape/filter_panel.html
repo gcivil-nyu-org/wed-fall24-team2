@@ -1,0 +1,203 @@
+<!-- templates/soundscape/filter_panel.html -->
+{% load static %}
+<style>
+  .filter-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    color: #a527cf;
+  }
+
+  .filter-icon {
+    width: 16px;
+    height: 16px;
+    fill: #a527cf;
+    transition: fill 0.3s;
+  }
+
+  .filter-btn:hover path {
+    fill: #9370db;
+  }
+
+  .filter-panel {
+    position: fixed;
+    right: -320px;
+    top: 0;
+    width: 320px;
+    height: 100%;
+    background: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .filter-panel.open {
+    right: 0;
+  }
+
+  .filter-header {
+    background-color: #a527cf;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .filter-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .close-filter {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .filter-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+
+  .filter-section {
+    margin-bottom: 25px;
+  }
+
+  .filter-section h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+  }
+
+  .filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .filter-options input[type='date'],
+  .filter-options input[type='time'] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+
+  .apply-filters,
+  .reset-filters {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .apply-filters {
+    background-color: #a527cf;
+    color: white;
+  }
+
+  .reset-filters {
+    background-color: #f0f0f0;
+    color: #333;
+  }
+
+  .filter-toggle {
+    position: fixed;
+    right: 20px;
+    top: 80px;
+    padding: 10px 20px;
+    background-color: #a527cf;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .filter-icon {
+    width: 16px;
+    height: 16px;
+  }
+</style>
+<script src="{% static 'js/filter.js'%}"></script>
+<div class="filter-panel" id="filterPanel">
+  <div class="filter-header">
+    <h3>Filter Soundscape</h3>
+    <button class="close-filter" onclick="toggleFilters()">&times;</button>
+  </div>
+
+  <div class="filter-content">
+    <div class="filter-section">
+      <h4>Sound Types</h4>
+      <div class="filter-options">
+        <label class="filter-checkbox">
+          <input type="checkbox" name="soundType" value="nature" checked />
+          Nature Sounds
+        </label>
+        <label class="filter-checkbox">
+          <input type="checkbox" name="soundType" value="urban" checked />
+          Urban Sounds
+        </label>
+        <label class="filter-checkbox">
+          <input type="checkbox" name="soundType" value="culture" checked />
+          Cultural Sounds
+        </label>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <h4>Date Range</h4>
+      <div class="filter-options">
+        <label
+          >From:
+          <input type="date" id="dateFrom" name="dateFrom" />
+        </label>
+        <label
+          >To:
+          <input type="date" id="dateTo" name="dateTo" />
+        </label>
+      </div>
+    </div>
+
+    <button class="apply-filters" onclick="applyFilters()">
+      Apply Filters
+    </button>
+    <button class="reset-filters" onclick="resetFilters()">Reset All</button>
+  </div>
+</div>
+
+<!-- Filter Toggle Button -->
+<button class="filter-btn" onclick="toggleFilters()">
+  <svg
+    style="width: 16px; height: 16px; fill: #a527cf"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 512 512"
+  >
+    <path
+      d="M3.9 54.9C10.5 40.9 24.5 32 40 32l432 0c15.5 0 29.5 8.9 36.1 22.9s4.6 30.5-5.2 42.5L320 320.9 320 448c0 12.1-6.8 23.2-17.7 28.6s-23.8 4.3-33.5-3l-64-48c-8.1-6-12.8-15.5-12.8-25.6l0-79.1L9 97.3C-.7 85.4-2.8 68.8 3.9 54.9z"
+    />
+  </svg>
+</button>

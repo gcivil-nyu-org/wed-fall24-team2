@@ -1,0 +1,88 @@
+{% extends 'soundscape/base.html' %}
+
+{% block title %}Log in{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1 class="form-title">Log in</h1>
+
+    <form method="post" action=".">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label">Username</label><br>
+            {{ form.username }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Password</label><br>
+            {{ form.password }}
+        </div>
+
+        {% if form.errors or form.non_field_errors %}
+            <div class="error-container">
+                {% for field in form %}
+                    {{ field.errors }}
+                {% endfor %}
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <button class="submit-button">Submit</button>
+    </form>
+</div>
+
+<style>
+.form-container {
+    width: 90%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f3e8ff; /* Light purple background */
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.form-title {
+    margin-bottom: 20px;
+    font-size: 24px; /* Smaller title font */
+    color: #A527CF; /* Purple title color */
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px; /* Smaller label font */
+    color: #6a0dad; /* Darker purple for labels */
+}
+
+.error-container {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #ffebee; /* Light red background for errors */
+    border: 1px solid #f44336; /* Red border */
+    border-radius: 8px;
+}
+
+.submit-button {
+    padding: 10px 20px;
+    background-color: #A527CF; /* Purple background */
+    color: white;
+    border: none;
+    border-radius: 25px; /* Rounded button */
+    font-size: 16px; /* Smaller button font */
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%; /* Full width */
+}
+
+.submit-button:hover {
+    background-color: #8415a3; /* Darker purple on hover */
+}
+</style>
+{% endblock %}
