@@ -1,8 +1,8 @@
-# chatroom/urls.py
 from django.urls import path
+
 from . import views
 
+app_name = "chatroom"
 urlpatterns = [
-    # URL pattern that captures the room name
-    path("<str:chatroom_name>/", views.chatroom, name="chatroom"),
+    path("", views.chatroom, name="chatroom"),
 ]
