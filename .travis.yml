@@ -26,3 +26,6 @@ deploy:
   bucket_name: "elasticbeanstalk-us-east-1-783764603041"
   on:
     branch: main
+
+after_success:
+  - coveralls
