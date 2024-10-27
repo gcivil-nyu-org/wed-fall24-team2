@@ -4,6 +4,7 @@ from django.forms.models import model_to_dict
 from .forms import SignupForm
 from chatroom.models import Chatroom
 
+
 import requests
 
 import os
@@ -15,21 +16,39 @@ def homepage(request):
     APP_TOKEN = os.environ.get("NYC_OPEN_DATA_APP_TOKEN")
     headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
 
-    BATCH_SIZE = 1000  # Socrata's max limit per request
+    BATCH_SIZE = 1000
     TOTAL_ROWS = 2000
     all_data = []
 
+    # Get filter parameters from the request (if any)
+    sound_type = request.GET.get("soundType", "Noise")
+    date_from = request.GET.get("dateFrom")
+    date_to = request.GET.get("dateTo")
+
     try:
-        # Fetch data in parallel batches for efficiency
         batch_offsets = range(0, TOTAL_ROWS, BATCH_SIZE)
 
         for offset in batch_offsets:
+            # Set the base where clause depending on whether a filter is applied
+            where_clause = (
+                f"starts_with(complaint_type, '{sound_type}')"
+                if sound_type
+                else "starts_with(complaint_type, 'Noise')"
+            )
+
+            # Apply date filters if provided
+            if date_from:
+                where_clause += f" AND created_date >= '{date_from}'"
+            if date_to:
+                where_clause += f" AND created_date <= '{date_to}'"
+
             params = {
                 "$limit": min(BATCH_SIZE, TOTAL_ROWS - offset),
                 "$offset": offset,
-                "$where": "starts_with(complaint_type, 'Noise')",
+                "$where": where_clause,
             }
 
+            # Fetch data from the API
             response = requests.get(API_URL, params=params, headers=headers)
             response.raise_for_status()
 
@@ -41,6 +60,7 @@ def homepage(request):
             if len(batch_data) < params["$limit"]:
                 break
 
+        # Render homepage.html with the data (filtered or default)
         return render(
             request,
             "soundscape/homepage.html",
