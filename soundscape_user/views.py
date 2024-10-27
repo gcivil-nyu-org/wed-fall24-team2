@@ -72,6 +72,7 @@ def sounds_at_location(request, lat, lng):
             {
                 'user_name': sound.user_name,
                 'sound_descriptor': sound.sound_descriptor,
+                'sound_name': sound.s3_file_name,
                 'listen_link': f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{sound.s3_file_name}"
             }
             for sound in sounds

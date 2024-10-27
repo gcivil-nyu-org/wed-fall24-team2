@@ -9,23 +9,145 @@ function loadMarkers(existingMarkers, map) {
   existingMarkers = markers;
 }
 
+// function fetchAndDisplaySounds(lat, lng) {
+//   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
+//     .then(response => response.json())
+//     .then(data => {
+//       if (data.sounds && data.sounds.length > 0) {  // Check if there are sounds
+//         const soundsListPromises = data.sounds.map(sound => {
+//           // Create the initial loading list item
+//           const listItem = `
+//             <li>
+//               ${sound.user_name} - ${sound.sound_descriptor} 
+//               <span class="loading">Loading sound...</span>
+//             </li>
+//           `;
+          
+//           // Create a promise to download the sound file
+//           const soundPromise = fetch(sound.listen_link)
+//             .then(response => {
+//               if (!response.ok) {
+//                 throw new Error('Network response was not ok');
+//               }
+//               return response.blob(); // Convert to Blob
+//             })
+//             .then(blob => {
+//               const audioUrl = URL.createObjectURL(blob); // Create a Blob URL
+//               // Update the list item to include the audio element
+//               return `
+//                 <li>
+//                   ${sound.user_name} - ${sound.sound_descriptor} 
+//                   <audio controls style="width: 100%;">
+//                     <source src="${audioUrl}" type="audio/mpeg">
+//                     Your browser does not support the audio element.
+//                   </audio>
+//                 </li>
+//               `;
+//             })
+//             .catch(error => {
+//               console.error('Error fetching sound file:', error);
+//               return `
+//                 <li>
+//                   ${sound.user_name} - ${sound.sound_descriptor} (Error loading sound)
+//                 </li>
+//               `;
+//             });
+          
+//           return Promise.resolve(listItem).then(item => {
+//             // Return both the initial item and the updated item when the sound is loaded
+//             return soundPromise.then(updatedItem => ({
+//               initial: item,
+//               updated: updatedItem,
+//             }));
+//           });
+//         });
+
+//         // Wait for all sounds to be processed and display them
+//         Promise.all(soundsListPromises).then(soundsList => {
+//           // Create an array to hold the final list items
+//           const finalList = soundsList.map(({ initial, updated }) => initial + updated).join('');
+//           document.getElementById('sounds-list').innerHTML = finalList;
+//         });
+//       } else {
+//         document.getElementById('sounds-list').innerHTML = '<p>No sounds yet.</p>';
+//       }
+//     })
+//     .catch(error => console.error('Error loading sounds:', error));
+// }
+
 function fetchAndDisplaySounds(lat, lng) {
-  console.log("heeh")
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data, "here sound?")
-          if (data.sounds && data.sounds.length > 0) {  // Check if there are sounds
-              const soundsList = data.sounds.map(sound => 
-                  `<li>${sound.user_name} - ${sound.sound_descriptor} (<a href="${sound.listen_link}" target="_blank">Listen</a>)</li>`
-              ).join('');
-              document.getElementById('sounds-list').innerHTML = soundsList;
-          } else {
-              document.getElementById('sounds-list').innerHTML = '<p>No sounds yet.</p>';
-          }
-      })
-      .catch(error => console.error('Error loading sounds:', error));
+    .then(response => response.json())
+    .then(data => {
+      if (data.sounds && data.sounds.length > 0) {  // Check if there are sounds
+        const soundsListPromises = data.sounds.map(sound => {
+          // Create the initial loading list item
+          const listItem = `
+            <li id="${sound.sound_name}"> <!-- Assign a unique ID based on sound data -->
+              ${sound.user_name} - ${sound.sound_descriptor} 
+              <span class="loading"></span>
+            </li>
+          `;
+          
+          // Create a promise to download the sound file
+          const soundPromise = fetch(sound.listen_link)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.blob(); // Convert to Blob
+            })
+            .then(blob => {
+              const audioUrl = URL.createObjectURL(blob); // Create a Blob URL
+              // Update the list item to include the audio element
+              const audioElement = `
+                <audio controls style="width: 100%;">
+                  <source src="${audioUrl}" type="audio/mpeg">
+                  Your browser does not support the audio element.
+                </audio>
+              `;
+              // Replace the loading message with the audio element
+              document.getElementById(sound.sound_name).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} ${audioElement}`;
+            })
+            .catch(error => {
+              console.error('Error fetching sound file:', error);
+              // Handle error gracefully by showing a message
+              document.getElementById(sound.sound_name).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} (Error loading sound)`;
+            });
+
+          return Promise.resolve(listItem); // Resolve the initial loading item
+        });
+
+        // Wait for all sounds to be processed and display them
+        Promise.all(soundsListPromises).then(soundsList => {
+          // Set the innerHTML for the list
+          document.getElementById('sounds-list').innerHTML = soundsList.join('');
+        });
+      } else {
+        document.getElementById('sounds-list').innerHTML = '<p>No sounds yet.</p>';
+      }
+    })
+    .catch(error => console.error('Error loading sounds:', error));
 }
+
+
+
+function playSound(url) {
+  fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.blob();
+    })
+    .then(blob => {
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+      audio.play();
+    })
+    .catch(error => console.error('Error fetching sound file:', error));
+}
+
 
 
 
@@ -72,6 +194,7 @@ function addMarker(lng, lat, map) {
     </div>
   </div>
 `);
+
 
       
 
