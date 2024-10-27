@@ -18,7 +18,6 @@ function applyFilters(map) {
     checkbox => checkbox.value
 );
 const dateFrom = document.getElementById("dateFrom").value;
-console.log(dateFrom);
 const dateTo = document.getElementById("dateTo").value;
 
 const params = new URLSearchParams();
