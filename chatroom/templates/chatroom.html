@@ -1,222 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatroom</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f2f5;
-        }
-        .chat-container {
-            max-width: 900px;
-            margin: 40px auto;
-            border-radius: 8px;
-            overflow: hidden;
-            background-color: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            height: 80vh;
-        }
-        .chat-header {
-            background-color: #007bff;
-            color: #ffffff;
-            padding: 20px;
-            text-align: center;
-            font-size: 1.75rem;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background-color: #e9ecef;
-        }
-        .chat-message {
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 10px;
-            background-color: #f1f3f5;
-            display: flex;
-            flex-direction: column;
-        }
-        .chat-message.user {
-            background-color: #cce5ff;
-            align-self: flex-end;
-        }
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            color: #555;
-        }
-        .username {
-            font-weight: bold;
-            color: #007bff;
-        }
-        .timestamp {
-            color: #888;
-        }
-        .message-text {
-            font-size: 1rem;
-        }
-        .delete-btn {
-            background-color: transparent;
-            border: none;
-            color: #dc3545;
-            cursor: pointer;
-            font-size: 1.25rem;
-            margin-left: 15px;
-            align-self: flex-end;
-        }
-        .delete-btn:hover {
-            color: #ff4d4f;
-        }
-        .chat-input {
-            display: flex;
-            padding: 20px;
-            background-color: #ffffff;
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .chat-input input {
-            flex: 1;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 30px;
-            font-size: 1rem;
-            outline: none;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        .chat-input input:focus {
-            border-color: #007bff;
-        }
-        .chat-input button {
-            padding: 15px 20px;
-            background-color: #007bff;
-            color: #ffffff;
-            border: none;
-            border-radius: 30px;
-            margin-left: 15px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .chat-input button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
 </head>
+
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            Chatroom
-        </div>
-        <div class="chat-messages" id="chat-messages">
-            <!-- Preloaded messages -->
-            <div class="chat-message">
-                <div class="message-header">
-                    <span class="username">Alice</span>
-                    <span class="timestamp">10/10/2024 10:30 AM</span>
+
+<div class="container">
+    <div class="row d-flex justify-content-center">
+        <div class="col-3">
+            <form>
+                <div class="form-group">
+                    <label for="chat-text" class="h4 pt-5">Chatbox</label>
+                    <textarea class="form-control" id="chat-text" readonly rows="10"></textarea><br>
                 </div>
-                <div class="message-text">Hi all, I'm thinking of moving to this neighborhood, how is the noise like at night?</div>
-            </div>
-            <div class="chat-message user">
-                <div class="message-header">
-                    <span class="username">John</span>
-                    <span class="timestamp">10/10/2024 10:32 AM</span>
+                <div class="form-group">
+                    <label for="input" class="sr-only">Enter Message</label>
+                    <input class="form-control" placeholder="Enter text here" id="input" type="text"></br>
                 </div>
-                <div class="message-text">It's pretty quiet at night.</div>
-            </div>
-            <div class="chat-message">
-                <div class="message-header">
-                    <span class="username">Bob</span>
-                    <span class="timestamp">10/10/2024 10:35 AM</span>
-                </div>
-                <div class="message-text">I heard some construction on Willoughby St last week but that was during the day.</div>
-            </div>
-        </div>
-        <div class="chat-input">
-            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" onkeydown="checkEnter(event)">
-            <button onclick="sendMessage()">Send</button>
+                <input class="btn btn-primary btn-lg btn-block" id="submit" type="button" value="Send">
+            </form>
         </div>
     </div>
+</div>
+{% comment %} Get data for username and chatbox name{% endcomment %}
+{{ request.user.username|json_script:"user_username" }}
+{{ chatroom_name|json_script:"room-name" }}
 
-    <script>
-        const chatMessages = document.getElementById('chat-messages');
+<script>
+    const user_username = JSON.parse(document.getElementById('user_username').textContent);
+    const boxName = JSON.parse(document.getElementById('room-name').textContent);
 
-        function getCurrentTime() {
-            const now = new Date();
-            const options = {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            };
-            return now.toLocaleString('en-US', options);
+    // Create a WebSocket in JavaScript.
+    const chatSocket = new WebSocket(
+        'ws://' +
+        window.location.host +
+        '/ws/chatroom/' +
+        boxName +
+        '/'
+    );
+
+    // Function to send message
+    function sendMessage() {
+        const messageInputDom = document.querySelector('#input');
+        const message = messageInputDom.value;
+        if (message.trim() !== "") {
+            const timestamp = new Date().toISOString();  // Add timestamp in ISO format
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'username': user_username,
+                'timestamp': timestamp,
+            }));
+            messageInputDom.value = '';
         }
+    }
 
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
+    // Event listener for the Send button click
+    document.querySelector('#submit').onclick = function (e) {
+        sendMessage();
+    };
 
-            if (message) {
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('chat-message', 'user');
-
-                const headerDiv = document.createElement('div');
-                headerDiv.classList.add('message-header');
-
-                const usernameSpan = document.createElement('span');
-                usernameSpan.classList.add('username');
-                usernameSpan.textContent = 'You'; // Mocked as "You"
-
-                const timestampSpan = document.createElement('span');
-                timestampSpan.classList.add('timestamp');
-                timestampSpan.textContent = getCurrentTime();
-
-                headerDiv.appendChild(usernameSpan);
-                headerDiv.appendChild(timestampSpan);
-
-                const messageText = document.createElement('div');
-                messageText.classList.add('message-text');
-                messageText.textContent = message;
-
-                messageDiv.appendChild(headerDiv);
-                messageDiv.appendChild(messageText);
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.classList.add('delete-btn');
-                deleteBtn.textContent = '×';
-                deleteBtn.onclick = function() {
-                    deleteMessage(messageDiv);
-                };
-                messageDiv.appendChild(deleteBtn);
-
-                chatMessages.appendChild(messageDiv);
-                input.value = '';
-
-                // Scroll to the latest message
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
+    // Event listener for Enter key press in the input field
+    document.querySelector('#input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {  // Check if the key pressed is the Enter key
+            e.preventDefault();  // Prevent default form submission behavior
+            sendMessage();
         }
+    });
 
-        function deleteMessage(messageElement) {
-            chatMessages.removeChild(messageElement);
-        }
 
-        // Function to check for Enter key press
-        function checkEnter(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
-    </script>
+    chatSocket.onmessage = function (e) {
+        console.log("Message received from server:", e.data);  // Log incoming message for debugging
+        const data = JSON.parse(e.data);
+        const chatTextDom = document.querySelector('#chat-text');
+        chatTextDom.value += `${data.timestamp} - ${data.username}: ${data.message}\n`;
+        chatTextDom.scrollTop = chatTextDom.scrollHeight;
+    };
+
+</script>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous">
+</script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous">
+</script>
 </body>
 </html>
