@@ -11,3 +11,30 @@ document.addEventListener('click', function (event) {
     panel.classList.remove('open');
   }
 });
+
+
+function applyFilters(map) {
+  const soundTypes = Array.from(document.querySelectorAll("input[name='soundType']:checked")).map(
+    checkbox => checkbox.value
+);
+const dateFrom = document.getElementById("dateFrom").value;
+console.log(dateFrom);
+const dateTo = document.getElementById("dateTo").value;
+
+const params = new URLSearchParams();
+params.append("soundType", soundTypes.length > 0 ? soundTypes[0] : "Noise");
+if (dateFrom) params.append("dateFrom", dateFrom);
+if (dateTo) params.append("dateTo", dateTo);
+
+// Redirect to the filtered sound data view
+window.location.href = `/filtered-sound-data/?${params.toString()}`;
+}
+
+function resetFilters(){
+  const params = new URLSearchParams();
+  window.location.href = `/filtered-sound-data/?${params.toString()}`;
+
+}
+window.toggleFilters = toggleFilters;
+window.applyFilters = applyFilters;
+window.resetFilters = resetFilters;
