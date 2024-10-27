@@ -109,8 +109,11 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [
                 (
-                    #Hardcoding the value since the fetch doesnt happen
-                    os.getenv("REDIS_URL", "soundscape-chatroom-redis.cugehm.ng.0001.use1.cache.amazonaws.com"),
+                    # Hardcoding the value since the fetch doesnt happen
+                    os.getenv(
+                        "REDIS_URL",
+                        "soundscape-chatroom-redis.cugehm.ng.0001.use1.cache.amazonaws.com",
+                    ),
                     int(os.getenv("REDIS_PORT", 6379)),
                 )
             ],
