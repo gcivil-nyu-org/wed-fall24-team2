@@ -1,109 +1,130 @@
-<!doctype html>
+{% load static %}
+<!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        <title>{% block title %}{% endblock %} | SoundScape</title>
+    <title>{% block title %}{% endblock %} | SoundScape</title>
 
-        <style>
-            body {
-                font-size: 14px;
-                background-color: #f9f9fc;
-                color: #333;
-                font-family: 'Helvetica', 'Arial', sans-serif;
-            }
+    <style>
+      body {
+        font-size: 14px;
+        background-color: #f9f9fc;
+        color: #333;
+        font-family: 'Helvetica', 'Arial', sans-serif;
+      }
 
-            .navbar {
-    background-color: white;
-    color: black;
-    padding: 8px 16px;
-    position: sticky;
-    top: 0;
-    width: 100vw;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+      .user-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
 
-.navbar ul {
-    list-style-type: none;
-    display: flex;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-}
+      .navbar {
+        background-color: white;
+        color: black;
+        padding: 10px 16px;
+        position: sticky;
+        top: 0;
+        width: 100vw;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
 
-.navbar ul li {
-    margin-right: 20px;
-}
+      .navbar ul {
+        list-style-type: none;
+        display: flex;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+      }
 
-.navbar ul li:last-child {
-    margin-right: 0;
-}
+      .navbar ul li {
+        margin-right: 20px;
+      }
 
-.navbar a {
-    color: #A527CF;
-    text-decoration: none; 
-    font-size: 16px; 
-    font-weight: 600; 
-    padding: 8px 12px; 
-    border-radius: 12px;
-    transition: background-color 0.3s, color 0.3s; 
-}
+      .navbar ul li:last-child {
+        margin-right: 0;
+      }
 
-.navbar a:hover {
-    background-color: #f0f0f0;
-    color: #9370DB;
-}
+      .navbar a {
+        color: #a527cf;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 12px;
+        transition: background-color 0.3s, color 0.3s;
+      }
 
-.user-info {
-    display: flex;
-    align-items: center;
-}
+      .navbar a:hover {
+        background-color: #f0f0f0;
+        color: #9370db;
+      }
 
-.user-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
+      .user-info {
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+        align-items: center; /* Center-align the image and username */
+      }
 
-.username {
-    font-size: 10px;
-    font-weight: 500;
-    color: #090000;
-}
-            .page-content {
-                padding: 20px;
-            }
-        </style>
-    </head>
+      .user-icon {
+        width: 30px;
+        height: 25px;
 
-    <body>
-        <nav class="navbar">
-            <a href="/" class="home-link">Home</a>
+        margin-bottom: 0px; /* Add space between the image and username */
+      }
 
-            <div class="auth-links">
-                {% if request.user.is_authenticated %}
-                    <a href="{% url 'soundscape:homepage' %}" class="user-info">
-                        <span class="user-icon"></span> {{ request.user.username }}
-                    </a>
-                    <a href="{% url 'soundscape:logout' %}" class="logout-link">Log out</a>
-                {% else %}
-                    <a href="{% url 'soundscape:signup' %}" class="signup-link">Sign up</a>
-                    <a href="{% url 'soundscape:login' %}" class="login-link">Log in</a>
-                {% endif %}
-            </div>
-        </nav>
+      .username {
+        font-size: 10px;
+        font-weight: 500;
+        color: #090000;
+        margin-bottom: 0px;
+      }
+      .page-content {
+        padding: 20px;
+      }
+    </style>
+  </head>
 
-        <div class="page-content">
-            {% block content %}
-            {% endblock %}
-        </div>
-    </body>
+  <body>
+    <div class="navbar">
+      <div class="nav-left">
+        <ul>
+          <li>
+            <a id="homeLink" href="/">
+                Home
+            </a>
+        </li>   
+        </ul>
+      </div>
+      <div class="nav-right">
+        <ul>
+          {% if request.user.is_authenticated %}
+          <li class="user-info">
+            <img
+              src="{% static 'images/user-icon.png' %}"
+              alt="User Icon"
+              class="user-icon"
+            />
+            <div class="username">{{ request.user.username }}</div>
+          </li>
+          <li><a href="{% url 'soundscape:logout' %}">Logout</a></li>
+          {% else %}
+          <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
+          <li><a href="{% url 'soundscape:login' %}">Login</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="page-content">{% block content %} {% endblock %}</div>
+  </body>
 </html>

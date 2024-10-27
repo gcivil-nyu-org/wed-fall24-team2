@@ -102,6 +102,9 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Define the ASGI application for Channels
 ASGI_APPLICATION = "core.asgi.application"
 
+# Debug statements to check environment variables
+print("REDIS_URL from environment:", os.getenv("REDIS_URL"))
+print("REDIS_PORT from environment:", os.getenv("REDIS_PORT"))
 # Channel layer configuration to use Redis
 CHANNEL_LAYERS = {
     "default": {
@@ -109,7 +112,11 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [
                 (
-                    os.getenv("REDIS_URL", "localhost"),
+                    # Hardcoding the value since the fetch doesnt happen
+                    os.getenv(
+                        "REDIS_URL",
+                        "soundscape-chatroom-redis.cugehm.ng.0001.use1.cache.amazonaws.com",
+                    ),
                     int(os.getenv("REDIS_PORT", 6379)),
                 )
             ],

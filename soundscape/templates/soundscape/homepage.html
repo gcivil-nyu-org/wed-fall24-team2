@@ -68,7 +68,7 @@
         background-position: center;
       }
 
-      .sound-information{
+      .sound-information {
         display: flex;
         flex-direction: column;
       }
@@ -182,7 +182,7 @@
         padding: 10px;
       }
 
-      .mapboxgl-popup-close-button{
+      .mapboxgl-popup-close-button {
         margin-right: 8px;
         font-weight: bold;
       }
@@ -264,7 +264,7 @@
     <div class="navbar">
       <div class="nav-left">
         <ul>
-          <li><a href="">Home</a></li>
+          <li><a href="/">Home</a></li>
         </ul>
       </div>
       <div class="nav-right">
@@ -289,6 +289,7 @@
             username = "Anonymous"; // If the user is not logged in, set username to null
           </script>
           {% endif %}
+          <li>{% include 'soundscape/filter_panel.html' %}</li>
         </ul>
       </div>
     </div>
@@ -305,9 +306,8 @@
     <script>
       var NYC_NEIGHBORHOODS = JSON.parse('{{ chatrooms|escapejs }}');
       var SOUND_DATA = JSON.parse('{{sound_data|escapejs}}');
-      var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA)
+      var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
     </script>
-
 
     <script>
       mapboxgl.accessToken = '{{ mapbox_access_token }}';

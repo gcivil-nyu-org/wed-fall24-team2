@@ -1,6 +1,6 @@
 asgiref==3.8.1
 attrs==24.2.0
-autobahn==24.4.2
+autobahn
 Automat==24.8.1
 black==24.8.0
 click==8.1.7
@@ -34,3 +34,5 @@ requests
 # git+https://github.com/MTG/freesound-python.git
 txaio==23.1.1
 zope.interface==7.1.0
+supervisor
+gunicorn
