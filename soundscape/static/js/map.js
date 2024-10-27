@@ -109,33 +109,34 @@ function addChatroomMarkers(map) {
   });
 }
 
-function addSoundMarkers(map) {
-  SOUND_DATA.forEach((sound) => {
-    if (sound.longitude && sound.latitude) {
-      const el = document.createElement('div');
-      el.className = 'sound-marker';
-      const popup = new mapboxgl.Popup({
-        offset: 25,
-      }).setHTML(`
-          <div class="sound-information">
-             <span>Description: ${sound.descriptor}</span>
-             <span>Status: ${sound.status}</span>
-             <span>Date Reported: ${new Intl.DateTimeFormat('en-US').format(
-               new Date(sound.created_date)
-             )}</span>
-          </div>
-        `);
-      existingMarkers.push({
-        lng: sound.longitude,
-        lat: sound.latitude,
-      });
-      new mapboxgl.Marker(el)
-        .setLngLat([sound.longitude, sound.latitude])
-        .setPopup(popup)
-        .addTo(map);
-    }
-  });
-}
+// removing soundmarkers for heatmap
+// function addSoundMarkers(map) {
+//   SOUND_DATA.forEach((sound) => {
+//     if (sound.longitude && sound.latitude) {
+//       const el = document.createElement('div');
+//       el.className = 'sound-marker';
+//       const popup = new mapboxgl.Popup({
+//         offset: 25,
+//       }).setHTML(`
+//           <div class="sound-information">
+//              <span>Description: ${sound.descriptor}</span>
+//              <span>Status: ${sound.status}</span>
+//              <span>Date Reported: ${new Intl.DateTimeFormat('en-US').format(
+//                new Date(sound.created_date)
+//              )}</span>
+//           </div>
+//         `);
+//       existingMarkers.push({
+//         lng: sound.longitude,
+//         lat: sound.latitude,
+//       });
+//       new mapboxgl.Marker(el)
+//         .setLngLat([sound.longitude, sound.latitude])
+//         .setPopup(popup)
+//         .addTo(map);
+//     }
+//   });
+// }
 
 function addHeatmapLayer(map) {
   map.on('load', () => {
@@ -215,7 +216,6 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
   // Load markers and add chatroom markers, then add search box
   loadMarkers(existingMarkers, map);
   addChatroomMarkers(map);
-  addSoundMarkers(map);
   addControls(map);
   addHeatmapLayer(map);
 }
@@ -233,19 +233,3 @@ function errorLocation(error, map, existingMarkers) {
   // Optional: Set a default location (e.g., NYC) if geolocation fails
   initializeMap([-74.006, 40.7128], map, existingMarkers); // Default center (New York City)
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-  const navbar = document.querySelector('.navbar');
-  const homeLink = navbar.querySelector('#homeLink');
-
-  if (homeLink) {
-      // Check if the current URL contains 'filtered'
-      if (window.location.href.includes('filtered')) {
-          homeLink.href = '../'; // Set to parent directory
-      } else {
-          homeLink.href = '/'; // Set to home
-      }
-  } else {
-      console.error("Element with ID 'homeLink' not found.");
-  }
-});
