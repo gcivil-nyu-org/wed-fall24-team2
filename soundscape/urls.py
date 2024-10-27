@@ -19,5 +19,4 @@ urlpatterns = [
     path(
         "logout/", LogoutView.as_view(next_page="/"), name="logout"
     ),  # Redirect to homepage after logout
-    path("filtered-sound-data/", views.filtered_sound_data, name="filtered_sound_data"),
 ]

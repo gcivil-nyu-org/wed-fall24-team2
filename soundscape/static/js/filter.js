@@ -27,14 +27,14 @@ if (dateFrom) params.append("dateFrom", dateFrom);
 if (dateTo) params.append("dateTo", dateTo);
 
 // Redirect to the filtered sound data view
-window.location.href = `/filtered-sound-data/?${params.toString()}`;
+window.location.href = `/?${params.toString()}`;
 }
 
-function resetFilters(){
+function resetFilters() {
   const params = new URLSearchParams();
-  window.location.href = `/filtered-sound-data/?${params.toString()}`;
-
+  window.location.href = `/?${params.toString()}`;
 }
+
 window.toggleFilters = toggleFilters;
 window.applyFilters = applyFilters;
 window.resetFilters = resetFilters;
