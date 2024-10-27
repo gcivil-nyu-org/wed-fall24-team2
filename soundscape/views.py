@@ -3,7 +3,6 @@ from django.forms.models import model_to_dict
 
 from .forms import SignupForm
 from chatroom.models import Chatroom
-from django.http import JsonResponse
 
 
 import requests
