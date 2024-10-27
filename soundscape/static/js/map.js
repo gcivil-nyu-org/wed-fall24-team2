@@ -233,3 +233,19 @@ function errorLocation(error, map, existingMarkers) {
   // Optional: Set a default location (e.g., NYC) if geolocation fails
   initializeMap([-74.006, 40.7128], map, existingMarkers); // Default center (New York City)
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const navbar = document.querySelector('.navbar');
+  const homeLink = navbar.querySelector('#homeLink');
+
+  if (homeLink) {
+      // Check if the current URL contains 'filtered'
+      if (window.location.href.includes('filtered')) {
+          homeLink.href = '../'; // Set to parent directory
+      } else {
+          homeLink.href = '/'; // Set to home
+      }
+  } else {
+      console.error("Element with ID 'homeLink' not found.");
+  }
+});
