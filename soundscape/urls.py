@@ -12,7 +12,9 @@ urlpatterns = [
     path(
         "login/",
         auth_views.LoginView.as_view(
-            template_name="soundscape/login.html", authentication_form=LoginForm
+            template_name="soundscape/login.html",
+            authentication_form=LoginForm,
+            redirect_authenticated_user=True,
         ),
         name="login",
     ),
