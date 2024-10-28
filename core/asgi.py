@@ -1,20 +1,25 @@
 import os
 from django.core.asgi import get_asgi_application
 
-# Seems to fail due to the model imports in my consumers.py
+# Set the default settings module before calling get_asgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 application = get_asgi_application()
 
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-import chatroom.routing
+
+# Lazy import of Channels and routing after Django application setup
+def get_application():
+    from channels.routing import ProtocolTypeRouter, URLRouter
+    from channels.auth import AuthMiddlewareStack
+    import chatroom.routing
+
+    return ProtocolTypeRouter(
+        {
+            "http": get_asgi_application(),
+            "websocket": AuthMiddlewareStack(
+                URLRouter(chatroom.routing.websocket_urlpatterns)
+            ),
+        }
+    )
 
 
-application = ProtocolTypeRouter(
-    {
-        "http": get_asgi_application(),
-        "websocket": AuthMiddlewareStack(
-            URLRouter(chatroom.routing.websocket_urlpatterns)
-        ),
-    }
-)
+application = get_application()
