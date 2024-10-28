@@ -35,7 +35,9 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
             # Check if user is authenticated and exists
             if user is None or not user.is_authenticated:
                 logger.error("Unauthenticated user cannot send messages.")
-                await self.send(text_data=json.dumps({"error": "User not authenticated"}))
+                await self.send(
+                    text_data=json.dumps({"error": "User not authenticated"})
+                )
                 return
 
             username = user.username
@@ -64,7 +66,6 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
         except Chatroom.DoesNotExist:
             logger.error("Chatroom does not exist.")
             await self.send(text_data=json.dumps({"error": "Chatroom does not exist"}))
-
 
     async def chat_message(self, event):
         logger.info(f"Chat message event received: {event}")
@@ -105,4 +106,3 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
 
         # Send the chat history to the WebSocket
         await self.send(text_data=json.dumps({"history": history, "page": page}))
-
