@@ -47,6 +47,19 @@
         '/'
     );
 
+    // Function to display chat history
+    function displayChatHistory(history) {
+        const chatTextDom = document.querySelector('#chat-text');
+        chatTextDom.value = '';  // Clear the textarea before adding history
+
+        history.forEach(item => {
+            chatTextDom.value += `${item.timestamp} - ${item.username}: ${item.message}\n`;
+        });
+
+        // Scroll to the bottom of the chat after loading history
+        chatTextDom.scrollTop = chatTextDom.scrollHeight;
+    }
+
     // Function to send message
     function sendMessage() {
         const messageInputDom = document.querySelector('#input');
@@ -76,14 +89,21 @@
     });
 
 
+    // Handle incoming WebSocket messages
     chatSocket.onmessage = function (e) {
         console.log("Message received from server:", e.data);  // Log incoming message for debugging
         const data = JSON.parse(e.data);
         const chatTextDom = document.querySelector('#chat-text');
-        chatTextDom.value += `${data.timestamp} - ${data.username}: ${data.message}\n`;
-        chatTextDom.scrollTop = chatTextDom.scrollHeight;
-    };
 
+        // Check if the message contains chat history
+        if (data.history) {
+            displayChatHistory(data.history);  // Load chat history
+        } else if (data.message) {
+            // Display new message
+            chatTextDom.value += `${data.timestamp} - ${data.username}: ${data.message}\n`;
+            chatTextDom.scrollTop = chatTextDom.scrollHeight;
+        }
+    };
 </script>
 
 <!-- Optional JavaScript -->
@@ -99,3 +119,4 @@
 </script>
 </body>
 </html>
+<!--https://farhanghazi17.medium.com/deploy-django-channels-websockets-on-aws-elastic-beanstalk-using-gunicorn-supervisor-redis-872ce86ba68d-->
