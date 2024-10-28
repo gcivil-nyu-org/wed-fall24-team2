@@ -206,28 +206,3 @@
     />
   </svg>
 </button>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-        // Select the home link more specifically
-        const navbar = document.querySelector('.navbar'); // Target the navbar
-        const homeLink = navbar.querySelector('#homeLink'); // Find the home link within the navbar
-
-        // Check if the element exists before trying to set its href
-        if (homeLink) { 
-            homeLink.href = '../'; // Change the href to the desired path
-        } else {
-            console.error("Element with ID 'homeLink' not found."); // Log error if not found
-        }
-    });
-</script>
-
-<style>
-  .sound-marker {
-      background-image: url('../static/images/listen_to_sound.png'); /* Changed path */
-      background-size: contain;
-      width: 20px;
-      height: 20px;
-      background-repeat: no-repeat;
-      background-position: center;
-  }
-</style>

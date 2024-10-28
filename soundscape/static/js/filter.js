@@ -7,7 +7,7 @@ document.addEventListener('click', function (event) {
   const panel = document.getElementById('filterPanel');
   const toggle = document.querySelector('.filter-toggle');
 
-  if (!panel.contains(event.target) && !toggle.contains(event.target)) {
+  if (panel && toggle && !panel.contains(event.target) && !toggle.contains(event.target)) {
     panel.classList.remove('open');
   }
 });
@@ -30,8 +30,7 @@ window.location.href = `/?${params.toString()}`;
 }
 
 function resetFilters() {
-  const params = new URLSearchParams();
-  window.location.href = `/?${params.toString()}`;
+  window.location.href = `/`;
 }
 
 window.toggleFilters = toggleFilters;
