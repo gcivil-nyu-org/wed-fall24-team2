@@ -30,12 +30,6 @@ def homepage(request):
     user_sound_files = SoundFileUser.objects.all()
     user_sound_files_data = json.dumps([model_to_dict(sound) for sound in user_sound_files])
 
-    print("Hello")
-    print(user_sound_files)
-
-    print("hello hello")
-    print(user_sound_files_data)
-
     try:
         batch_offsets = range(0, TOTAL_ROWS, BATCH_SIZE)
 
@@ -82,7 +76,7 @@ def homepage(request):
                 ),
                 "username": request.user.username,
                 "sound_data": json.dumps(all_data),
-                "user_sounds": user_sound_files_data,
+                "user_sound_data": user_sound_files_data,
             },
         )
 
