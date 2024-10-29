@@ -3,11 +3,9 @@ const MIN_ZOOM_LEVEL = 13;
 /* MARKERS */
 async function loadMarkers(existingMarkers, map) {
   // const markers = USER_SOUND_DATA;
-
   // for (const { latitude, longitude, user_name, sound_descriptor, s3_file_name } of markers) {
   //   console.log(s3_file_name);
   //   const marker = addMarker(longitude, latitude, map);
-
   //   // if (marker) {
   //   //   marker.getElement().addEventListener('click', () => {
   //   //     const soundUrl = `${s3_file_name}`;
@@ -16,7 +14,6 @@ async function loadMarkers(existingMarkers, map) {
   //   //   });
   //   //}
   // }
-
   // existingMarkers = markers;
 }
 
@@ -24,10 +21,6 @@ function addUserSound(map) {
   USER_SOUND_DATA.forEach((sound) => {
     const el = document.createElement('div');
     el.className = 'sound-marker';
-
-    // const popup = new mapboxgl.Popup({
-    //   offset: 25,
-    // })
 
     const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
   <div style="font-family: Arial, sans-serif; width: 250px; color: #333;">
@@ -57,9 +50,6 @@ function addUserSound(map) {
     </div>
   </div>
 `);
-
-
-
     existingMarkers.push({
       lng: sound.longitude,
       lat: sound.latitude,
@@ -68,86 +58,88 @@ function addUserSound(map) {
       .setLngLat([sound.longitude, sound.latitude])
       .setPopup(popup)
       .addTo(map);
-  });
+    popup.on('open', () => {
+      fetchAndDisplaySounds(sound.latitude, sound.longitude);
 
-  popup.on('open', () => {
-    fetchAndDisplaySounds(sound.latitude, sound.longitude);
+      document
+        .getElementById('popup-hear-sound-btn')
+        .addEventListener('click', function () {
+          alert('Playing sound at this location!');
+        });
 
-    document
-      .getElementById('popup-hear-sound-btn')
-      .addEventListener('click', function () {
-        alert('Playing sound at this location!');
-      });
+      document
+        .getElementById('popup-upload-sound-btn')
+        .addEventListener('click', function () {
+          document.getElementById('upload-sound-form').style.display = 'block';
+        });
 
-    document
-      .getElementById('popup-upload-sound-btn')
-      .addEventListener('click', function () {
-        document.getElementById('upload-sound-form').style.display = 'block';
-      });
+      document
+        .getElementById('sound-upload-form')
+        .addEventListener('submit', function (event) {
+          event.preventDefault();
+          const soundFile = document.getElementById('sound-file').files[0];
+          const latitude = document.getElementById('latitude').value;
+          const longitude = document.getElementById('longitude').value;
+          const soundDescriptor =
+            document.getElementById('sound-descriptor').value;
 
-    document
-      .getElementById('sound-upload-form')
-      .addEventListener('submit', function (event) {
-        event.preventDefault();
-        const soundFile = document.getElementById('sound-file').files[0];
-        const latitude = document.getElementById('latitude').value;
-        const longitude = document.getElementById('longitude').value;
-        const soundDescriptor = document.getElementById('sound-descriptor').value;
+          // Handle the file upload and form data submission
+          const formData = new FormData();
+          formData.append('username', username);
+          formData.append('sound_file', soundFile);
+          formData.append('latitude', latitude);
+          formData.append('longitude', longitude);
+          formData.append('sound_descriptor', soundDescriptor);
 
-        // Handle the file upload and form data submission
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('sound_file', soundFile);
-        formData.append('latitude', latitude);
-        formData.append('longitude', longitude);
-        formData.append('sound_descriptor', soundDescriptor);
-
-        fetch('/soundscape_user/upload/', {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': csrfToken
-          },
-          body: formData,
-        })
-          .then(response => response.json())
-          .then(data => {
-            alert('Sound uploaded successfully!');
-            document.getElementById('upload-sound-form').style.display = 'none';
-
-            fetchAndDisplaySounds(sound.latitude, sound.longitude);
+          fetch('/soundscape_user/upload/', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrfToken,
+            },
+            body: formData,
           })
-          .catch(error => {
-            alert('Error uploading sound');
-            console.error('Error:', error);
-          });
-      });
+            .then((response) => response.json())
+            .then((data) => {
+              alert('Sound uploaded successfully!');
+              document.getElementById('upload-sound-form').style.display =
+                'none';
+
+              fetchAndDisplaySounds(sound.latitude, sound.longitude);
+            })
+            .catch((error) => {
+              alert('Error uploading sound');
+              console.error('Error:', error);
+            });
+        });
+    });
   });
 }
 
-
 function fetchAndDisplaySounds(lat, lng) {
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.sounds && data.sounds.length > 0) {  // Check if there are sounds
-        const soundsListPromises = data.sounds.map(sound => {
+    .then((response) => response.json())
+    .then((data) => {
+      console.log({ data });
+      if (data.sounds && data.sounds.length > 0) {
+        // Check if there are sounds
+        const soundsListPromises = data.sounds.map((sound) => {
           // Create the initial loading list item
           const listItem = `
             <li id="${sound.sound_name}"> <!-- Assign a unique ID based on sound data -->
-              ${sound.user_name} - ${sound.sound_descriptor} 
+              ${sound.user_name} - ${sound.sound_descriptor}
               <span class="loading"></span>
             </li>
           `;
-          
+
           // Create a promise to download the sound file
           const soundPromise = fetch(sound.listen_link)
-            .then(response => {
+            .then((response) => {
               if (!response.ok) {
                 throw new Error('Network response was not ok');
               }
               return response.blob(); // Convert to Blob
             })
-            .then(blob => {
+            .then((blob) => {
               const audioUrl = URL.createObjectURL(blob); // Create a Blob URL
               // Update the list item to include the audio element
               const audioElement = `
@@ -157,49 +149,50 @@ function fetchAndDisplaySounds(lat, lng) {
                 </audio>
               `;
               // Replace the loading message with the audio element
-              document.getElementById(sound.sound_name).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} ${audioElement}`;
+              document.getElementById(
+                sound.sound_name
+              ).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} ${audioElement}`;
             })
-            .catch(error => {
+            .catch((error) => {
               console.error('Error fetching sound file:', error);
               // Handle error gracefully by showing a message
-              document.getElementById(sound.sound_name).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} (Error loading sound)`;
+              document.getElementById(
+                sound.sound_name
+              ).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} (Error loading sound)`;
             });
 
           return Promise.resolve(listItem); // Resolve the initial loading item
         });
 
         // Wait for all sounds to be processed and display them
-        Promise.all(soundsListPromises).then(soundsList => {
+        Promise.all(soundsListPromises).then((soundsList) => {
           // Set the innerHTML for the list
-          document.getElementById('sounds-list').innerHTML = soundsList.join('');
+          document.getElementById('sounds-list').innerHTML =
+            soundsList.join('');
         });
       } else {
-        document.getElementById('sounds-list').innerHTML = '<p>No sounds yet.</p>';
+        document.getElementById('sounds-list').innerHTML =
+          '<p>No sounds yet.</p>';
       }
     })
-    .catch(error => console.error('Error loading sounds:', error));
+    .catch((error) => console.error('Error loading sounds:', error));
 }
-
-
 
 function playSound(url) {
   fetch(url)
-    .then(response => {
+    .then((response) => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       return response.blob();
     })
-    .then(blob => {
+    .then((blob) => {
       const audioUrl = URL.createObjectURL(blob);
       const audio = new Audio(audioUrl);
       audio.play();
     })
-    .catch(error => console.error('Error fetching sound file:', error));
+    .catch((error) => console.error('Error fetching sound file:', error));
 }
-
-
-
 
 function addMarker(lng, lat, map) {
   const currentZoom = map.getZoom();
@@ -245,9 +238,8 @@ function addMarker(lng, lat, map) {
   </div>
 `);
 
-      const el = document.createElement('div');
-    el.className = 'sound-marker';
-      
+  const el = document.createElement('div');
+  el.className = 'sound-marker';
 
   const marker = new mapboxgl.Marker(el)
     .setLngLat([lng, lat])
@@ -276,7 +268,8 @@ function addMarker(lng, lat, map) {
         const soundFile = document.getElementById('sound-file').files[0];
         const latitude = document.getElementById('latitude').value;
         const longitude = document.getElementById('longitude').value;
-        const soundDescriptor = document.getElementById('sound-descriptor').value;
+        const soundDescriptor =
+          document.getElementById('sound-descriptor').value;
 
         // Handle the file upload and form data submission
         const formData = new FormData();
@@ -289,18 +282,18 @@ function addMarker(lng, lat, map) {
         fetch('/soundscape_user/upload/', {
           method: 'POST',
           headers: {
-            'X-CSRFToken': csrfToken
+            'X-CSRFToken': csrfToken,
           },
           body: formData,
         })
-          .then(response => response.json())
-          .then(data => {
+          .then((response) => response.json())
+          .then((data) => {
             alert('Sound uploaded successfully!');
             document.getElementById('upload-sound-form').style.display = 'none';
 
             fetchAndDisplaySounds(lat, lng);
           })
-          .catch(error => {
+          .catch((error) => {
             alert('Error uploading sound');
             console.error('Error:', error);
           });
@@ -358,19 +351,19 @@ function addMarker(lng, lat, map) {
 
 //       popup.on('open', () => {
 //         fetchAndDisplaySounds(lat, lng);
-    
+
 //         document
 //           .getElementById('popup-hear-sound-btn')
 //           .addEventListener('click', function () {
 //             alert('Playing sound at this location!');
 //           });
-    
+
 //         document
 //           .getElementById('popup-upload-sound-btn')
 //           .addEventListener('click', function () {
 //             document.getElementById('upload-sound-form').style.display = 'block';
 //           });
-    
+
 //         document
 //           .getElementById('sound-upload-form')
 //           .addEventListener('submit', function (event) {
@@ -379,7 +372,7 @@ function addMarker(lng, lat, map) {
 //             const latitude = document.getElementById('latitude').value;
 //             const longitude = document.getElementById('longitude').value;
 //             const soundDescriptor = document.getElementById('sound-descriptor').value;
-    
+
 //             // Handle the file upload and form data submission
 //             const formData = new FormData();
 //             formData.append('username', username);
@@ -387,7 +380,7 @@ function addMarker(lng, lat, map) {
 //             formData.append('latitude', latitude);
 //             formData.append('longitude', longitude);
 //             formData.append('sound_descriptor', soundDescriptor);
-    
+
 //             fetch('/soundscape_user/upload/', {
 //               method: 'POST',
 //               headers: {
@@ -399,7 +392,7 @@ function addMarker(lng, lat, map) {
 //               .then(data => {
 //                 alert('Sound uploaded successfully!');
 //                 document.getElementById('upload-sound-form').style.display = 'none';
-    
+
 //                 fetchAndDisplaySounds(lat, lng);
 //               })
 //               .catch(error => {
@@ -412,10 +405,6 @@ function addMarker(lng, lat, map) {
 //     resolve(marker);
 //   });
 // }
-
-
-
-
 
 function isDuplicateMarker(lng, lat, existingMarkers) {
   const threshold = 0.0005;
@@ -480,35 +469,6 @@ function addChatroomMarkers(map) {
       .addTo(map);
   });
 }
-
-// removing soundmarkers for heatmap
-// function addSoundMarkers(map) {
-//   SOUND_DATA.forEach((sound) => {
-//     if (sound.longitude && sound.latitude) {
-//       const el = document.createElement('div');
-//       el.className = 'sound-marker';
-//       const popup = new mapboxgl.Popup({
-//         offset: 25,
-//       }).setHTML(`
-//           <div class="sound-information">
-//              <span>Description: ${sound.descriptor}</span>
-//              <span>Status: ${sound.status}</span>
-//              <span>Date Reported: ${new Intl.DateTimeFormat('en-US').format(
-//                new Date(sound.created_date)
-//              )}</span>
-//           </div>
-//         `);
-//       existingMarkers.push({
-//         lng: sound.longitude,
-//         lat: sound.latitude,
-//       });
-//       new mapboxgl.Marker(el)
-//         .setLngLat([sound.longitude, sound.latitude])
-//         .setPopup(popup)
-//         .addTo(map);
-//     }
-//   });
-// }
 
 function addHeatmapLayer(map) {
   map.on('load', () => {
@@ -585,13 +545,13 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
     });
   }
 
-  // Load markers and add chatroom markers, then add search box
-  
-  addChatroomMarkers(map);
-  addUserSound(map);
-  addControls(map);
   addHeatmapLayer(map);
-  loadMarkers(existingMarkers, map);
+  addChatroomMarkers(map);
+  if (username !== 'Anonymous') {
+    addUserSound(map);
+  }
+
+  addControls(map);
 }
 
 function successLocation(position, map, existingMarkers) {
