@@ -187,13 +187,6 @@
         font-weight: bold;
       }
 
-      .user-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin-right: 10px;
-      }
-
       .navbar {
         background-color: white;
         color: black;
@@ -248,6 +241,7 @@
       .user-icon {
         width: 30px;
         height: 25px;
+        border-radius: 50%;
 
         margin-bottom: 0px; /* Add space between the image and username */
       }
@@ -270,14 +264,7 @@
       <div class="nav-right">
         <ul>
           {% if user.is_authenticated %}
-          <li class="user-info">
-            <img
-              src="{% static 'images/user-icon.png' %}"
-              alt="User Icon"
-              class="user-icon"
-            />
-            <div class="username">{{ username }}</div>
-          </li>
+          <li>{% include 'soundscape/profile_panel.html' %}</li>
           <li><a href="{% url 'soundscape:logout' %}">Logout</a></li>
           {% else %}
           <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>

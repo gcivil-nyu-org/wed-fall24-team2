@@ -1,37 +1,46 @@
 name,address,city,state,country,zipcode,description,latitude,longitude
-Manhattan,1 Centre Street,New York,NY,USA,10007,The heart of New York City with iconic skyscrapers and attractions,40.7831,-73.9712
-Brooklyn,209 Joralemon Street,Brooklyn,NY,USA,11201,A diverse borough known for its artistic communities and brownstone buildings,40.6782,-73.9442
-Queens,120-55 Queens Blvd,Queens,NY,USA,11424,The largest borough by area featuring diverse communities and cultures,40.7282,-73.7949
-The Bronx,851 Grand Concourse,Bronx,NY,USA,10451,Home to the Yankee Stadium and the Bronx Zoo,40.837,-73.8654
-Staten Island,10 Richmond Terrace,Staten Island,NY,USA,10301,The most suburban of NYC's boroughs with ferry access to Manhattan,40.5795,-74.1502
-Upper East Side,1000 5th Avenue,New York,NY,USA,10028,An affluent area known for its museums and upscale residences,40.7736,-73.9566
-Upper West Side,2000 Broadway,New York,NY,USA,10023,A residential area with a mix of cultural institutions and restaurants,40.787,-73.9734
-Harlem,125 West 125th Street,New York,NY,USA,10027,A neighborhood rich in African American history and culture,40.8116,-73.9453
-Greenwich Village,1 Washington Square,New York,NY,USA,10012,A bohemian neighborhood known for its artistic heritage,40.7336,-73.9962
-East Village,St. Marks Place,New York,NY,USA,10003,Known for its diverse community and vibrant nightlife,40.7274,-73.9817
-West Village,Bleecker Street,New York,NY,USA,10014,A charming area with narrow streets and historic townhouses,40.7331,-74.0028
-SoHo,Broadway and Spring Street,New York,NY,USA,10012,Famous for its cast-iron architecture and high-end shopping,40.7242,-74.0036
-Tribeca,375 Greenwich Street,New York,NY,USA,10013,A trendy neighborhood known for its loft apartments and restaurants,40.719,-74.0113
-Chelsea,75 9th Avenue,New York,NY,USA,10011,Home to art galleries and the High Line elevated park,40.7442,-74.0022
-Hell's Kitchen,600 West 42nd Street,New York,NY,USA,10036,A diverse neighborhood with a thriving restaurant scene,40.7645,-73.9936
-Financial District,1 Wall Street,New York,NY,USA,10005,The city's main financial center with historic landmarks,40.7074,-74.0113
-Lower East Side,Katz's Delicatessen,New York,NY,USA,10002,A historic neighborhood known for its immigrant heritage,40.7132,-73.9866
-Williamsburg,Bedford Avenue,Brooklyn,NY,USA,11211,A trendy neighborhood known for its hipster culture and waterfront views,40.7081,-73.9571
-Bushwick,Knickerbocker Avenue,Brooklyn,NY,USA,11237,An up-and-coming neighborhood with a thriving arts scene,40.6928,-73.911
-Crown Heights,Eastern Parkway,Brooklyn,NY,USA,11225,A diverse neighborhood with a mix of cultures and architecture,40.6618,-73.9352
-Prospect Lefferts Gardens,Flatbush Avenue,Brooklyn,NY,USA,11225,A residential area near Prospect Park with historic architecture,40.6533,-73.9515
-Astoria,31-01 Steinway Street,Queens,NY,USA,11103,A diverse neighborhood known for its Greek heritage and food scene,40.7694,-73.9257
-Flushing,Main Street,Queens,NY,USA,11354,Home to a vibrant Asian community and diverse culinary scene,40.7676,-73.8272
-Jackson Heights,Roosevelt Avenue,Queens,NY,USA,11372,One of the most ethnically diverse neighborhoods in New York City,40.7464,-73.892
-Long Island City,1 Court Square,Queens,NY,USA,11101,A rapidly developing area with great views of Manhattan,40.7435,-73.9512
-Sunnyside,Queens Boulevard,Queens,NY,USA,11104,A quiet residential neighborhood with a small-town feel,40.7431,-73.924
-Forest Hills,71-40 Austin Street,Queens,NY,USA,11375,An upscale neighborhood with a mix of houses and apartment buildings,40.713,-73.8443
-Bayside,Bell Boulevard,Queens,NY,USA,11361,A suburban-like neighborhood with a strong sense of community,40.7658,-73.7691
-Riverdale,Riverdale Avenue,Bronx,NY,USA,10471,An affluent residential area with a suburban feel,40.8952,-73.9144
-DUMBO,1 Main Street,Brooklyn,NY,USA,11201,A former industrial area known for its tech startups and art scene,40.7033,-73.9879
-City Island,City Island Avenue,Bronx,NY,USA,10464,A small seaport with a New England-like atmosphere,40.8356,-73.7755
-Marine Park,Flatbush Avenue,Brooklyn,NY,USA,11234,A residential neighborhood centered around its namesake park,40.6083,-73.9174
-Park Slope,7th Avenue,Brooklyn,NY,USA,11215,A family-friendly neighborhood with beautiful brownstones,40.6683,-73.9804
-Carroll Gardens,Court Street,Brooklyn,NY,USA,11231,A charming neighborhood known for its brownstones and Italian-American heritage,40.6834,-73.9955
-Greenpoint,Manhattan Avenue,Brooklyn,NY,USA,11222,A traditionally Polish neighborhood experiencing rapid gentrification,40.728,-73.9515
-Sheepshead Bay,Emmons Avenue,Brooklyn,NY,USA,11235,A waterfront neighborhood known for its fishing piers and seafood restaurants,40.5964,-73.9412
+Harlem,125 West 125th Street,New York,NY,USA,10027,A neighborhood rich in African American history and culture,40.808889,-73.948333
+Upper East Side,1000 5th Avenue,New York,NY,USA,10028,An affluent area known for its museums and upscale residences,40.769,-73.966
+Upper West Side,2000 Broadway,New York,NY,USA,10023,A residential area with a mix of cultural institutions and restaurants,40.787,-73.975
+Time Square,,New York,NY,USA,,,40.7575,-73.985833
+Hell's Kitchen,600 West 42nd Street,New York,NY,USA,10036,A diverse neighborhood with a thriving restaurant scene,40.764167,-73.992222
+Greenwich Village,1 Washington Square,New York,NY,USA,10012,A bohemian neighborhood known for its artistic heritage,40.733611,-74.002778
+East Village,St. Marks Place,New York,NY,USA,10003,Known for its diverse community and vibrant nightlife,40.728,-73.986
+West Village,Bleecker Street,New York,NY,USA,10014,A charming area with narrow streets and historic townhouses,40.736,-74.004
+Downtown Brooklyn,,Brooklyn,,,,,40.693889,-73.987222
+Tribeca,375 Greenwich Street,New York,NY,USA,10013,A trendy neighborhood known for its loft apartments and restaurants,40.718,-74.008
+Chelsea,75 9th Avenue,New York,NY,USA,10011,Home to art galleries and the High Line elevated park,40.746389,-74.001389
+Financial District,1 Wall Street,New York,NY,USA,10005,The city's main financial center with historic landmarks,40.7075,-74.009167
+Lower East Side,Katz's Delicatessen,New York,NY,USA,10002,A historic neighborhood known for its immigrant heritage,40.715,-73.985
+Soho,Broadway and Spring Street,New York,NY,USA,10012,Famous for its cast-iron architecture and high-end shopping,40.723,-74
+NoMad,,,,,,,40.7442,-73.9883
+Chinatown,,,,,,,40.715,-73.997
+Little Italy,,,,,,,40.719,-73.997
+Koreatown,,,,,,,40.747,-73.987
+Murray Hill,,,,,,,40.748,-73.978
+Gramercy Park,,,,,,,40.738,-73.986
+Crown Heights,,Brooklyn,,,,,40.673,-73.946
+Flatbush,,Brooklyn,,,,,40.645,-73.96
+Prospect Park,,Brooklyn,,,,,40.661667,-73.970833
+Kensington,,Brooklyn,,,,,40.638528,-73.973167
+Brownsville,,Brooklyn,,,,,40.662,-73.909
+Canarsie,,Brooklyn,,,,,40.64,-73.902
+East New York,,Brooklyn,,,,,40.67,-73.89
+Bedford-Stuyvesant,,Brooklyn,,,,,40.687,-73.941
+Bushwick,,Brooklyn,,,,,40.697,-73.917
+Greenpoint,,,,,,,40.73,-73.95
+Williamsburg,,,,,,,40.71,-73.96
+Brooklyn Heights,,Brooklyn,,,,,40.696,-73.995
+Dumbo,,Brooklyn,,,,,40.703,-73.99
+Sunnyside Gardens,,Queens,,,,,40.746944,-73.9175
+Astoria,,Queens,,,,,40.767,-73.921
+Long Island City,,Queens,,,,,40.7509,-73.9411
+Woodside,,Queens,,,,,40.745,-73.905
+Bayside,,Queens,,,,,40.76,-73.77
+Flushing,,Queens,,,,,40.765,-73.805
+Belmont,,Bronx,,,,,40.855,-73.886
+Riverdale,,Bronx,,,,,40.894,-73.913
+Morris Heights,,Bronx,,,,,40.85,-73.92
+Williamsbridge,,Bronx,,,,,40.877,-73.866
+Tompkinsville,,Staten Island,,,,,40.633889,-74.085833
+Sunset Park,,Brooklyn,,,,,40.643333,-74.014444
