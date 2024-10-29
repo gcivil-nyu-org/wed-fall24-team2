@@ -5,7 +5,6 @@ from soundscape_user.models import SoundFileUser
 from .forms import SignupForm
 from chatroom.models import Chatroom
 
-
 import requests
 
 import os
@@ -98,6 +97,9 @@ def homepage(request):
 
 
 def signup(request):
+    if request.user.is_authenticated:
+        return redirect("/")
+
     if request.method == "POST":
         form = SignupForm(request.POST)
 
