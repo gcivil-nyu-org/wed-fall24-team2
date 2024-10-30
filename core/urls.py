@@ -26,7 +26,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("sound/", include("sounddata_s3.urls")),
     path("chatroom/", include("chatroom.urls")),
-    path('soundscape_user/', include('soundscape_user.urls')),
+    path("soundscape_user/", include("soundscape_user.urls")),
 ]
 
 if settings.DEBUG:

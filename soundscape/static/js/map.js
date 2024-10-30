@@ -26,7 +26,6 @@ function addUserSound(map) {
   <div style="font-family: Arial, sans-serif; width: 250px; color: #333;">
     <h3 style="margin: 0 0 10px; font-size: 18px;">Sound</h3>
     <div style="margin-bottom: 10px;">
-      <button id="popup-hear-sound-btn" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Listen</button>
       <button id="popup-upload-sound-btn" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Upload</button>
     </div>
     <h4 style="font-size: 16px; margin: 10px 0;">Uploaded Sounds:</h4>
@@ -61,11 +60,11 @@ function addUserSound(map) {
     popup.on('open', () => {
       fetchAndDisplaySounds(sound.latitude, sound.longitude);
 
-      document
-        .getElementById('popup-hear-sound-btn')
-        .addEventListener('click', function () {
-          alert('Playing sound at this location!');
-        });
+      // document
+      //   .getElementById('popup-hear-sound-btn')
+      //   .addEventListener('click', function () {
+      //     alert('Playing sound at this location!');
+      //   });
 
       document
         .getElementById('popup-upload-sound-btn')
@@ -213,7 +212,6 @@ function addMarker(lng, lat, map) {
   <div style="font-family: Arial, sans-serif; width: 250px; color: #333;">
     <h3 style="margin: 0 0 10px; font-size: 18px;">Sound</h3>
     <div style="margin-bottom: 10px;">
-      <button id="popup-hear-sound-btn" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Listen</button>
       <button id="popup-upload-sound-btn" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Upload</button>
     </div>
     <h4 style="font-size: 16px; margin: 10px 0;">Uploaded Sounds:</h4>
@@ -249,11 +247,11 @@ function addMarker(lng, lat, map) {
   popup.on('open', () => {
     fetchAndDisplaySounds(lat, lng);
 
-    document
-      .getElementById('popup-hear-sound-btn')
-      .addEventListener('click', function () {
-        alert('Playing sound at this location!');
-      });
+    // document
+    //   .getElementById('popup-hear-sound-btn')
+    //   .addEventListener('click', function () {
+    //     alert('Playing sound at this location!');
+    //   });
 
     document
       .getElementById('popup-upload-sound-btn')

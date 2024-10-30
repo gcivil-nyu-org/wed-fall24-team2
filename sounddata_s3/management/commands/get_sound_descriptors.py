@@ -1,6 +1,7 @@
 import csv
 from django.core.management.base import BaseCommand
 
+
 class Command(BaseCommand):
     help = "Fetch unique sound descriptors from the CSV file"
 
@@ -16,5 +17,6 @@ class Command(BaseCommand):
                     unique_descriptors.add(descriptor)
 
         unique_descriptors_list = list(unique_descriptors)
-        self.stdout.write(f"Unique Descriptors ({len(unique_descriptors_list)}): {unique_descriptors_list}")
-
+        self.stdout.write(
+            f"Unique Descriptors ({len(unique_descriptors_list)}): {unique_descriptors_list}"
+        )
