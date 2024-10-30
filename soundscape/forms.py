@@ -36,12 +36,13 @@ class SignupForm(UserCreationForm):
         )
     )
     email = forms.CharField(
+        required=True,
         widget=forms.EmailInput(
             attrs={
                 "placeholder": "Your email address",
                 "class": "w-full py-4 px-6 rounded-xl",
             }
-        )
+        ),
     )
     password1 = forms.CharField(
         widget=forms.PasswordInput(
@@ -59,3 +60,9 @@ class SignupForm(UserCreationForm):
             }
         )
     )
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("This email is already in use.")
+        return email
