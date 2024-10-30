@@ -449,6 +449,10 @@ function addControls(map) {
     map.addControl(new mapboxgl.NavigationControl());
   }
 }
+function isLoggedIn(){
+  return username!='Anonymous';
+}
+
 function addChatroomMarkers(map) {
   NYC_NEIGHBORHOODS.forEach((neighborhood) => {
     const el = document.createElement('div');
@@ -457,6 +461,14 @@ function addChatroomMarkers(map) {
     const popup = new mapboxgl.Popup({
       offset: 25,
     }).setHTML(getChatroomComponent(neighborhood));
+    el.addEventListener('click', ()=>{
+      if(!isLoggedIn()) {
+        window.location.href='/login';
+
+      }else{
+        popup.addTo(map);
+      }
+    });
     existingMarkers.push({
       lng: neighborhood.longitude,
       lat: neighborhood.latitude,
