@@ -2,7 +2,7 @@
 
 [![Build Status](https://app.travis-ci.com/gcivil-nyu-org/wed-fall24-team2.svg?token=5CzaCsh5AqstQS8aFcN5&branch=main)](https://app.travis-ci.com/gcivil-nyu-org/wed-fall24-team2)
 
-[![Coverage Status](https://coveralls.io/repos/github/gcivil-nyu-org/wed-fall24-team2/badge.svg?branch=data_s3)](https://coveralls.io/github/gcivil-nyu-org/wed-fall24-team2?branch=data_s3)
+[![Coverage Status](https://coveralls.io/repos/github/gcivil-nyu-org/wed-fall24-team2/badge.svg?branch=main)](https://coveralls.io/github/gcivil-nyu-org/wed-fall24-team2?branch=main)
 
 ## Setup
 
