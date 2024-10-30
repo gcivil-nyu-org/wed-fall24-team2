@@ -266,9 +266,15 @@
           {% if user.is_authenticated %}
           <li>{% include 'soundscape/profile_panel.html' %}</li>
           <li><a href="{% url 'soundscape:logout' %}">Logout</a></li>
+          <script>
+            username = "{{ username }}"; // Storing the username in a JavaScript variable
+          </script>
           {% else %}
           <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
           <li><a href="{% url 'soundscape:login' %}">Login</a></li>
+          <script>
+            username = "Anonymous"; // If the user is not logged in, set username to null
+          </script>
           {% endif %}
           <li>{% include 'soundscape/filter_panel.html' %}</li>
         </ul>
@@ -278,6 +284,9 @@
     <div class="app-container">
       <div id="map"></div>
     </div>
+    <script>
+      const csrfToken = "{{ csrf_token }}";
+    </script>
     <script src="{% static 'js/mapUtils.js'%}"></script>
     <script src="{% static 'js/chatroom.js'%}"></script>
     <script src="{% static 'js/map.js'%}"></script>
@@ -285,6 +294,8 @@
       var NYC_NEIGHBORHOODS = JSON.parse('{{ chatrooms|escapejs }}');
       var SOUND_DATA = JSON.parse('{{sound_data|escapejs}}');
       var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
+      var USER_SOUND_DATA = JSON.parse('{{user_sound_data|escapejs}}');
+      var USER_SOUND_GEOJSON_DATA = convertToGeoJSON(USER_SOUND_DATA);
     </script>
 
     <script>

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.forms.models import model_to_dict
+from soundscape_user.models import SoundFileUser
 
 from .forms import SignupForm
 from chatroom.models import Chatroom
@@ -23,6 +24,12 @@ def homepage(request):
     sound_type = request.GET.get("soundType", "Noise")
     date_from = request.GET.get("dateFrom")
     date_to = request.GET.get("dateTo")
+
+    # Query SoundFileUser data
+    user_sound_files = SoundFileUser.objects.all()
+    user_sound_files_data = json.dumps(
+        [model_to_dict(sound) for sound in user_sound_files]
+    )
 
     try:
         batch_offsets = range(0, TOTAL_ROWS, BATCH_SIZE)
@@ -70,6 +77,7 @@ def homepage(request):
                 ),
                 "username": request.user.username,
                 "sound_data": json.dumps(all_data),
+                "user_sound_data": user_sound_files_data,
             },
         )
 
@@ -85,6 +93,7 @@ def homepage(request):
                 "username": request.user.username,
                 "sound_data": json.dumps([]),  # Empty data on error
                 "error_message": str(e),
+                "user_sounds": user_sound_files_data,
             },
         )
 
