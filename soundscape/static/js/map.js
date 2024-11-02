@@ -264,6 +264,11 @@ function addMarker(lng, lat, map) {
       .addEventListener('submit', function (event) {
         event.preventDefault();
         const soundFile = document.getElementById('sound-file').files[0];
+        if (soundFile.size > 3 *1024 * 1024) {  // 3 MB limit
+          alert('Please limit the sound file size to 3 MB');
+          return;
+        }
+
         const latitude = document.getElementById('latitude').value;
         const longitude = document.getElementById('longitude').value;
         const soundDescriptor =
@@ -286,10 +291,16 @@ function addMarker(lng, lat, map) {
         })
           .then((response) => response.json())
           .then((data) => {
-            alert('Sound uploaded successfully!');
-            document.getElementById('upload-sound-form').style.display = 'none';
+            console.log(data)
+            if (data.error)
+            {
+              alert(data.error)
+            }else{
+              alert('Sound uploaded successfully!');
+              document.getElementById('upload-sound-form').style.display = 'none';
 
-            fetchAndDisplaySounds(lat, lng);
+              fetchAndDisplaySounds(lat, lng);
+            }
           })
           .catch((error) => {
             alert('Error uploading sound');

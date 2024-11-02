@@ -21,6 +21,12 @@ def upload_sound_file(request):
         if form.is_valid():
             user_name = form.cleaned_data["username"]
             sound_file = request.FILES["sound_file"]
+            print(sound_file.size)
+            if sound_file.size > 3 * 1024 * 1024:  # 3 MB
+                return JsonResponse(
+                    {"error": "Please limit the sound file size to 3 MB"}, status=400
+                )
+
             latitude = form.cleaned_data["latitude"]
             sound_descriptor = form.cleaned_data["sound_descriptor"]
             longitude = form.cleaned_data["longitude"]
