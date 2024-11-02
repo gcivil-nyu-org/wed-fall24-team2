@@ -1,21 +1,6 @@
 const MIN_ZOOM_LEVEL = 13;
 
 /* MARKERS */
-async function loadMarkers(existingMarkers, map) {
-  // const markers = USER_SOUND_DATA;
-  // for (const { latitude, longitude, user_name, sound_descriptor, s3_file_name } of markers) {
-  //   console.log(s3_file_name);
-  //   const marker = addMarker(longitude, latitude, map);
-  //   // if (marker) {
-  //   //   marker.getElement().addEventListener('click', () => {
-  //   //     const soundUrl = `${s3_file_name}`;
-  //   //     fetchAndDisplaySounds(latitude, longitude);
-  //   //     playSound(soundUrl);
-  //   //   });
-  //   //}
-  // }
-  // existingMarkers = markers;
-}
 
 function addUserSound(map) {
   USER_SOUND_DATA.forEach((sound) => {
@@ -299,111 +284,6 @@ function addMarker(lng, lat, map) {
   });
 }
 
-// function addMarker(lng, lat, map) {
-//   return new Promise((resolve, reject) => {
-//     const currentZoom = map.getZoom();
-//     const currentCenter = map.getCenter();
-//     const distanceFromUser = getDistance(lat, lng, currentCenter.lat, currentCenter.lng);
-
-//     if (currentZoom < MIN_ZOOM_LEVEL || distanceFromUser > 1000) {
-//       resolve(null);
-//       return;
-//     }
-
-//     const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-//   <div style="font-family: Arial, sans-serif; width: 250px; color: #333;">
-//     <h3 style="margin: 0 0 10px; font-size: 18px;">Sound</h3>
-//     <div style="margin-bottom: 10px;">
-//       <button id="popup-hear-sound-btn" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Listen</button>
-//       <button id="popup-upload-sound-btn" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Upload</button>
-//     </div>
-//     <h4 style="font-size: 16px; margin: 10px 0;">Uploaded Sounds:</h4>
-//     <ul id="sounds-list" style="list-style-type: none; padding-left: 0; margin: 0;"></ul>
-//     <div id="upload-sound-form" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-//       <form id="sound-upload-form">
-//         <input type="file" id="sound-file" accept="audio/*" required style="margin-bottom: 10px;"/>
-//         <br/>
-//         <label for="sound-descriptor" style="margin-bottom: 5px; display: block;">Sound Descriptor:</label>
-//         <select id="sound-descriptor" required style="width: 100%; padding: 5px; margin-bottom: 10px;">
-//           <option value="">Select a descriptor</option>
-//           <option value="noise">Noise</option>
-//           <option value="nature">Nature</option>
-//           <option value="people">People</option>
-//           <option value="subway">Subway</option>
-//         </select>
-//         <input type="hidden" id="latitude" value="${lat}"/>
-//         <input type="hidden" id="longitude" value="${lng}"/>
-//         <button type="submit" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer;">Submit</button>
-//       </form>
-//     </div>
-//   </div>
-// `);
-
-//     const el = document.createElement('div');
-//     el.className = 'sound-marker';
-
-//     const marker = new mapboxgl.Marker(el)
-//       .setLngLat([lng, lat])
-//       .setPopup(popup)
-//       .addTo(map);
-
-//       popup.on('open', () => {
-//         fetchAndDisplaySounds(lat, lng);
-
-//         document
-//           .getElementById('popup-hear-sound-btn')
-//           .addEventListener('click', function () {
-//             alert('Playing sound at this location!');
-//           });
-
-//         document
-//           .getElementById('popup-upload-sound-btn')
-//           .addEventListener('click', function () {
-//             document.getElementById('upload-sound-form').style.display = 'block';
-//           });
-
-//         document
-//           .getElementById('sound-upload-form')
-//           .addEventListener('submit', function (event) {
-//             event.preventDefault();
-//             const soundFile = document.getElementById('sound-file').files[0];
-//             const latitude = document.getElementById('latitude').value;
-//             const longitude = document.getElementById('longitude').value;
-//             const soundDescriptor = document.getElementById('sound-descriptor').value;
-
-//             // Handle the file upload and form data submission
-//             const formData = new FormData();
-//             formData.append('username', username);
-//             formData.append('sound_file', soundFile);
-//             formData.append('latitude', latitude);
-//             formData.append('longitude', longitude);
-//             formData.append('sound_descriptor', soundDescriptor);
-
-//             fetch('/soundscape_user/upload/', {
-//               method: 'POST',
-//               headers: {
-//                 'X-CSRFToken': csrfToken
-//               },
-//               body: formData,
-//             })
-//               .then(response => response.json())
-//               .then(data => {
-//                 alert('Sound uploaded successfully!');
-//                 document.getElementById('upload-sound-form').style.display = 'none';
-
-//                 fetchAndDisplaySounds(lat, lng);
-//               })
-//               .catch(error => {
-//                 alert('Error uploading sound');
-//                 console.error('Error:', error);
-//               });
-//           });
-//       });
-
-//     resolve(marker);
-//   });
-// }
-
 function isDuplicateMarker(lng, lat, existingMarkers) {
   const threshold = 0.0005;
   return existingMarkers.some((marker) => {
@@ -449,8 +329,8 @@ function addControls(map) {
     map.addControl(new mapboxgl.NavigationControl());
   }
 }
-function isLoggedIn(){
-  return username!='Anonymous';
+function isLoggedIn() {
+  return username != 'Anonymous';
 }
 
 function addChatroomMarkers(map) {
@@ -461,11 +341,10 @@ function addChatroomMarkers(map) {
     const popup = new mapboxgl.Popup({
       offset: 25,
     }).setHTML(getChatroomComponent(neighborhood));
-    el.addEventListener('click', ()=>{
-      if(!isLoggedIn()) {
-        window.location.href='/login';
-
-      }else{
+    el.addEventListener('click', () => {
+      if (!isLoggedIn()) {
+        window.location.href = '/login';
+      } else {
         popup.addTo(map);
       }
     });
@@ -473,10 +352,20 @@ function addChatroomMarkers(map) {
       lng: neighborhood.longitude,
       lat: neighborhood.latitude,
     });
-    new mapboxgl.Marker(el)
+    const marker = new mapboxgl.Marker(el)
       .setLngLat([neighborhood.longitude, neighborhood.latitude])
       .setPopup(popup)
       .addTo(map);
+
+    let chatInitialized = false;
+
+    marker.getElement().addEventListener('click', () => {
+      if (!chatInitialized) {
+        console.log('initializing chat for:', neighborhood);
+        initializeChat(neighborhood);
+        chatInitialized = true;
+      }
+    });
   });
 }
 

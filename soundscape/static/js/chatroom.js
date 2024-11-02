@@ -1,108 +1,118 @@
+// Initialize WebSocket and chat functionality
+function initializeChat(neighborhood) {
+  const boxName = encodeURIComponent(neighborhood.name.replace(/-/g, ' '));
+  const chatSocket = new WebSocket(
+    'ws://' + window.location.host + '/ws/chatroom/' + boxName + '/'
+  );
+
+  // Function to create a message element
+  function createMessageElement(data) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${
+      data.username === username ? 'user' : ''
+    }`;
+
+    const timestamp = new Date(data.timestamp).toLocaleString();
+
+    messageDiv.innerHTML = `
+            <div class="message-header">
+                <span class="username">${data.username}</span>
+                <span class="timestamp">${timestamp}</span>
+            </div>
+            <div class="message-text">${data.message}</div>
+        `;
+
+    return messageDiv;
+  }
+
+  // Function to display chat history
+  function displayChatHistory(history) {
+    const chatMessages = document.getElementById('chat-messages');
+    chatMessages.innerHTML = ''; // Clear existing messages
+
+    history.forEach((item) => {
+      const messageElement = createMessageElement(item);
+      chatMessages.appendChild(messageElement);
+    });
+
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  // Function to send message
+  function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value;
+    if (message.trim() !== '') {
+      const timestamp = new Date().toISOString();
+      chatSocket.send(
+        JSON.stringify({
+          message,
+          username,
+          timestamp,
+        })
+      );
+      messageInput.value = '';
+    }
+  }
+
+  // Handle incoming WebSocket messages
+  chatSocket.onmessage = function (e) {
+    const data = JSON.parse(e.data);
+    const chatMessages = document.getElementById('chat-messages');
+
+    if (data.history) {
+      displayChatHistory(data.history);
+    } else if (data.message) {
+      const messageElement = createMessageElement(data);
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  };
+
+  // Handle WebSocket connection errors
+  chatSocket.onerror = function (error) {
+    console.error('WebSocket Error:', error);
+    const chatMessages = document.getElementById('chat-messages');
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'chat-message error';
+    errorDiv.textContent =
+      'Error: Could not connect to chat server. Please try refreshing the page.';
+    chatMessages.appendChild(errorDiv);
+  };
+
+  // Handle WebSocket disconnection
+  chatSocket.onclose = function (e) {
+    console.log('Chat socket closed unexpectedly');
+    const chatMessages = document.getElementById('chat-messages');
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'chat-message error';
+    errorDiv.textContent =
+      'Connection lost. Please refresh the page to reconnect.';
+    chatMessages.appendChild(errorDiv);
+  };
+
+  document
+    .getElementById('messageInput')
+    .addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+}
+
 function getChatroomComponent(neighborhood) {
-  return `<div class="chat-container">
-        <div class="chat-header">
+  return `
+    <div class="chat-container">
+        <div id="room-name" class="chat-header">
             ${neighborhood.name}
         </div>
         <div class="chat-messages" id="chat-messages">
-            <!-- Preloaded messages -->
-            <div class="chat-message">
-                <div class="message-header">
-                    <span class="username">Alice</span>
-                    <span class="timestamp">10/10/2024 10:30 AM</span>
-                </div>
-                <div class="message-text">Hi all, I'm thinking of moving to this neighborhood, how is the noise like at night?</div>
-            </div>
-            <div class="chat-message user">
-                <div class="message-header">
-                    <span class="username">John</span>
-                    <span class="timestamp">10/10/2024 10:32 AM</span>
-                </div>
-                <div class="message-text">It's pretty quiet at night.</div>
-            </div>
-            <div class="chat-message">
-                <div class="message-header">
-                    <span class="username">Bob</span>
-                    <span class="timestamp">10/10/2024 10:35 AM</span>
-                </div>
-                <div class="message-text">I heard some construction on ${neighborhood.nearbyStreet} last week but that was during the day.</div>
-            </div>
         </div>
         <div class="chat-input">
-            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" onkeydown="checkEnter(event)">
-            <button id='send-message' onclick="sendMessage()">Send</button>
+            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
+            <button id="send-message" onclick="sendMessage()">Send</button>
         </div>
     </div>`;
-}
-
-function getCurrentTime() {
-  const now = new Date();
-  const options = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  };
-  return now.toLocaleString('en-US', options);
-}
-
-function sendMessage() {
-  const input = document.getElementById('messageInput');
-  const message = input.value.trim();
-
-  if (message) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('chat-message', 'user');
-
-    const headerDiv = document.createElement('div');
-    headerDiv.classList.add('message-header');
-
-    const usernameSpan = document.createElement('span');
-    usernameSpan.classList.add('username');
-    usernameSpan.textContent = 'You'; // Mocked as "You"
-
-    const timestampSpan = document.createElement('span');
-    timestampSpan.classList.add('timestamp');
-    timestampSpan.textContent = getCurrentTime();
-
-    headerDiv.appendChild(usernameSpan);
-    headerDiv.appendChild(timestampSpan);
-
-    const messageText = document.createElement('div');
-    messageText.classList.add('message-text');
-    messageText.textContent = message;
-
-    messageDiv.appendChild(headerDiv);
-    messageDiv.appendChild(messageText);
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.classList.add('delete-btn');
-    deleteBtn.textContent = '×';
-    deleteBtn.onclick = function () {
-      deleteMessage(messageDiv);
-    };
-    messageDiv.appendChild(deleteBtn);
-    const chatMessages = document.getElementById('chat-messages');
-    if (chatMessages) {
-      chatMessages.appendChild(messageDiv);
-      input.value = '';
-      // Scroll to the latest message
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-  }
-}
-
-function deleteMessage(messageElement) {
-  const chatMessages = document.getElementById('chat-messages');
-  if (chatMessages) {
-    chatMessages.removeChild(messageElement);
-  }
-}
-
-// Function to check for Enter key press
-function checkEnter(event) {
-  if (event.key === 'Enter') {
-    sendMessage();
-  }
 }
