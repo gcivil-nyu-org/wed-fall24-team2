@@ -182,11 +182,13 @@
       <div class="filter-options">
         <label
           >From:
-          <input type="date" id="dateFrom" name="dateFrom" />
+          <input type="date" id="dateFrom" name="dateFrom"
+          value="{{ date_from|default:'' }}" />
         </label>
         <label
           >To:
-          <input type="date" id="dateTo" name="dateTo" />
+          <input type="date" id="dateTo" name="dateTo" 
+          value="{{ date_to|default:'' }}"/>
         </label>
       </div>
     </div>
