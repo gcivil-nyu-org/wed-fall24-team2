@@ -35,9 +35,6 @@ def homepage(request):
     if date_to:
         where_clause += f" AND created_date <= '{date_to}'"
 
-    # Print selected sound types for debugging
-    print("Selected sound types:", sound_type)
-
     # Query SoundFileUser data
     user_sound_files = SoundFileUser.objects.all()
     user_sound_files_data = json.dumps(
@@ -78,12 +75,11 @@ def homepage(request):
                 "username": request.user.username,
                 "sound_data": json.dumps(all_data),
                 "user_sound_data": user_sound_files_data,
-                "sound_type": sound_type,  # Now a list
+                "sound_type": sound_type,  
                 "date_from": date_from,
                 "date_to": date_to,
             },
         )
-
     except requests.RequestException as e:
         return render(
             request,

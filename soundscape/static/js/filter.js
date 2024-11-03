@@ -24,9 +24,6 @@ function applyFilters(map) {
   soundTypes.forEach(soundType => params.append("soundType", soundType));
   if (dateFrom) params.append("dateFrom", dateFrom);
   if (dateTo) params.append("dateTo", dateTo);
-
-  console.log(params);
-
   // Redirect to the filtered sound data view
   window.location.href = `/?${params.toString()}`;
 }
@@ -49,8 +46,6 @@ window.resetFilters = resetFilters;
     filters.forEach((checkbox) => {
       const filterName = checkbox.name;
       const filterValue = checkbox.value;
-      console.log(urlParams);
-
       // Check if the URL has the specific filter parameter and matches the checkbox value
       if (urlParams.has(filterName) && urlParams.getAll(filterName).includes(filterValue)) {
         checkbox.checked = true;
