@@ -21,14 +21,22 @@ def homepage(request):
     all_data = []
 
     # Get filter parameters from the request (if any)
-    sound_type = request.GET.get("soundType", ["Noise"])
+    sound_type = request.GET.getlist("soundType") or ["Noise"]
     date_from = request.GET.get("dateFrom")
     date_to = request.GET.get("dateTo")
-    if sound_type:
-        sound_type_conditions = " OR ".join([f"starts_with(complaint_type, '{stype}')" for stype in sound_type])
-        where_clause = f"({sound_type_conditions})"
-    else:
-        where_clause = "starts_with(complaint_type, 'Noise')"
+
+    # Create where clause for sound types
+    sound_type_conditions = " OR ".join([f"starts_with(complaint_type, '{stype}')" for stype in sound_type])
+    where_clause = f"({sound_type_conditions})"
+
+    # Apply date filters if provided
+    if date_from:
+        where_clause += f" AND created_date >= '{date_from}'"
+    if date_to:
+        where_clause += f" AND created_date <= '{date_to}'"
+
+    # Print selected sound types for debugging
+    print("Selected sound types:", sound_type)
 
     # Query SoundFileUser data
     user_sound_files = SoundFileUser.objects.all()
@@ -40,19 +48,6 @@ def homepage(request):
         batch_offsets = range(0, TOTAL_ROWS, BATCH_SIZE)
 
         for offset in batch_offsets:
-            # Set the base where clause depending on whether a filter is applied
-            where_clause = (
-                f"starts_with(complaint_type, '{sound_type}')"
-                if sound_type
-                else "starts_with(complaint_type, 'Noise')"
-            )
-
-            # Apply date filters if provided
-            if date_from:
-                where_clause += f" AND created_date >= '{date_from}'"
-            if date_to:
-                where_clause += f" AND created_date <= '{date_to}'"
-
             params = {
                 "$limit": min(BATCH_SIZE, TOTAL_ROWS - offset),
                 "$offset": offset,

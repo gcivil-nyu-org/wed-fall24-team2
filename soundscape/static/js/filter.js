@@ -16,18 +16,21 @@ document.addEventListener('click', function (event) {
 function applyFilters(map) {
   const soundTypes = Array.from(document.querySelectorAll("input[name='soundType']:checked")).map(
     checkbox => checkbox.value
-);
-const dateFrom = document.getElementById("dateFrom").value;
-const dateTo = document.getElementById("dateTo").value;
+  );
+  const dateFrom = document.getElementById("dateFrom").value;
+  const dateTo = document.getElementById("dateTo").value;
 
-const params = new URLSearchParams();
-params.append("soundType", soundTypes.length > 0 ? soundTypes[0] : "Noise");
-if (dateFrom) params.append("dateFrom", dateFrom);
-if (dateTo) params.append("dateTo", dateTo);
+  const params = new URLSearchParams();
+  soundTypes.forEach(soundType => params.append("soundType", soundType));
+  if (dateFrom) params.append("dateFrom", dateFrom);
+  if (dateTo) params.append("dateTo", dateTo);
 
-// Redirect to the filtered sound data view
-window.location.href = `/?${params.toString()}`;
+  console.log(params);
+
+  // Redirect to the filtered sound data view
+  window.location.href = `/?${params.toString()}`;
 }
+
 
 function resetFilters() {
   window.location.href = `/`;
