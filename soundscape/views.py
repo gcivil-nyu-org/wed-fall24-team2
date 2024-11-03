@@ -21,9 +21,14 @@ def homepage(request):
     all_data = []
 
     # Get filter parameters from the request (if any)
-    sound_type = request.GET.get("soundType", "Noise")
+    sound_type = request.GET.get("soundType", ["Noise"])
     date_from = request.GET.get("dateFrom")
     date_to = request.GET.get("dateTo")
+    if sound_type:
+        sound_type_conditions = " OR ".join([f"starts_with(complaint_type, '{stype}')" for stype in sound_type])
+        where_clause = f"({sound_type_conditions})"
+    else:
+        where_clause = "starts_with(complaint_type, 'Noise')"
 
     # Query SoundFileUser data
     user_sound_files = SoundFileUser.objects.all()
@@ -78,6 +83,9 @@ def homepage(request):
                 "username": request.user.username,
                 "sound_data": json.dumps(all_data),
                 "user_sound_data": user_sound_files_data,
+                "sound_type": sound_type,  # Now a list
+                "date_from": date_from,
+                "date_to": date_to,
             },
         )
 
