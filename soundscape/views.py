@@ -26,7 +26,9 @@ def homepage(request):
     date_to = request.GET.get("dateTo")
 
     # Create where clause for sound types
-    sound_type_conditions = " OR ".join([f"starts_with(complaint_type, '{stype}')" for stype in sound_type])
+    sound_type_conditions = " OR ".join(
+        [f"starts_with(complaint_type, '{stype}')" for stype in sound_type]
+    )
     where_clause = f"({sound_type_conditions})"
 
     # Apply date filters if provided
@@ -75,7 +77,7 @@ def homepage(request):
                 "username": request.user.username,
                 "sound_data": json.dumps(all_data),
                 "user_sound_data": user_sound_files_data,
-                "sound_type": sound_type,  
+                "sound_type": sound_type,
                 "date_from": date_from,
                 "date_to": date_to,
             },
