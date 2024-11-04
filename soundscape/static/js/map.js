@@ -413,6 +413,7 @@ function addHeatmapLayer(map) {
       type: 'geojson',
       data: SOUND_GEOJSON_DATA,
     });
+
     map.addLayer({
       id: 'heatmap',
       type: 'heatmap',
@@ -455,6 +456,34 @@ function addHeatmapLayer(map) {
         },
         'heatmap-opacity': 0.8,
       },
+    });
+
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    map.on('mouseenter', 'heatmap', (e) => {
+      // Change the cursor style as a UI indicator.
+      map.getCanvas().style.cursor = 'pointer';
+
+      const coordinates = e.features[0].geometry.coordinates;
+      console.log(e.features[0]);
+
+      popup.setLngLat(coordinates).setHTML(`
+          <div class="sound-information">
+             <span>Description: </span>
+             <span>Status: </span>
+             <span>Date Reported: ${new Intl.DateTimeFormat('en-US').format(
+               new Date()
+             )}</span>
+          </div>
+        `).addTo(map);
+    });
+
+    map.on('mouseleave', 'heatmap', () => {
+      map.getCanvas().style.cursor = '';
+      popup.remove();
     });
   });
 }
