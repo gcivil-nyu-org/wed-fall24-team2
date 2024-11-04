@@ -27,7 +27,12 @@ function convertToGeoJSON(data) {
         coordinates: [item.longitude, item.latitude],
       },
       properties:{
-        weight: 1
+        weight: 1,
+        complaint_type: item.complaint_type,
+        descriptor: item.descriptor,
+        status: item.status,
+        created_date: item.created_date,
+        closed_date: item.closed_date
       }
     })),
   };

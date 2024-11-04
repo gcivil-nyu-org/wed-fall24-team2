@@ -468,17 +468,30 @@ function addHeatmapLayer(map) {
       map.getCanvas().style.cursor = 'pointer';
 
       const coordinates = e.features[0].geometry.coordinates;
-      console.log(e.features[0]);
+      const complaint_type = e.features[0].properties.complaint_type.split(/[ - ]+/).pop();
+      const descriptor = e.features[0].properties.descriptor;
+      const status = e.features[0].properties.status;
+      const created_date = e.features[0].properties.created_date;
+      const closed_date = e.features[0].properties.closed_date;
 
       popup.setLngLat(coordinates).setHTML(`
-          <div class="sound-information">
-             <span>Description: </span>
-             <span>Status: </span>
-             <span>Date Reported: ${new Intl.DateTimeFormat('en-US').format(
-               new Date()
-             )}</span>
-          </div>
-        `).addTo(map);
+        <div class="sound-information">
+          <span>Type: ${complaint_type}</span>
+          <span>Descriptor: ${descriptor}</span>
+          <span>Reported at: ${new Intl.DateTimeFormat('en-US').format(
+            new Date(created_date)
+          )}</span>
+          ${closed_date? 
+            `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
+              new Date(closed_date)
+            )}</span>` : ``
+          }
+
+          ${status == "In Progress"? 
+            `<span class="in-progress-badge">${status}</span>` : 
+            `<span class="closed-badge">${status}</span>`}
+        </div>
+      `).addTo(map);
     });
 
     map.on('mouseleave', 'heatmap', () => {
