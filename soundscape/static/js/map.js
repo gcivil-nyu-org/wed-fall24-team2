@@ -487,9 +487,11 @@ function addHeatmapLayer(map) {
             )}</span>` : ``
           }
 
-          ${status == "In Progress"? 
-            `<span class="in-progress-badge">${status}</span>` : 
-            `<span class="closed-badge">${status}</span>`}
+          ${status == "Open"? 
+            `<span class="open-badge">${status}</span>` : 
+            (status == "In Progress"?
+            `<span class="in-progress-badge">${status}</span>` :
+            `<span class="closed-badge">${status}</span>`)}
         </div>
       `).addTo(map);
     });
