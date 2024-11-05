@@ -8,4 +8,5 @@ urlpatterns = [
         views.sounds_at_location,
         name="sounds_at_location",
     ),
+    path("delete/", views.delete_sound_file, name="delete_sound_file"),
 ]
