@@ -36,19 +36,19 @@ function initializeChat(neighborhood) {
 
     return messageDiv;
   }
+
   // Function to display chat history
-  function displayChatHistory(history) {
+function displayChatHistory(history) {
     const chatMessages = document.getElementById('chat-messages');
     chatMessages.innerHTML = ''; // Clear existing messages
 
-    history.forEach((item) => {
-      const messageElement = createMessageElement(item);
-      chatMessages.appendChild(messageElement);
+    history.reverse().forEach((item) => {
+        const messageElement = createMessageElement(item);
+        chatMessages.appendChild(messageElement);
     });
 
-    // Scroll to bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
+}
 
   // Function to send message
   function sendMessage() {
@@ -103,6 +103,11 @@ function initializeChat(neighborhood) {
     chatMessages.appendChild(errorDiv);
   };
 
+  const sendButton = document.getElementById('send-message');
+  if (sendButton) {
+          sendButton.addEventListener('click', sendMessage);
+  }
+
   document
     .getElementById('messageInput')
     .addEventListener('keypress', function (e) {
@@ -123,7 +128,7 @@ function getChatroomComponent(neighborhood) {
         </div>
         <div class="chat-input">
             <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
-            <button id="send-message" onclick="sendMessage()">Send</button>
+            <button id="send-message">Send</button>
         </div>
     </div>`;
 }
