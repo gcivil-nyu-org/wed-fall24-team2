@@ -1,4 +1,5 @@
 import boto3
+import json
 from django.conf import settings
 from django.http import JsonResponse
 from .forms import SoundFileUploadForm
@@ -94,5 +95,44 @@ def sounds_at_location(request, lat, lng):
             for sound in sounds
         ]
         return JsonResponse({"sounds": sound_list}, status=200)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def check_file_exists_in_s3(key):
+    try:
+        s3.get_object(
+            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+            Key=key,
+        )
+        return True
+    except Exception as e:
+        print(f"Cannot find file {key}: {e}")
+        return False
+
+
+def delete_sound_file(request):
+    if request.method == "POST":
+        sound = json.loads(request.body)
+
+        if check_file_exists_in_s3(sound["sound_name"]):
+            try:
+                s3.delete_object(
+                    Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                    Key=sound["sound_name"],
+                )
+            except Exception as e:
+                return JsonResponse(
+                    {"error": f"Error deleting in S3: {str(e)}"}, status=500
+                )
+        else:
+            print("Cannot find file in s3, delete metadata from RDS anyway")
+
+        SoundFileUser.objects.filter(
+            user_name=sound["user_name"],
+            s3_file_name=sound["sound_name"],
+        ).delete()
+
+        return JsonResponse({"sound": sound["sound_name"]}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)

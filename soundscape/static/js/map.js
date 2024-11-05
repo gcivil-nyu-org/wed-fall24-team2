@@ -150,10 +150,45 @@ function fetchAndDisplaySounds(lat, lng) {
                   Your browser does not support the audio element.
                 </audio>
               `;
+
+              const deleteBtn = isLoggedInUser(sound.user_name)? 
+              `<button class="delete-icon" id="delete-sound"></button>` : ``;
+
               // Replace the loading message with the audio element
               document.getElementById(
                 sound.sound_name
-              ).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} ${audioElement}`;
+              ).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} ${deleteBtn} ${audioElement}`;
+
+              
+              if (isLoggedInUser(sound.user_name)) {
+                document.getElementById("delete-sound").addEventListener('click', () => {
+                  if (window.confirm("Are you sure you want to delete this sound file?")) {
+                    fetch('/soundscape_user/delete/', {
+                      method: 'POST',
+                      headers: {
+                        'X-CSRFToken': csrfToken,
+                      },
+                      body: JSON.stringify(sound),
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      
+                      if (data.error) {
+                        alert(data.error)
+                      } else {
+                        alert('You have deleted a sound file!');
+                      }
+
+                      // Reload the page
+                      location.reload();
+                    })
+                    .catch((error) => {
+                      console.log('Error deleting sound file:', error);
+                    })
+                  }
+                });
+              }
+
             })
             .catch((error) => {
               console.error('Error fetching sound file:', error);
@@ -367,8 +402,13 @@ function addControls(map) {
     map.addControl(new mapboxgl.NavigationControl());
   }
 }
+
 function isLoggedIn() {
   return username != 'Anonymous';
+}
+
+function isLoggedInUser(provided_username) {
+  return username == provided_username
 }
 
 function addChatroomMarkers(map) {
@@ -521,7 +561,7 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
 
   addHeatmapLayer(map);
   addChatroomMarkers(map);
-  if (username !== 'Anonymous') {
+  if (isLoggedIn()) {
     addUserSound(map);
   }
 
