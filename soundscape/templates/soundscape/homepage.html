@@ -73,6 +73,30 @@
         flex-direction: column;
       }
 
+      .open-badge {
+        background-color: green;
+        color: white;
+        padding: 4px 8px;
+        text-align: center;
+        border-radius: 5px;
+      }
+      
+      .in-progress-badge {
+        background-color: rgb(232, 35, 35);
+        color: white;
+        padding: 4px 8px;
+        text-align: center;
+        border-radius: 5px;
+      }
+
+      .closed-badge {
+        background-color: grey;
+        color: white;
+        padding: 4px 8px;
+        text-align: center;
+        border-radius: 5px;
+      }
+
       .chat-container {
         max-width: 900px;
         width: 600px;
@@ -298,6 +322,7 @@
       var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
       var USER_SOUND_DATA = JSON.parse('{{user_sound_data|escapejs}}');
       var USER_SOUND_GEOJSON_DATA = convertToGeoJSON(USER_SOUND_DATA);
+      var SOUND_DESCRIPTORS = JSON.parse('{{sound_descriptors|escapejs}}');
     </script>
 
     <script>

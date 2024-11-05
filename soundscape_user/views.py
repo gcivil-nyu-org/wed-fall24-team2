@@ -39,7 +39,10 @@ def upload_sound_file(request):
                 print("inside s3?")
                 sound_data = sound_file.read()
                 # s3_file_name = f"user_sounds/{user_name}_{sound_file.name}"
-                s3_file_name = f"user_sounds/{user_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{sound_file.name}"
+                s3_file_name = (
+                    f"user_sounds/{user_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+                    f"_{sound_file.name}"
+                )
 
                 s3.put_object(
                     Bucket=settings.AWS_STORAGE_BUCKET_NAME,
@@ -85,7 +88,8 @@ def sounds_at_location(request, lat, lng):
                 "user_name": sound.user_name,
                 "sound_descriptor": sound.sound_descriptor,
                 "sound_name": sound.s3_file_name,
-                "listen_link": f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{sound.s3_file_name}",
+                "listen_link": f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3"
+                f".{settings.AWS_S3_REGION_NAME}.amazonaws.com/{sound.s3_file_name}",
             }
             for sound in sounds
         ]

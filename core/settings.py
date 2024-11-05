@@ -235,3 +235,5 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/"
+USE_TZ = True
+TIME_ZONE = "UTC"
