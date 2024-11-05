@@ -133,6 +133,6 @@ def delete_sound_file(request):
             s3_file_name=sound["sound_name"],
         ).delete()
 
-        return JsonResponse({"sound": sound["sound_name"]}, status=200)
+        return JsonResponse({"status": "success"}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)

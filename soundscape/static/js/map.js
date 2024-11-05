@@ -96,7 +96,7 @@ function addUserSound(map) {
           })
             .then((response) => response.json())
             .then((data) => {
-              console.log(data)
+
               if (data.error)
               {
                 alert(data.error)
@@ -121,7 +121,7 @@ function fetchAndDisplaySounds(lat, lng) {
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
     .then((response) => response.json())
     .then((data) => {
-      console.log({ data });
+
       if (data.sounds && data.sounds.length > 0) {
         // Check if there are sounds
         const soundsListPromises = data.sounds.map((sound) => {
@@ -152,7 +152,7 @@ function fetchAndDisplaySounds(lat, lng) {
               `;
 
               const deleteBtn = isLoggedInUser(sound.user_name)? 
-              `<button class="delete-icon" id="delete-sound"></button>` : ``;
+              `<button class="delete-icon" id="delete-sound-${sound.sound_name}"></button>` : ``;
 
               // Replace the loading message with the audio element
               document.getElementById(
@@ -161,7 +161,7 @@ function fetchAndDisplaySounds(lat, lng) {
 
               
               if (isLoggedInUser(sound.user_name)) {
-                document.getElementById("delete-sound").addEventListener('click', () => {
+                document.getElementById("delete-sound-" + sound.sound_name).addEventListener('click', () => {
                   if (window.confirm("Are you sure you want to delete this sound file?")) {
                     fetch('/soundscape_user/delete/', {
                       method: 'POST',
@@ -178,9 +178,8 @@ function fetchAndDisplaySounds(lat, lng) {
                       } else {
                         alert('You have deleted a sound file!');
                       }
-
-                      // Reload the page
-                      location.reload();
+                      
+                      fetchAndDisplaySounds(lat, lng);
                     })
                     .catch((error) => {
                       console.log('Error deleting sound file:', error);
@@ -337,7 +336,7 @@ function addMarker(lng, lat, map) {
         })
           .then((response) => response.json())
           .then((data) => {
-            console.log(data)
+
             if (data.error)
             {
               alert(data.error)
