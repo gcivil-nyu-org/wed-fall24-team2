@@ -97,7 +97,7 @@ function addUserSound(map) {
           })
             .then((response) => response.json())
             .then((data) => {
-              console.log(data)
+
               if (data.error)
               {
                 alert(data.error)
@@ -122,7 +122,7 @@ function fetchAndDisplaySounds(lat, lng) {
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
     .then((response) => response.json())
     .then((data) => {
-      console.log({ data });
+
       if (data.sounds && data.sounds.length > 0) {
         // Check if there are sounds
         const soundsListPromises = data.sounds.map((sound) => {
@@ -151,10 +151,44 @@ function fetchAndDisplaySounds(lat, lng) {
                   Your browser does not support the audio element.
                 </audio>
               `;
+
+              const deleteBtn = isLoggedInUser(sound.user_name)? 
+              `<button class="delete-icon" id="delete-sound-${sound.sound_name}"></button>` : ``;
+
               // Replace the loading message with the audio element
               document.getElementById(
                 sound.sound_name
-              ).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} ${audioElement}`;
+              ).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} ${deleteBtn} ${audioElement}`;
+
+              
+              if (isLoggedInUser(sound.user_name)) {
+                document.getElementById("delete-sound-" + sound.sound_name).addEventListener('click', () => {
+                  if (window.confirm("Are you sure you want to delete this sound file?")) {
+                    fetch('/soundscape_user/delete/', {
+                      method: 'POST',
+                      headers: {
+                        'X-CSRFToken': csrfToken,
+                      },
+                      body: JSON.stringify(sound),
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      
+                      if (data.error) {
+                        alert(data.error)
+                      } else {
+                        alert('You have deleted a sound file!');
+                      }
+                      
+                      fetchAndDisplaySounds(lat, lng);
+                    })
+                    .catch((error) => {
+                      console.log('Error deleting sound file:', error);
+                    })
+                  }
+                });
+              }
+
             })
             .catch((error) => {
               console.error('Error fetching sound file:', error);
@@ -305,7 +339,7 @@ function addMarker(lng, lat, map) {
         })
           .then((response) => response.json())
           .then((data) => {
-            console.log(data)
+
             if (data.error)
             {
               alert(data.error)
@@ -370,8 +404,13 @@ function addControls(map) {
     map.addControl(new mapboxgl.NavigationControl());
   }
 }
+
 function isLoggedIn() {
   return username != 'Anonymous';
+}
+
+function isLoggedInUser(provided_username) {
+  return username == provided_username
 }
 
 function addChatroomMarkers(map) {
@@ -524,7 +563,7 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
 
   addHeatmapLayer(map);
   addChatroomMarkers(map);
-  if (username !== 'Anonymous') {
+  if (isLoggedIn()) {
     addUserSound(map);
   }
 
