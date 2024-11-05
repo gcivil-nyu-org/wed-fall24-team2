@@ -5,26 +5,38 @@ function initializeChat(neighborhood) {
     'ws://' + window.location.host + '/ws/chatroom/' + boxName + '/'
   );
 
-  // Function to create a message element
-  function createMessageElement(data) {
+
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    };
+    return date.toLocaleString(undefined, options);
+}
+
+function createMessageElement(data) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `chat-message ${
       data.username === username ? 'user' : ''
     }`;
 
-    const timestamp = new Date(data.timestamp).toLocaleString();
+    const formattedTimestamp = formatTimestamp(data.timestamp);
 
     messageDiv.innerHTML = `
-            <div class="message-header">
-                <span class="username">${data.username}</span>
-                <span class="timestamp">${timestamp}</span>
-            </div>
-            <div class="message-text">${data.message}</div>
-        `;
+        <div class="message-header">
+            <span class="username">${data.username}</span>
+            <span class="timestamp">${formattedTimestamp}</span>
+        </div>
+        <div class="message-text">${data.message}</div>
+    `;
 
     return messageDiv;
-  }
-
+}
   // Function to display chat history
   function displayChatHistory(history) {
     const chatMessages = document.getElementById('chat-messages');
