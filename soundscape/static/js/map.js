@@ -58,7 +58,7 @@ function addUserSound(map) {
         document.getElementById('popup-content').style.display = 'none';
         document.getElementById('upload-sound-form').style.display = 'block';
       });
-    
+
       document.getElementById('close-upload-form-btn').addEventListener('click', function () {
         document.getElementById('upload-sound-form').style.display = 'none';
         document.getElementById('popup-content').style.display = 'block';
@@ -263,12 +263,12 @@ function addMarker(lng, lat, map) {
       document.getElementById('popup-content').style.display = 'none';
       document.getElementById('upload-sound-form').style.display = 'block';
     });
-  
+
     document.getElementById('close-upload-form-btn').addEventListener('click', function () {
       document.getElementById('upload-sound-form').style.display = 'none';
       document.getElementById('popup-content').style.display = 'block';
     });
-  
+
 
     document
       .getElementById('sound-upload-form')
@@ -378,14 +378,7 @@ function addChatroomMarkers(map) {
 
     const popup = new mapboxgl.Popup({
       offset: 25,
-    }).setHTML(getChatroomComponent(neighborhood));
-    el.addEventListener('click', () => {
-      if (!isLoggedIn()) {
-        window.location.href = '/login';
-      } else {
-        popup.addTo(map);
-      }
-    });
+    }).setHTML(isLoggedIn() ? getChatroomComponent(neighborhood): getChatroomPublicComponent(neighborhood));
     existingMarkers.push({
       lng: neighborhood.longitude,
       lat: neighborhood.latitude,
@@ -398,7 +391,7 @@ function addChatroomMarkers(map) {
     let chatInitialized = false;
 
     marker.getElement().addEventListener('click', () => {
-      if (!chatInitialized) {
+      if (!chatInitialized && isLoggedIn()) {
         console.log('initializing chat for:', neighborhood);
         initializeChat(neighborhood);
         chatInitialized = true;
@@ -481,14 +474,14 @@ function addHeatmapLayer(map) {
           <span>Reported at: ${new Intl.DateTimeFormat('en-US').format(
             new Date(created_date)
           )}</span>
-          ${closed_date? 
+          ${closed_date?
             `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
               new Date(closed_date)
             )}</span>` : ``
           }
 
-          ${status == "Open"? 
-            `<span class="open-badge">${status}</span>` : 
+          ${status == "Open"?
+            `<span class="open-badge">${status}</span>` :
             (status == "In Progress"?
             `<span class="in-progress-badge">${status}</span>` :
             `<span class="closed-badge">${status}</span>`)}
