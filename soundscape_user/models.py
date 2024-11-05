@@ -11,7 +11,7 @@ class SoundFileUser(models.Model):
 
     def __str__(self):
         return f"{self.user_name} - {self.s3_file_name}"
-    
+
 
 class SoundDescriptor(models.Model):
     descriptor = models.CharField(max_length=255, unique=True)

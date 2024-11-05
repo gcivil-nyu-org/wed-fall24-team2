@@ -24,10 +24,9 @@ function addUserSound(map) {
         <label for="sound-descriptor" style="margin-bottom: 5px; display: block;">Sound Descriptor:</label>
         <select id="sound-descriptor" required style="width: 100%; padding: 5px; margin-bottom: 10px;">
           <option value="">Select a descriptor</option>
-          <option value="noise">Noise</option>
-          <option value="nature">Nature</option>
-          <option value="people">People</option>
-          <option value="subway">Subway</option>
+          ${SOUND_DESCRIPTORS.map(descriptor => 
+            `<option value="${descriptor.descriptor}">${descriptor.descriptor}</option>`
+          ).join('')}
         </select>
         <input type="hidden" id="latitude" value="${sound.latitude}"/>
         <input type="hidden" id="longitude" value="${sound.longitude}"/>
@@ -105,6 +104,8 @@ function addUserSound(map) {
                 alert('Sound uploaded successfully!');
                 document.getElementById('upload-sound-form').style.display = 'none';
                 document.getElementById('popup-content').style.display = 'block';
+
+                document.getElementById('sound-upload-form').reset();
 
                 fetchAndDisplaySounds(sound.latitude, sound.longitude);
               }
@@ -263,10 +264,9 @@ function addMarker(lng, lat, map) {
         <label for="sound-descriptor" style="margin-bottom: 5px; display: block;">Sound Descriptor:</label>
         <select id="sound-descriptor" required style="width: 100%; padding: 5px; margin-bottom: 10px;">
           <option value="">Select a descriptor</option>
-          <option value="noise">Noise</option>
-          <option value="nature">Nature</option>
-          <option value="people">People</option>
-          <option value="subway">Subway</option>
+          ${SOUND_DESCRIPTORS.map(descriptor => 
+            `<option value="${descriptor.descriptor}">${descriptor.descriptor}</option>`
+          ).join('')}
         </select>
         <input type="hidden" id="latitude" value="${lat}"/>
         <input type="hidden" id="longitude" value="${lng}"/>
@@ -347,6 +347,8 @@ function addMarker(lng, lat, map) {
               alert('Sound uploaded successfully!');
               document.getElementById('upload-sound-form').style.display = 'none';
               document.getElementById('popup-content').style.display = 'block';
+
+              document.getElementById('sound-upload-form').reset();
 
               fetchAndDisplaySounds(lat, lng);
             }

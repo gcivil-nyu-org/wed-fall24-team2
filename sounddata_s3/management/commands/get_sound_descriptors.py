@@ -6,9 +6,7 @@ class Command(BaseCommand):
     help = "Fetch unique sound descriptors from the CSV file"
 
     def handle(self, *args, **kwargs):
-        local_csv_path = (
-            "/Users/manavparikh/Desktop/Fall24/Software Engineering/Project/wed-fall24-team2/nyc_complaints_data.csv"
-        )
+        local_csv_path = "/Users/manavparikh/Desktop/Fall24/Software Engineering/Project/wed-fall24-team2/nyc_complaints_data.csv"
         unique_descriptors = set()
 
         with open(local_csv_path, mode="r", encoding="utf-8") as csv_file:
