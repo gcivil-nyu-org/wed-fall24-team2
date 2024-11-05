@@ -413,6 +413,7 @@ function addHeatmapLayer(map) {
       type: 'geojson',
       data: SOUND_GEOJSON_DATA,
     });
+
     map.addLayer({
       id: 'heatmap',
       type: 'heatmap',
@@ -455,6 +456,49 @@ function addHeatmapLayer(map) {
         },
         'heatmap-opacity': 0.8,
       },
+    });
+
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    map.on('mouseenter', 'heatmap', (e) => {
+      // Change the cursor style as a UI indicator.
+      map.getCanvas().style.cursor = 'pointer';
+
+      const coordinates = e.features[0].geometry.coordinates;
+      const complaint_type = e.features[0].properties.complaint_type.split(/[ - ]+/).pop();
+      const descriptor = e.features[0].properties.descriptor;
+      const status = e.features[0].properties.status;
+      const created_date = e.features[0].properties.created_date;
+      const closed_date = e.features[0].properties.closed_date;
+
+      popup.setLngLat(coordinates).setHTML(`
+        <div class="sound-information">
+          <span>Type: ${complaint_type}</span>
+          <span>Descriptor: ${descriptor}</span>
+          <span>Reported at: ${new Intl.DateTimeFormat('en-US').format(
+            new Date(created_date)
+          )}</span>
+          ${closed_date? 
+            `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
+              new Date(closed_date)
+            )}</span>` : ``
+          }
+
+          ${status == "Open"? 
+            `<span class="open-badge">${status}</span>` : 
+            (status == "In Progress"?
+            `<span class="in-progress-badge">${status}</span>` :
+            `<span class="closed-badge">${status}</span>`)}
+        </div>
+      `).addTo(map);
+    });
+
+    map.on('mouseleave', 'heatmap', () => {
+      map.getCanvas().style.cursor = '';
+      popup.remove();
     });
   });
 }
