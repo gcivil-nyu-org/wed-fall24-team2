@@ -1,0 +1,112 @@
+<!-- templates/soundscape/profile_panel.html -->
+{% load static %}
+<style>
+  .profile-panel {
+    position: fixed;
+    right: -320px;
+    top: 0;
+    width: 320px;
+    height: 100%;
+    background: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .profile-panel.open {
+    right: 0;
+  }
+  .profile-toggle {
+    position: fixed;
+    right: 20px;
+    top: 80px;
+    padding: 10px 20px;
+    background-color: #a527cf;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-header {
+    background-color: #a527cf;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .profile-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .close-profile {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .profile-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+
+  .profile-section {
+    margin-bottom: 25px;
+  }
+
+  .profile-section h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+  }
+
+  .badge {
+    background-color: #fae4fb;
+    color: white;
+    padding: 4px 8px;
+    text-align: center;
+    border-radius: 5px;
+  }
+
+</style>
+<script defer src="{% static 'js/profile.js'%}"></script>
+
+<div class="profile-panel" id="profilePanel">
+  <div class="profile-header">
+    <h3>Profile</h3>
+    <button class="close-profile" onclick="toggleProfile()">&times;</button>
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-section">
+        <div>
+            <label>Username</label><br />
+            <h4>{{ request.user.username }}</h4>
+        </div>
+        <div>
+            <label>Email</label><br />
+            <h4>{{ request.user.email }}</h4>
+        </div>
+        <h4 class="badge">Joined since {{ request.user.date_joined | date:"M d, Y" }}</h4>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Toggle Button -->
+<button class="user-info" onclick="toggleProfile()">
+  <img src="{% static 'images/user-icon.png' %}" alt="User Icon" class="user-icon" />
+  <div class="username">{{ username }}</div>
+</button>
+
