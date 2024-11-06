@@ -38,17 +38,17 @@ function initializeChat(neighborhood) {
   }
 
   // Function to display chat history
-function displayChatHistory(history) {
+  function displayChatHistory(history) {
     const chatMessages = document.getElementById('chat-messages');
     chatMessages.innerHTML = ''; // Clear existing messages
 
     history.reverse().forEach((item) => {
-        const messageElement = createMessageElement(item);
-        chatMessages.appendChild(messageElement);
+      const messageElement = createMessageElement(item);
+      chatMessages.appendChild(messageElement);
     });
 
     chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+  }
 
   // Function to send message
   function sendMessage() {
@@ -103,19 +103,20 @@ function displayChatHistory(history) {
     chatMessages.appendChild(errorDiv);
   };
 
-  const sendButton = document.getElementById('send-message');
-  if (sendButton) {
-          sendButton.addEventListener('click', sendMessage);
-  }
-
-  document
-    .getElementById('messageInput')
-    .addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
+  setTimeout(() => {
+    document
+      .getElementById('messageInput')
+      .addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+    const sendButton = document.getElementById('send-message');
+    if (sendButton) {
+      sendButton.addEventListener('click', sendMessage);
+    }
+  });
 }
 
 function getChatroomComponent(neighborhood) {
@@ -175,8 +176,8 @@ function getChatroomPublicComponent(neighborhood) {
             </div>
         </div>
         <div class="chat-input">
-            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" disabled>
-            <button id="send-message" onclick="sendMessage()" disabled>Send</button>
+            <input type="text" placeholder="Type a message..." autocomplete="off" disabled>
+            <button disabled>Send</button>
         </div>
     </div>
     <style>
