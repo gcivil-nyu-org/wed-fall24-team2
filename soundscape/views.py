@@ -44,8 +44,6 @@ def homepage(request):
         [model_to_dict(sound) for sound in user_sound_files]
     )
 
-    print(user_sound_files_data)
-
     sound_descriptors = SoundDescriptor.objects.all()
     sound_descriptors_data = json.dumps(
         [model_to_dict(sound) for sound in sound_descriptors]
