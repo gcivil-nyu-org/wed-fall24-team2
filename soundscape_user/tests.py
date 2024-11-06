@@ -33,7 +33,7 @@ class SoundFileUploadTest(TestCase):
 
     @patch("boto3.client")
     def test_upload_sound_file_invalid_size(self, mock_boto_client):
-        mock_s3 = mock_boto_client.return_value
+        # mock_s3 = mock_boto_client.return_value
 
         # Creating a file that exceeds 3 MB
         sound_file = SimpleUploadedFile(
@@ -56,7 +56,7 @@ class SoundFileUploadTest(TestCase):
 
     @patch("boto3.client")
     def test_upload_sound_file_invalid_method(self, mock_boto_client):
-        mock_s3 = mock_boto_client.return_value
+        # mock_s3 = mock_boto_client.return_value
         sound_file = SimpleUploadedFile(
             "test_sound.mp3", b"file_content", content_type="audio/mp3"
         )
@@ -112,13 +112,13 @@ class SoundFileDeleteTest(TestCase):
             "ResponseMetadata": {"HTTPStatusCode": 204}
         }
 
-        sound_file = SoundFileUser.objects.create(
-            user_name="test_user",
-            sound_descriptor="ambient_noise",
-            s3_file_name="user_sounds/test_user_20231106.mp3",
-            latitude=40.7128,
-            longitude=-74.0060,
-        )
+        # sound_file = SoundFileUser.objects.create(
+        #     user_name="test_user",
+        #     sound_descriptor="ambient_noise",
+        #     s3_file_name="user_sounds/test_user_20231106.mp3",
+        #     latitude=40.7128,
+        #     longitude=-74.0060,
+        # )
 
         data = json.dumps(
             {
