@@ -1,5 +1,8 @@
 from django.shortcuts import render
 
 
-def chatroom(request):
-    return render(request, "chatroom.html")
+def chatroom(request, chatroom_name):
+    context = {
+        "chatroom_name": chatroom_name,
+    }
+    return render(request, "chatroom.html", context)

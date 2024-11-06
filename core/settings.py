@@ -35,6 +35,13 @@ FREESOUND_API_KEY = os.getenv("FREESOUND_API_KEY")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
+if "RDS_DB_NAME" in os.environ:
+    AWS_S3_REGION_NAME = os.environ["AWS_S3_REGION_NAME"]
+    AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
+else:
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -64,6 +71,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "data_collection",
     "sounddata_s3",
+    "soundscape_user",
 ]
 
 MIDDLEWARE = [
@@ -96,9 +104,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
+# Define the ASGI application for Channels
+ASGI_APPLICATION = "core.asgi.application"
 
-# Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+# Debug statements to check environment variables
+print("REDIS_URL from environment:", os.getenv("REDIS_URL"))
+print("REDIS_PORT from environment:", os.getenv("REDIS_PORT"))
+# Channel layer configuration to use Redis
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                (
+                    # Hardcoding the value since the fetch doesnt happen
+                    os.getenv(
+                        "REDIS_URL",
+                        "soundscape-chatroom-redis.cugehm.ng.0001.use1.cache.amazonaws.com",
+                    ),
+                    int(os.getenv("REDIS_PORT", 6379)),
+                )
+            ],
+        },
+    },
+}
 
 # DATABASES = {
 #      'default': {
@@ -204,3 +233,5 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/"
+USE_TZ = True
+TIME_ZONE = "UTC"

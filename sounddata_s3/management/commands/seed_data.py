@@ -19,7 +19,10 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **kwargs):
-        local_csv_path = "/Users/manavparikh/Desktop/Fall24/Software Engineering/Project/wed-fall24-team2/nyc_complaints_data.csv"
+        local_csv_path = (
+            "/Users/manavparikh/Desktop/Fall24/Software "
+            "Engineering/Project/wed-fall24-team2/nyc_complaints_data.csv"
+        )
 
         AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
         AWS_SCRET_ACCESS_KEY = os.getenv("AWS_SCRET_ACCESS_KEY")
@@ -64,7 +67,6 @@ class Command(BaseCommand):
                     freesound_client, sound_descriptor
                 )
 
-                # Uncomment this if you want to upload sound file to S3 and save data to the database
                 if sound:
                     sound_file_url = self.upload_sound_to_s3(
                         s3_client, sound, unique_key
@@ -80,7 +82,8 @@ class Command(BaseCommand):
 
                     self.stdout.write(
                         self.style.SUCCESS(
-                            f"Processed row {i+1}: {unique_key} and {sound_descriptor} - Sound URL: {sound}"
+                            f"Processed row "
+                            f"{i + 1}: {unique_key} and {sound_descriptor} - Sound URL: {sound}"
                         )
                     )
                 else:
@@ -117,7 +120,9 @@ class Command(BaseCommand):
         #             sound_file_url=sound_file_url
         #         )
 
-        #         self.stdout.write(self.style.SUCCESS(f"Processed row {i+1}: {unique_key} and {sound_descriptor} - Sound URL: {sound}"))
+        # self.stdout.write(self.style.
+        # SUCCESS(f"Processed row {i+1}: {unique_key} and {sound_descriptor} - Sound URL: {sound}"))
+
         #     else:
         #         self.stdout.write(self.style.WARNING(f"No sound found for {sound_descriptor}"))
 
@@ -146,7 +151,7 @@ class Command(BaseCommand):
             return None
 
     def upload_sound_to_s3(self, client, sound_url, unique_key):
-        AWS_S3_BUCKET_NAME = "nyc-sound-files"
+        AWS_S3_BUCKET_NAME = "nyc-soundscape-sound-files"
         try:
             response = requests.get(sound_url)
             sound_data = response.content
