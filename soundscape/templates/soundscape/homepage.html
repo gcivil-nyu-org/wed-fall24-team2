@@ -200,6 +200,109 @@
         background-color: #a527cf;
       }
 
+      /* .sound-date {
+        font-size: 0.6em;
+        color: green;
+        font-weight: 500;
+        margin-top: 0px;
+        margin-bottom: 2px;
+        padding: 2px 6px;
+        background-color: #f2f2f2;
+        border-radius: 4px;
+        display: inline-block;
+        text-align: center;
+      } */
+
+      /* .sound-date::before {
+        content: "📅 "; 
+        font-size: 0.8em;
+        color: green;
+      } */
+
+      /*  */
+
+      .sound-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin: 2px 0;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  max-width: 400px; /* Limit width to keep it compact */
+  transition: transform 0.3s;
+}
+
+.sound-item:hover {
+  transform: translateY(-5px);
+}
+
+.sound-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sound-user {
+  color: #4a90e2;
+  font-weight: bold;
+}
+
+.sound-descriptor {
+  font-weight: bold;
+  color: #333;
+  margin-left: 5px;
+}
+
+.sound-date {
+  font-size: 9px;
+  color: #6c757d;
+  text-align: left;
+}
+
+.sound-name-header {
+  display: flex;
+}
+
+.sound-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.audio-player {
+  flex-grow: 1;
+}
+
+.delete-icon {
+  background-image: url('./static/images/bin.png');
+  background-size: contain;
+  width: 20px;
+  height: 20px;
+  color: white;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* .delete-icon {
+        background-image: url('./static/images/bin.png');
+        background-size: contain;
+        width: 20px;
+        height: 20px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: right;
+      } */
+
+
+
       .mapboxgl-popup-content {
         width: fit-content;
         height: fit-content;
@@ -279,15 +382,7 @@
         margin-bottom: 0px;
       }
 
-      .delete-icon {
-        background-image: url('./static/images/bin.png');
-        background-size: contain;
-        width: 20px;
-        height: 20px;
-        background-repeat: no-repeat;
-        background-position: center;
-        float: right;
-      }
+
     </style>
   </head>
   <body>
