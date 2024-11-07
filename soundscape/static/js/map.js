@@ -2,120 +2,117 @@ const MIN_ZOOM_LEVEL = 13;
 
 /* MARKERS */
 
+function createSoundMarker(lng, lat, map) {
+  const el = document.createElement('div');
+  el.className = 'sound-marker';
+
+  const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+    <div style="font-family: Arial, sans-serif; width: 250px; color: #333;">
+      <div id="popup-content">
+        <h3 style="margin: 0 0 10px; font-size: 18px;">Sound</h3>
+        <div style="margin-bottom: 10px;">
+          <button id="popup-upload-sound-btn" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Upload</button>
+        </div>
+        <h4 style="font-size: 16px; margin: 10px 0;">Uploaded Sounds:</h4>
+        <ul id="sounds-list" style="list-style-type: none; padding-left: 0; margin: 0;"></ul>
+      </div>
+      <div id="upload-sound-form" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
+        <form id="sound-upload-form">
+          <input type="file" id="sound-file" accept="audio/*" required style="margin-bottom: 1px;"/>
+          <span id="file-size-error" style="display: block; color: red; font-size: 9px; margin-top: 0px; margin-bottom: 5px">Max file size is 3 MB</span>
+          <label for="sound-descriptor" style="margin-bottom: 5px; display: block;">Sound Descriptor:</label>
+          <select id="sound-descriptor" required style="width: 100%; padding: 5px; margin-bottom: 10px;">
+            <option value="">Select a descriptor</option>
+            ${SOUND_DESCRIPTORS.map(descriptor => 
+              `<option value="${descriptor.descriptor}">${descriptor.descriptor}</option>`
+            ).join('')}
+          </select>
+          <input type="hidden" id="latitude" value="${lat}"/>
+          <input type="hidden" id="longitude" value="${lng}"/>
+          <button type="submit" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer;">Submit</button>
+          <button type="button" id="close-upload-form-btn" style="background-color: #FF4C4C; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Close</button>
+        </form>
+      </div>
+    </div>
+  `);
+  
+  var marker = new mapboxgl.Marker(el)
+    .setLngLat([lng, lat])
+    .setPopup(popup)
+    .addTo(map);
+
+  popup.on('open', () => {
+    fetchAndDisplaySounds(lat, lng);
+
+    document.getElementById('popup-upload-sound-btn').addEventListener('click', function () {
+      document.getElementById('popup-content').style.display = 'none';
+      document.getElementById('upload-sound-form').style.display = 'block';
+    });
+
+    document.getElementById('close-upload-form-btn').addEventListener('click', function () {
+      document.getElementById('upload-sound-form').style.display = 'none';
+      document.getElementById('popup-content').style.display = 'block';
+    });
+
+    document
+      .getElementById('sound-upload-form')
+      .addEventListener('submit', function (event) {
+        event.preventDefault();
+        const soundFile = document.getElementById('sound-file').files[0];
+        if (soundFile.size > 3 *1024 * 1024) {  // 3 MB limit
+          alert('Please limit the sound file size to 3 MB');
+          return;
+        }
+
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+        const soundDescriptor =
+          document.getElementById('sound-descriptor').value;
+
+        // Handle the file upload and form data submission
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('sound_file', soundFile);
+        formData.append('latitude', latitude);
+        formData.append('longitude', longitude);
+        formData.append('sound_descriptor', soundDescriptor);
+
+        fetch('/soundscape_user/upload/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+          },
+          body: formData,
+        })
+        .then((response) => response.json())
+        .then((data) => {
+
+          if (data.error) {
+            alert(data.error);
+          } else {
+            alert('Sound uploaded successfully!');
+            document.getElementById('upload-sound-form').style.display = 'none';
+            document.getElementById('popup-content').style.display = 'block';
+
+            document.getElementById('sound-upload-form').reset();
+
+            fetchAndDisplaySounds(lat, lng);
+          }
+        })
+        .catch((error) => {
+          alert('Error uploading sound');
+          console.error('Error:', error);
+        });
+      });
+  });
+
+  return marker;
+}
+
 function addUserSound(map) {
   USER_SOUND_DATA.forEach((sound) => {
-    const el = document.createElement('div');
-    el.className = 'sound-marker';
-
-    const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-    <div style="font-family: Arial, sans-serif; width: 250px; color: #333;">
-    <div id="popup-content">
-      <h3 style="margin: 0 0 10px; font-size: 18px;">Sound</h3>
-      <div style="margin-bottom: 10px;">
-        <button id="popup-upload-sound-btn" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Upload</button>
-      </div>
-      <h4 style="font-size: 16px; margin: 10px 0;">Uploaded Sounds:</h4>
-      <ul id="sounds-list" style="list-style-type: none; padding-left: 0; margin: 0;"></ul>
-    </div>
-    <div id="upload-sound-form" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-      <form id="sound-upload-form">
-        <input type="file" id="sound-file" accept="audio/*" required style="margin-bottom: 1px;"/>
-        <span id="file-size-error" style="display: block; color: red; font-size: 9px; margin-top: 0px; margin-bottom: 5px">Max file size is 3 MB</span>
-        <label for="sound-descriptor" style="margin-bottom: 5px; display: block;">Sound Descriptor:</label>
-        <select id="sound-descriptor" required style="width: 100%; padding: 5px; margin-bottom: 10px;">
-          <option value="">Select a descriptor</option>
-          ${SOUND_DESCRIPTORS.map(descriptor => 
-            `<option value="${descriptor.descriptor}">${descriptor.descriptor}</option>`
-          ).join('')}
-        </select>
-        <input type="hidden" id="latitude" value="${sound.latitude}"/>
-        <input type="hidden" id="longitude" value="${sound.longitude}"/>
-        <button type="submit" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer;">Submit</button>
-        <button type="button" id="close-upload-form-btn" style="background-color: #FF4C4C; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Close</button>
-      </form>
-    </div>
-  </div>
-`);
-    existingMarkers.push({
-      lng: sound.longitude,
-      lat: sound.latitude,
-    });
-    new mapboxgl.Marker(el)
-      .setLngLat([sound.longitude, sound.latitude])
-      .setPopup(popup)
-      .addTo(map);
-    popup.on('open', () => {
-      fetchAndDisplaySounds(sound.latitude, sound.longitude);
-
-      // document
-      //   .getElementById('popup-hear-sound-btn')
-      //   .addEventListener('click', function () {
-      //     alert('Playing sound at this location!');
-      //   });
-
-      document.getElementById('popup-upload-sound-btn').addEventListener('click', function () {
-        document.getElementById('popup-content').style.display = 'none';
-        document.getElementById('upload-sound-form').style.display = 'block';
-      });
-    
-
-      document.getElementById('close-upload-form-btn').addEventListener('click', function () {
-        document.getElementById('upload-sound-form').style.display = 'none';
-        document.getElementById('popup-content').style.display = 'block';
-      });
-
-      document
-        .getElementById('sound-upload-form')
-        .addEventListener('submit', function (event) {
-          event.preventDefault();
-          const soundFile = document.getElementById('sound-file').files[0];
-          if (soundFile.size > 3 *1024 * 1024) {  // 3 MB limit
-            alert('Please limit the sound file size to 3 MB');
-            return;
-          }
-
-          const latitude = document.getElementById('latitude').value;
-          const longitude = document.getElementById('longitude').value;
-          const soundDescriptor =
-            document.getElementById('sound-descriptor').value;
-
-          // Handle the file upload and form data submission
-          const formData = new FormData();
-          formData.append('username', username);
-          formData.append('sound_file', soundFile);
-          formData.append('latitude', latitude);
-          formData.append('longitude', longitude);
-          formData.append('sound_descriptor', soundDescriptor);
-
-          fetch('/soundscape_user/upload/', {
-            method: 'POST',
-            headers: {
-              'X-CSRFToken': csrfToken,
-            },
-            body: formData,
-          })
-            .then((response) => response.json())
-            .then((data) => {
-
-              if (data.error)
-              {
-                alert(data.error)
-              }else{
-                alert('Sound uploaded successfully!');
-                document.getElementById('upload-sound-form').style.display = 'none';
-                document.getElementById('popup-content').style.display = 'block';
-
-                document.getElementById('sound-upload-form').reset();
-
-                fetchAndDisplaySounds(sound.latitude, sound.longitude);
-              }
-            })
-            .catch((error) => {
-              alert('Error uploading sound');
-              console.error('Error:', error);
-            });
-        });
-    });
+    createSoundMarker(sound.longitude, sound.latitude, map);
+    saveMarker(sound.longitude, sound.latitude, existingMarkers);
   });
 }
 
@@ -246,119 +243,8 @@ function addMarker(lng, lat, map) {
   if (currentZoom < MIN_ZOOM_LEVEL || distanceFromUser > 1000) {
     return;
   }
-
-  const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-  <div style="font-family: Arial, sans-serif; width: 250px; color: #333;">
-    <div id="popup-content">
-      <h3 style="margin: 0 0 10px; font-size: 18px;">Sound</h3>
-      <div style="margin-bottom: 10px;">
-        <button id="popup-upload-sound-btn" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Upload</button>
-      </div>
-      <h4 style="font-size: 16px; margin: 10px 0;">Uploaded Sounds:</h4>
-      <ul id="sounds-list" style="list-style-type: none; padding-left: 0; margin: 0;"></ul>
-    </div>
-    <div id="upload-sound-form" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-      <form id="sound-upload-form">
-        <input type="file" id="sound-file" accept="audio/*" required style="margin-bottom: 1px;"/>
-        <span id="file-size-error" style="display: block; color: red; font-size: 9px; margin-top: 0px; margin-bottom: 5px">Max file size is 3 MB</span>
-        <label for="sound-descriptor" style="margin-bottom: 5px; display: block;">Sound Descriptor:</label>
-        <select id="sound-descriptor" required style="width: 100%; padding: 5px; margin-bottom: 10px;">
-          <option value="">Select a descriptor</option>
-          ${SOUND_DESCRIPTORS.map(descriptor => 
-            `<option value="${descriptor.descriptor}">${descriptor.descriptor}</option>`
-          ).join('')}
-        </select>
-        <input type="hidden" id="latitude" value="${lat}"/>
-        <input type="hidden" id="longitude" value="${lng}"/>
-        <button type="submit" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer;">Submit</button>
-        <button type="button" id="close-upload-form-btn" style="background-color: #FF4C4C; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Close</button>
-      </form>
-    </div>
-  </div>
-`);
-
-  const el = document.createElement('div');
-  el.className = 'sound-marker';
-
-  const marker = new mapboxgl.Marker(el)
-    .setLngLat([lng, lat])
-    .setPopup(popup)
-    .addTo(map);
-
-  popup.on('open', () => {
-    fetchAndDisplaySounds(lat, lng);
-
-    // document
-    //   .getElementById('popup-hear-sound-btn')
-    //   .addEventListener('click', function () {
-    //     alert('Playing sound at this location!');
-    //   });
-
-    document.getElementById('popup-upload-sound-btn').addEventListener('click', function () {
-      document.getElementById('popup-content').style.display = 'none';
-      document.getElementById('upload-sound-form').style.display = 'block';
-    });
   
-
-    document.getElementById('close-upload-form-btn').addEventListener('click', function () {
-      document.getElementById('upload-sound-form').style.display = 'none';
-      document.getElementById('popup-content').style.display = 'block';
-    });
-  
-
-
-    document
-      .getElementById('sound-upload-form')
-      .addEventListener('submit', function (event) {
-        event.preventDefault();
-        const soundFile = document.getElementById('sound-file').files[0];
-        if (soundFile.size > 3 *1024 * 1024) {  // 3 MB limit
-          alert('Please limit the sound file size to 3 MB');
-          return;
-        }
-
-        const latitude = document.getElementById('latitude').value;
-        const longitude = document.getElementById('longitude').value;
-        const soundDescriptor =
-          document.getElementById('sound-descriptor').value;
-
-        // Handle the file upload and form data submission
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('sound_file', soundFile);
-        formData.append('latitude', latitude);
-        formData.append('longitude', longitude);
-        formData.append('sound_descriptor', soundDescriptor);
-
-        fetch('/soundscape_user/upload/', {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': csrfToken,
-          },
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((data) => {
-
-            if (data.error)
-            {
-              alert(data.error)
-            }else{
-              alert('Sound uploaded successfully!');
-              document.getElementById('upload-sound-form').style.display = 'none';
-              document.getElementById('popup-content').style.display = 'block';
-
-              document.getElementById('sound-upload-form').reset();
-
-              fetchAndDisplaySounds(lat, lng);
-            }
-          })
-          .catch((error) => {
-            alert('Error uploading sound');
-            console.error('Error:', error);
-          });
-      });
-  });
+  var marker = createSoundMarker(lng, lat, map);
 }
 
 function isDuplicateMarker(lng, lat, existingMarkers) {
@@ -423,10 +309,9 @@ function addChatroomMarkers(map) {
     const popup = new mapboxgl.Popup({
       offset: 25,
     }).setHTML(isLoggedIn() ? getChatroomComponent(neighborhood): getChatroomPublicComponent(neighborhood));
-    existingMarkers.push({
-      lng: neighborhood.longitude,
-      lat: neighborhood.latitude,
-    });
+
+    saveMarker(neighborhood.longitude, neighborhood.latitude, existingMarkers);
+
     const marker = new mapboxgl.Marker(el)
       .setLngLat([neighborhood.longitude, neighborhood.latitude])
       .setPopup(popup)
@@ -558,6 +443,7 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
       ) {
         return;
       }
+
       addMarker(coordinates.lng, coordinates.lat, map);
       saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
     });
