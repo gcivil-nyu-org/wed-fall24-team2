@@ -97,6 +97,10 @@ function createSoundMarker(lng, lat, map) {
             document.getElementById('sound-upload-form').reset();
 
             fetchAndDisplaySounds(lat, lng);
+
+            // Pop the marker from the list
+            // without removing the marker from the map
+            removeTempMarker(false);
           }
         })
         .catch((error) => {
@@ -245,6 +249,7 @@ function addMarker(lng, lat, map) {
   }
   
   var marker = createSoundMarker(lng, lat, map);
+  tempMarker.push(marker);
 }
 
 function isDuplicateMarker(lng, lat, existingMarkers) {
@@ -260,6 +265,18 @@ function isDuplicateMarker(lng, lat, existingMarkers) {
 function saveMarker(lng, lat, existingMarkers) {
   existingMarkers.push({ lng, lat });
   localStorage.setItem('markers', JSON.stringify(existingMarkers));
+}
+
+function removeTempMarker(removeFromMap) {
+  if (tempMarker != null) {
+    while(tempMarker.length > 0) {
+      const marker = tempMarker.pop();
+      if(removeFromMap) {
+        // Remove the marker from the map
+        marker.remove();
+      }
+    }
+  } 
 }
 
 function addControls(map) {
@@ -444,6 +461,7 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
         return;
       }
 
+      removeTempMarker(true);
       addMarker(coordinates.lng, coordinates.lat, map);
       saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
     });
