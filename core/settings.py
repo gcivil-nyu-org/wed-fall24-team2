@@ -151,8 +151,6 @@ if "RDS_DB_NAME" in os.environ:
             "PORT": os.environ["RDS_PORT"],
         }
     }
-    AWS_S3_REGION_NAME = os.environ["AWS_S3_REGION_NAME"]
-    AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
 elif "test" in sys.argv:
     DATABASES = {
         "default": {
@@ -235,3 +233,5 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/"
+USE_TZ = True
+TIME_ZONE = "UTC"

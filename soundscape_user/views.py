@@ -1,4 +1,5 @@
 import boto3
+import json
 from django.conf import settings
 from django.http import JsonResponse
 from .forms import SoundFileUploadForm
@@ -39,7 +40,10 @@ def upload_sound_file(request):
                 print("inside s3?")
                 sound_data = sound_file.read()
                 # s3_file_name = f"user_sounds/{user_name}_{sound_file.name}"
-                s3_file_name = f"user_sounds/{user_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{sound_file.name}"
+                s3_file_name = (
+                    f"user_sounds/{user_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+                    f"_{sound_file.name}"
+                )
 
                 s3.put_object(
                     Bucket=settings.AWS_STORAGE_BUCKET_NAME,
@@ -85,10 +89,50 @@ def sounds_at_location(request, lat, lng):
                 "user_name": sound.user_name,
                 "sound_descriptor": sound.sound_descriptor,
                 "sound_name": sound.s3_file_name,
-                "listen_link": f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{sound.s3_file_name}",
+                "listen_link": f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3"
+                f".{settings.AWS_S3_REGION_NAME}.amazonaws.com/{sound.s3_file_name}",
             }
             for sound in sounds
         ]
         return JsonResponse({"sounds": sound_list}, status=200)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def check_file_exists_in_s3(key):
+    try:
+        s3.get_object(
+            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+            Key=key,
+        )
+        return True
+    except Exception as e:
+        print(f"Cannot find file {key}: {e}")
+        return False
+
+
+def delete_sound_file(request):
+    if request.method == "POST":
+        sound = json.loads(request.body)
+
+        if check_file_exists_in_s3(sound["sound_name"]):
+            try:
+                s3.delete_object(
+                    Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                    Key=sound["sound_name"],
+                )
+            except Exception as e:
+                return JsonResponse(
+                    {"error": f"Error deleting in S3: {str(e)}"}, status=500
+                )
+        else:
+            print("Cannot find file in s3, delete metadata from RDS anyway")
+
+        SoundFileUser.objects.filter(
+            user_name=sound["user_name"],
+            s3_file_name=sound["sound_name"],
+        ).delete()
+
+        return JsonResponse({"status": "success"}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)

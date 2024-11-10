@@ -4,21 +4,27 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import User
 from .models import Chatroom, ChatMessage
+import urllib.parse
 
 logger = logging.getLogger(__name__)
 
 
 class ChatRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.chatroom_name = self.scope["url_route"]["kwargs"]["chatroom_name"]
-        self.room_group_name = f"chat_{self.chatroom_name}"
+        self.chatroom_name = urllib.parse.unquote(
+            self.scope["url_route"]["kwargs"]["chatroom_name"]
+        )
+
+        self.room_group_name = f"chat_{self.chatroom_name.replace(' ', '_')}"
 
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         logger.info(
             f"Connected to room: {self.chatroom_name}, Group Name: {self.room_group_name}"
         )
-
+        print(
+            f"Connected to room: {self.chatroom_name}, Group Name: {self.room_group_name}"
+        )
         await self.send_chat_history()
 
     async def disconnect(self, close_code):
@@ -99,7 +105,7 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
             {
                 "message": msg["message"],
                 "username": msg["user__username"],
-                "timestamp": msg["timestamp"].strftime("%Y-%m-%d %H:%M:%S"),
+                "timestamp": msg["timestamp"].isoformat(),
             }
             for msg in recent_messages
         ]

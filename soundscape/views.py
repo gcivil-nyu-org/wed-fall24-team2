@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.forms.models import model_to_dict
 from soundscape_user.models import SoundFileUser
+from soundscape_user.models import SoundDescriptor
 
 from .forms import SignupForm
 from chatroom.models import Chatroom
@@ -21,9 +22,21 @@ def homepage(request):
     all_data = []
 
     # Get filter parameters from the request (if any)
-    sound_type = request.GET.get("soundType", "Noise")
+    sound_type = request.GET.getlist("soundType") or ["Noise"]
     date_from = request.GET.get("dateFrom")
     date_to = request.GET.get("dateTo")
+
+    # Create where clause for sound types
+    sound_type_conditions = " OR ".join(
+        [f"starts_with(complaint_type, '{stype}')" for stype in sound_type]
+    )
+    where_clause = f"({sound_type_conditions})"
+
+    # Apply date filters if provided
+    if date_from:
+        where_clause += f" AND created_date >= '{date_from}'"
+    if date_to:
+        where_clause += f" AND created_date <= '{date_to}'"
 
     # Query SoundFileUser data
     user_sound_files = SoundFileUser.objects.all()
@@ -31,23 +44,15 @@ def homepage(request):
         [model_to_dict(sound) for sound in user_sound_files]
     )
 
+    sound_descriptors = SoundDescriptor.objects.all()
+    sound_descriptors_data = json.dumps(
+        [model_to_dict(sound) for sound in sound_descriptors]
+    )
+
     try:
         batch_offsets = range(0, TOTAL_ROWS, BATCH_SIZE)
 
         for offset in batch_offsets:
-            # Set the base where clause depending on whether a filter is applied
-            where_clause = (
-                f"starts_with(complaint_type, '{sound_type}')"
-                if sound_type
-                else "starts_with(complaint_type, 'Noise')"
-            )
-
-            # Apply date filters if provided
-            if date_from:
-                where_clause += f" AND created_date >= '{date_from}'"
-            if date_to:
-                where_clause += f" AND created_date <= '{date_to}'"
-
             params = {
                 "$limit": min(BATCH_SIZE, TOTAL_ROWS - offset),
                 "$offset": offset,
@@ -78,9 +83,12 @@ def homepage(request):
                 "username": request.user.username,
                 "sound_data": json.dumps(all_data),
                 "user_sound_data": user_sound_files_data,
+                "sound_descriptors": sound_descriptors_data,
+                "sound_type": sound_type,
+                "date_from": date_from,
+                "date_to": date_to,
             },
         )
-
     except requests.RequestException as e:
         return render(
             request,
@@ -94,6 +102,7 @@ def homepage(request):
                 "sound_data": json.dumps([]),  # Empty data on error
                 "error_message": str(e),
                 "user_sounds": user_sound_files_data,
+                "sound_descriptors": sound_descriptors_data,
             },
         )
 

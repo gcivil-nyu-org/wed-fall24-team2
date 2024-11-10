@@ -155,20 +155,24 @@
       <h4>Sound Types</h4>
       <div class="filter-options">
         <label class="filter-checkbox">
-          <input type="checkbox" name="soundType" value="Noise - Residential" checked />
+          <input type="checkbox" name="soundType" value="Noise - Residential"
+           {% if "Noise - Residential" in sound_type %}checked{% endif %} />
           Residential Noise
         </label>
         <label class="filter-checkbox">
-          <input type="checkbox" name="soundType" value="Noise - Street/Sidewalk" checked />
+          <input type="checkbox" name="soundType" value="Noise - Street/Sidewalk" 
+          {% if "Noise - Street/Sidewalk" in sound_type %}checked{% endif %} />
           Street/Sidewalk Noise
         </label>
         <label class="filter-checkbox">
-          <input type="checkbox" name="soundType" value="Noise - Commercial" checked />
+          <input type="checkbox" name="soundType" value="Noise - Commercial" 
+          {% if "Noise - Commercial" in sound_type %}checked{% endif %} />
           Commercial Noise
         </label>
         <label class="filter-checkbox">
-          <input type="checkbox" name="soundType" value="Noise - Vehicle" checked />
-          Vehicle Noise
+          <input type="checkbox" name="soundType" value="Noise - Vehicle" 
+          {% if "Noise - Vehicle" in sound_type %}checked{% endif %}  />
+          Vehicle Noise 
         </label>
       </div>
     </div>
@@ -178,11 +182,13 @@
       <div class="filter-options">
         <label
           >From:
-          <input type="date" id="dateFrom" name="dateFrom" />
+          <input type="date" id="dateFrom" name="dateFrom"
+          value="{{ date_from|default:'' }}" />
         </label>
         <label
           >To:
-          <input type="date" id="dateTo" name="dateTo" />
+          <input type="date" id="dateTo" name="dateTo" 
+          value="{{ date_to|default:'' }}"/>
         </label>
       </div>
     </div>
