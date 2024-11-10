@@ -3,9 +3,9 @@
 <style>
   .profile-panel {
     position: fixed;
-    right: -320px;
+    right: -350px;
     top: 0;
-    width: 320px;
+    width: 350px;
     height: 100%;
     background: white;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
@@ -80,6 +80,13 @@
     border-radius: 5px;
   }
 
+  #user-sounds-list {
+  display: flex;
+  flex-direction: column; /* Ensures items stack vertically */
+  gap: 10px; /* Adds spacing between items */
+}
+
+
 </style>
 <script defer src="{% static 'js/profile.js'%}"></script>
 
@@ -100,6 +107,15 @@
             <h4>{{ request.user.email }}</h4>
         </div>
         <h4 class="badge">Joined since {{ request.user.date_joined | date:"M d, Y" }}</h4>
+        <h4>Added Sounds</h4>
+        <script type="text/javascript">
+          var USERNAME = "{{ request.user.username }}";
+          var USER_SOUND_DATA = JSON.parse('{{ user_sound_data|escapejs }}');
+          var SOUND_DESCRIPTORS = JSON.parse('{{ sound_descriptors|escapejs }}');
+      </script>
+        <ul id="user-sounds-list">
+          <!-- Dynamically generated sound items will be inserted here -->
+        </ul>
     </div>
   </div>
 </div>

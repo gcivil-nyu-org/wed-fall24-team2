@@ -137,3 +137,25 @@ def delete_sound_file(request):
         return JsonResponse({"status": "success"}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def sounds_for_user(request, user_name):
+    if request.method == "GET":
+        print(f"Fetching sounds for user: {user_name}")  # Debug log
+        sounds = SoundFileUser.objects.filter(user_name=user_name).order_by(
+            "-created_at"
+        )
+        sound_list = [
+            {
+                "user_name": sound.user_name,
+                "sound_descriptor": sound.sound_descriptor,
+                "sound_name": sound.s3_file_name,
+                "listen_link": f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3"
+                f".{settings.AWS_S3_REGION_NAME}.amazonaws.com/{sound.s3_file_name}",
+                "created_at": sound.created_at,
+            }
+            for sound in sounds
+        ]
+        return JsonResponse({"sounds": sound_list}, status=200)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
