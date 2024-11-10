@@ -329,8 +329,6 @@
     <script src="{% static 'js/map.js'%}"></script>
     <script>
       var NYC_NEIGHBORHOODS = JSON.parse('{{ chatrooms|escapejs }}');
-      var SOUND_DATA = JSON.parse('{{sound_data|escapejs}}');
-      var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
       var USER_SOUND_DATA = JSON.parse('{{user_sound_data|escapejs}}');
       var USER_SOUND_GEOJSON_DATA = convertToGeoJSON(USER_SOUND_DATA);
       var SOUND_DESCRIPTORS = JSON.parse('{{sound_descriptors|escapejs}}');

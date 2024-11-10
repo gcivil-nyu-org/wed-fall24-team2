@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.forms.models import model_to_dict
+from django.http import JsonResponse
 from soundscape_user.models import SoundFileUser
 from soundscape_user.models import SoundDescriptor
 
@@ -13,31 +14,6 @@ import json
 
 
 def homepage(request):
-    API_URL = "https://data.cityofnewyork.us/resource/hbc2-s6te.json"
-    APP_TOKEN = os.environ.get("NYC_OPEN_DATA_APP_TOKEN")
-    headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
-
-    BATCH_SIZE = 1000
-    TOTAL_ROWS = 2000
-    all_data = []
-
-    # Get filter parameters from the request (if any)
-    sound_type = request.GET.getlist("soundType") or ["Noise"]
-    date_from = request.GET.get("dateFrom")
-    date_to = request.GET.get("dateTo")
-
-    # Create where clause for sound types
-    sound_type_conditions = " OR ".join(
-        [f"starts_with(complaint_type, '{stype}')" for stype in sound_type]
-    )
-    where_clause = f"({sound_type_conditions})"
-
-    # Apply date filters if provided
-    if date_from:
-        where_clause += f" AND created_date >= '{date_from}'"
-    if date_to:
-        where_clause += f" AND created_date <= '{date_to}'"
-
     # Query SoundFileUser data
     user_sound_files = SoundFileUser.objects.all()
     user_sound_files_data = json.dumps(
@@ -49,62 +25,81 @@ def homepage(request):
         [model_to_dict(sound) for sound in sound_descriptors]
     )
 
-    try:
-        batch_offsets = range(0, TOTAL_ROWS, BATCH_SIZE)
+    return render(
+        request,
+        "soundscape/homepage.html",
+        {
+            "mapbox_access_token": os.environ.get("MAPBOX_ACCESS_TOKEN"),
+            "chatrooms": json.dumps(
+                [model_to_dict(chatroom) for chatroom in Chatroom.objects.all()]
+            ),
+            "username": request.user.username,
+            "user_sound_data": user_sound_files_data,
+            "sound_descriptors": sound_descriptors_data,
+        },
+    )
 
-        for offset in batch_offsets:
-            params = {
-                "$limit": min(BATCH_SIZE, TOTAL_ROWS - offset),
-                "$offset": offset,
-                "$where": where_clause,
-            }
 
-            # Fetch data from the API
-            response = requests.get(API_URL, params=params, headers=headers)
-            response.raise_for_status()
+def get_noise_data(request):
+    if request.method == "POST":
+        conditions = json.loads(request.body)
 
-            batch_data = response.json()
-            if not batch_data:
-                break
+        API_URL = "https://data.cityofnewyork.us/resource/hbc2-s6te.json"
+        APP_TOKEN = os.environ.get("NYC_OPEN_DATA_APP_TOKEN")
+        headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
 
-            all_data.extend(batch_data)
-            if len(batch_data) < params["$limit"]:
-                break
+        BATCH_SIZE = 1000
+        TOTAL_ROWS = 2000
+        all_data = []
 
-        # Render homepage.html with the data (filtered or default)
-        return render(
-            request,
-            "soundscape/homepage.html",
-            {
-                "mapbox_access_token": os.environ.get("MAPBOX_ACCESS_TOKEN"),
-                "chatrooms": json.dumps(
-                    [model_to_dict(chatroom) for chatroom in Chatroom.objects.all()]
-                ),
-                "username": request.user.username,
-                "sound_data": json.dumps(all_data),
-                "user_sound_data": user_sound_files_data,
-                "sound_descriptors": sound_descriptors_data,
-                "sound_type": sound_type,
-                "date_from": date_from,
-                "date_to": date_to,
-            },
+        # Get filter parameters from the request (if any)
+        sound_type = conditions["soundType"] or ["Noise"]
+        date_from = conditions["dateFrom"]
+        date_to =conditions["dateTo"]
+
+        # Create where clause for sound types
+        sound_type_conditions = " OR ".join(
+            [f"starts_with(complaint_type, '{stype}')" for stype in sound_type]
         )
-    except requests.RequestException as e:
-        return render(
-            request,
-            "soundscape/homepage.html",
-            {
-                "mapbox_access_token": os.environ.get("MAPBOX_ACCESS_TOKEN"),
-                "chatrooms": json.dumps(
-                    [model_to_dict(chatroom) for chatroom in Chatroom.objects.all()]
-                ),
-                "username": request.user.username,
-                "sound_data": json.dumps([]),  # Empty data on error
-                "error_message": str(e),
-                "user_sounds": user_sound_files_data,
-                "sound_descriptors": sound_descriptors_data,
-            },
-        )
+        where_clause = f"({sound_type_conditions})"
+
+        # Apply date filters if provided
+        if date_from:
+            where_clause += f" AND created_date >= '{date_from}'"
+        if date_to:
+            where_clause += f" AND created_date <= '{date_to}'"
+
+        try:
+            batch_offsets = range(0, TOTAL_ROWS, BATCH_SIZE)
+
+            for offset in batch_offsets:
+                params = {
+                    "$limit": min(BATCH_SIZE, TOTAL_ROWS - offset),
+                    "$offset": offset,
+                    "$where": where_clause,
+                }
+
+                # Fetch data from the API
+                response = requests.get(API_URL, params=params, headers=headers)
+                response.raise_for_status()
+
+                batch_data = response.json()
+                if not batch_data:
+                    break
+
+                all_data.extend(batch_data)
+                if len(batch_data) < params["$limit"]:
+                    break
+            
+            return JsonResponse({"sound_data": json.dumps(all_data)}, status=200)
+
+        except Exception as e:
+            return JsonResponse(
+                {"error": f"Error fetching noise data: {str(e)}"}, status=500
+            )
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 
 def signup(request):
