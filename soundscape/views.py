@@ -55,7 +55,7 @@ def get_noise_data(request):
         # Get filter parameters from the request (if any)
         sound_type = conditions["soundType"] or ["Noise"]
         date_from = conditions["dateFrom"]
-        date_to =conditions["dateTo"]
+        date_to = conditions["dateTo"]
 
         # Create where clause for sound types
         sound_type_conditions = " OR ".join(
@@ -90,7 +90,7 @@ def get_noise_data(request):
                 all_data.extend(batch_data)
                 if len(batch_data) < params["$limit"]:
                     break
-            
+
             return JsonResponse({"sound_data": json.dumps(all_data)}, status=200)
 
         except Exception as e:
@@ -99,7 +99,6 @@ def get_noise_data(request):
             )
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
-
 
 
 def signup(request):
