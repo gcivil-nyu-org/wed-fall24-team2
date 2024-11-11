@@ -1,19 +1,3 @@
-<<<<<<< HEAD
-function toggleProfile() {
-  const panel = document.getElementById('profilePanel');
-  panel.classList.toggle('open');
-}
-
-document.addEventListener('click', function (event) {
-  const panel = document.getElementById('profilePanel');
-  const toggle = document.querySelector('.profile-toggle');
-
-  if (panel && toggle && !panel.contains(event.target) && !toggle.contains(event.target)) {
-    panel.classList.remove('open');
-  }
-});
-
-=======
 // function toggleProfile() {
 //   const panel = document.getElementById('profilePanel');
 //   panel.classList.toggle('open');
@@ -177,6 +161,5 @@ function toggleProfile() {
   console.log("Toggled profile panel for user:", USERNAME);
 }
 
->>>>>>> develop
 window.toggleProfile = toggleProfile;
 

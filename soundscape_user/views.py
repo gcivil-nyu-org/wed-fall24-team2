@@ -91,10 +91,7 @@ def sounds_at_location(request, lat, lng):
                 "sound_name": sound.s3_file_name,
                 "listen_link": f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3"
                 f".{settings.AWS_S3_REGION_NAME}.amazonaws.com/{sound.s3_file_name}",
-<<<<<<< HEAD
-=======
                 "created_at": sound.created_at,
->>>>>>> develop
             }
             for sound in sounds
         ]
@@ -140,8 +137,6 @@ def delete_sound_file(request):
         return JsonResponse({"status": "success"}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
-<<<<<<< HEAD
-=======
 
 
 def sounds_for_user(request, user_name):
@@ -164,4 +159,3 @@ def sounds_for_user(request, user_name):
         return JsonResponse({"sounds": sound_list}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
->>>>>>> develop

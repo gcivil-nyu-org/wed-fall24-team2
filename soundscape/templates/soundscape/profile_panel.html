@@ -80,8 +80,6 @@
     border-radius: 5px;
   }
 
-<<<<<<< HEAD
-=======
   #user-sounds-list {
     display: flex;
     flex-direction: column;
@@ -106,7 +104,6 @@
   justify-content: space-between;
 }
 
->>>>>>> develop
 </style>
 <script defer src="{% static 'js/profile.js'%}"></script>
 
@@ -127,8 +124,6 @@
             <h4>{{ request.user.email }}</h4>
         </div>
         <h4 class="badge">Joined since {{ request.user.date_joined | date:"M d, Y" }}</h4>
-<<<<<<< HEAD
-=======
         <h4>Added Sounds</h4>
         <!-- <script src="{% static 'js/profile.js'%}"></script> -->
         <script type="text/javascript">
@@ -139,7 +134,6 @@
         <div id="user-sounds-list">
           <!-- Dynamically generated sound items will be inserted here -->
         </div>
->>>>>>> develop
     </div>
   </div>
 </div>
