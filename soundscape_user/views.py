@@ -91,6 +91,7 @@ def sounds_at_location(request, lat, lng):
                 "sound_name": sound.s3_file_name,
                 "listen_link": f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3"
                 f".{settings.AWS_S3_REGION_NAME}.amazonaws.com/{sound.s3_file_name}",
+                "created_at": sound.created_at,
             }
             for sound in sounds
         ]
