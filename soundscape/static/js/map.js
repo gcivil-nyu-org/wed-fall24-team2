@@ -129,9 +129,11 @@ function fetchAndDisplaySounds(lat, lng) {
         // Check if there are sounds
         const soundsListPromises = data.sounds.map((sound) => {
           // Create the initial loading list item
+          const formattedDate = formatDateTime(sound.created_at);
           const listItem = `
             <li id="${sound.sound_name}"> <!-- Assign a unique ID based on sound data -->
               ${sound.user_name} - ${sound.sound_descriptor}
+              <div class="sound-date">${formattedDate}</div>
               <span class="loading"></span>
             </li>
           `;
@@ -160,7 +162,18 @@ function fetchAndDisplaySounds(lat, lng) {
               // Replace the loading message with the audio element
               document.getElementById(
                 sound.sound_name
-              ).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} ${deleteBtn} ${audioElement}`;
+              ).innerHTML = `
+              <div class="sound-listen">
+  <div class="sound-top">
+    <div class="sound-name-stuff">
+      <div>${sound.user_name} - ${sound.sound_descriptor}</div>
+      <div class="sound-date">${formattedDate}</div>
+    </div>
+    ${deleteBtn}
+  </div>
+  ${audioElement}
+</div>
+`;
 
               
               if (isLoggedInUser(sound.user_name)) {
@@ -231,6 +244,25 @@ function playSound(url) {
       audio.play();
     })
     .catch((error) => console.error('Error fetching sound file:', error));
+}
+
+function formatDateTime(dateString) {
+  console.log(dateString)
+  const date = new Date(dateString);
+
+  const options = { weekday: 'short', year: 'numeric', month: 'numeric', day: 'numeric' };
+  const formattedDate = date.toLocaleDateString('en-US', options);
+
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  
+  const formattedTime = `${hours}:${minutes} ${ampm}`;
+
+  return `${formattedDate} ${formattedTime}`;
 }
 
 function addMarker(lng, lat, map) {
