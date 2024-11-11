@@ -4,6 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Soundscape Explorer</title>
+    <link rel="icon" type="image/x-icon" href="./static/images/favicon.ico">
     <meta
       name="viewport"
       content="initial-scale=1,maximum-scale=1,user-scalable=no"
@@ -288,6 +289,21 @@
         background-position: center;
         float: right;
       }
+
+      .loader {
+        position: absolute;
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #c24ec2; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
     </style>
   </head>
   <body>
@@ -319,6 +335,7 @@
 
     <div class="app-container">
       <div id="map"></div>
+      <div id="loading-indicator" style="display: none;" class="loader"></div>
     </div>
     <script>
       const csrfToken = "{{ csrf_token }}";
@@ -328,8 +345,6 @@
     <script src="{% static 'js/map.js'%}"></script>
     <script>
       var NYC_NEIGHBORHOODS = JSON.parse('{{ chatrooms|escapejs }}');
-      var SOUND_DATA = JSON.parse('{{sound_data|escapejs}}');
-      var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
       var USER_SOUND_DATA = JSON.parse('{{user_sound_data|escapejs}}');
       var USER_SOUND_GEOJSON_DATA = convertToGeoJSON(USER_SOUND_DATA);
       var SOUND_DESCRIPTORS = JSON.parse('{{sound_descriptors|escapejs}}');
