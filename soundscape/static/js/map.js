@@ -380,96 +380,126 @@ function addChatroomMarkers(map) {
 
 function addHeatmapLayer(map) {
   map.on('load', () => {
-    map.addSource('heatmap-data', {
-      type: 'geojson',
-      data: SOUND_GEOJSON_DATA,
-    });
+    document.getElementById("loading-indicator").style.display = "block";
 
-    map.addLayer({
-      id: 'heatmap',
-      type: 'heatmap',
-      source: 'heatmap-data',
-      paint: {
-        // Set the heatmap weight based on the 'weight' property
-        'heatmap-weight': [
-          'coalesce', // Use 'coalesce' to provide a default value
-          ['get', 'weight'], // Get the 'weight' property
-          0, // Default weight if 'weight' is not present
-        ],
-        'heatmap-intensity': {
-          stops: [
-            [0, 0],
-            [6, 2],
-          ],
-        },
-        'heatmap-color': [
-          'interpolate',
-          ['linear'],
-          ['heatmap-density'],
-          0,
-          'rgba(0,0,0,0)',
-          0.2,
-          'rgba(255,237,160,0.5)',
-          0.4,
-          'rgba(255,217,105,0.7)',
-          0.6,
-          'rgba(255,182,72,0.8)',
-          0.8,
-          'rgba(255,120,50,1)',
-          1,
-          'rgba(255,50,0,1)',
-        ],
-        'heatmap-radius': {
-          stops: [
-            [10, 30],
-            [20, 50],
-          ],
-        },
-        'heatmap-opacity': 0.8,
+    fetch('/get_noise_data/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
       },
-    });
+      body: JSON.stringify({
+        "soundType": Array.from(document.querySelectorAll("input[name='soundType']:checked")).map(
+          checkbox => checkbox.value
+        ),
+        "dateFrom": document.getElementById("dateFrom").value,
+        "dateTo": document.getElementById("dateTo").value
+      }),
+    }).then((response) => {
+        if (!response.ok) {
+          throw new Error(response.error);
+        }
+        return response.json();
+    }).then((data) => {
+      var SOUND_DATA = JSON.parse(data.sound_data);
+      var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
 
-    const popup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
+      map.addSource('heatmap-data', {
+        type: 'geojson',
+        data: SOUND_GEOJSON_DATA,
+      });
+  
+      map.addLayer({
+        id: 'heatmap',
+        type: 'heatmap',
+        source: 'heatmap-data',
+        paint: {
+          // Set the heatmap weight based on the 'weight' property
+          'heatmap-weight': [
+            'coalesce', // Use 'coalesce' to provide a default value
+            ['get', 'weight'], // Get the 'weight' property
+            0, // Default weight if 'weight' is not present
+          ],
+          'heatmap-intensity': {
+            stops: [
+              [0, 0],
+              [6, 2],
+            ],
+          },
+          'heatmap-color': [
+            'interpolate',
+            ['linear'],
+            ['heatmap-density'],
+            0,
+            'rgba(0,0,0,0)',
+            0.2,
+            'rgba(255,237,160,0.5)',
+            0.4,
+            'rgba(255,217,105,0.7)',
+            0.6,
+            'rgba(255,182,72,0.8)',
+            0.8,
+            'rgba(255,120,50,1)',
+            1,
+            'rgba(255,50,0,1)',
+          ],
+          'heatmap-radius': {
+            stops: [
+              [10, 30],
+              [20, 50],
+            ],
+          },
+          'heatmap-opacity': 0.8,
+        },
+      });
 
-    map.on('mouseenter', 'heatmap', (e) => {
-      // Change the cursor style as a UI indicator.
-      map.getCanvas().style.cursor = 'pointer';
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      });
+  
+      map.on('mouseenter', 'heatmap', (e) => {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+  
+        const coordinates = e.features[0].geometry.coordinates;
+        const complaint_type = e.features[0].properties.complaint_type.split(/[ - ]+/).pop();
+        const descriptor = e.features[0].properties.descriptor;
+        const status = e.features[0].properties.status;
+        const created_date = e.features[0].properties.created_date;
+        const closed_date = e.features[0].properties.closed_date;
+  
+        popup.setLngLat(coordinates).setHTML(`
+          <div class="sound-information">
+            <span>Type: ${complaint_type}</span>
+            <span>Descriptor: ${descriptor}</span>
+            <span>Reported at: ${new Intl.DateTimeFormat('en-US').format(
+              new Date(created_date)
+            )}</span>
+            ${closed_date?
+              `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
+                new Date(closed_date)
+              )}</span>` : ``
+            }
+  
+            ${status == "Open"?
+              `<span class="open-badge">${status}</span>` :
+              (status == "In Progress"?
+              `<span class="in-progress-badge">${status}</span>` :
+              `<span class="closed-badge">${status}</span>`)}
+          </div>
+        `).addTo(map);
+      });
+  
+      map.on('mouseleave', 'heatmap', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
 
-      const coordinates = e.features[0].geometry.coordinates;
-      const complaint_type = e.features[0].properties.complaint_type.split(/[ - ]+/).pop();
-      const descriptor = e.features[0].properties.descriptor;
-      const status = e.features[0].properties.status;
-      const created_date = e.features[0].properties.created_date;
-      const closed_date = e.features[0].properties.closed_date;
+      document.getElementById("loading-indicator").style.display = "none";
 
-      popup.setLngLat(coordinates).setHTML(`
-        <div class="sound-information">
-          <span>Type: ${complaint_type}</span>
-          <span>Descriptor: ${descriptor}</span>
-          <span>Reported at: ${new Intl.DateTimeFormat('en-US').format(
-            new Date(created_date)
-          )}</span>
-          ${closed_date?
-            `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
-              new Date(closed_date)
-            )}</span>` : ``
-          }
-
-          ${status == "Open"?
-            `<span class="open-badge">${status}</span>` :
-            (status == "In Progress"?
-            `<span class="in-progress-badge">${status}</span>` :
-            `<span class="closed-badge">${status}</span>`)}
-        </div>
-      `).addTo(map);
-    });
-
-    map.on('mouseleave', 'heatmap', () => {
-      map.getCanvas().style.cursor = '';
-      popup.remove();
+    }).catch((error) => {
+      document.getElementById("loading-indicator").style.display = "none";
+      console.error('Error fetching noise data:', error);
     });
   });
 }
@@ -484,6 +514,7 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
       center: centerCoordinates,
       zoom: 12,
     });
+
     // Register onClick function on map
     map.on('click', function (e) {
       const coordinates = e.lngLat;
