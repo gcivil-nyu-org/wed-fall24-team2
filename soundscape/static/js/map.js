@@ -348,7 +348,7 @@ function addChatroomMarkers(map) {
 
 function addHeatmapLayer(map) {
   map.on('load', () => {
-    console.log("loading heatmap");
+    document.getElementById("loading-indicator").style.display = "block";
 
     fetch('/get_noise_data/', {
       method: 'POST',
@@ -368,8 +368,6 @@ function addHeatmapLayer(map) {
         }
         return response.json();
     }).then((data) => {
-      console.log("loaded heatmap");
-      
       var SOUND_DATA = JSON.parse(data.sound_data);
       var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
 
@@ -464,9 +462,13 @@ function addHeatmapLayer(map) {
         map.getCanvas().style.cursor = '';
         popup.remove();
       });
-    }).catch((error) => 
-      console.error('Error fetching noise data:', error)
-    );
+
+      document.getElementById("loading-indicator").style.display = "none";
+
+    }).catch((error) => {
+      document.getElementById("loading-indicator").style.display = "none";
+      console.error('Error fetching noise data:', error);
+    });
   });
 }
 
