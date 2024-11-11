@@ -80,6 +80,30 @@
     border-radius: 5px;
   }
 
+  #user-sounds-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px; 
+  }
+
+  .sound-listen-panel {
+  display: flex;
+  flex-direction: column;
+  /* align-items: flex-start; */
+  margin: 1px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.sound-top-panel {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
 </style>
 <script defer src="{% static 'js/profile.js'%}"></script>
 
@@ -100,6 +124,16 @@
             <h4>{{ request.user.email }}</h4>
         </div>
         <h4 class="badge">Joined since {{ request.user.date_joined | date:"M d, Y" }}</h4>
+        <h4>Added Sounds</h4>
+        <!-- <script src="{% static 'js/profile.js'%}"></script> -->
+        <script type="text/javascript">
+          var USERNAME = "{{ request.user.username }}";
+          var USER_SOUND_DATA = JSON.parse('{{ user_sound_data|escapejs }}');
+          var SOUND_DESCRIPTORS = JSON.parse('{{ sound_descriptors|escapejs }}');
+      </script>
+        <div id="user-sounds-list">
+          <!-- Dynamically generated sound items will be inserted here -->
+        </div>
     </div>
   </div>
 </div>
