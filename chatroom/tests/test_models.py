@@ -28,7 +28,9 @@ class ChatroomModelTests(TestCase):
         self.assertEqual(self.chatroom.state, "Test State")
         self.assertEqual(self.chatroom.country, "Test Country")
         self.assertEqual(self.chatroom.zipcode, "12345")
-        self.assertEqual(self.chatroom.description, "This is a test chatroom description.")
+        self.assertEqual(
+            self.chatroom.description, "This is a test chatroom description."
+        )
         self.assertEqual(self.chatroom.latitude, 12.345678)
         self.assertEqual(self.chatroom.longitude, 98.765432)
 
@@ -57,4 +59,6 @@ class ChatMessageModelTests(TestCase):
         self.assertEqual(self.chat_message.chatroom, self.chatroom)
         self.assertEqual(self.chat_message.user, self.user)
         self.assertEqual(self.chat_message.message, "This is a test message")
-        self.assertIsNotNone(self.chat_message.timestamp)  # Check if timestamp is auto-generated
+        self.assertIsNotNone(
+            self.chat_message.timestamp
+        )  # Check if timestamp is auto-generated
