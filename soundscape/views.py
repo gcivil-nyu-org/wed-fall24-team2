@@ -49,7 +49,7 @@ def get_noise_data(request):
         headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
 
         BATCH_SIZE = 1000
-        TOTAL_ROWS = 2000
+        TOTAL_ROWS = 1000
         all_data = []
 
         # Get filter parameters from the request (if any)
