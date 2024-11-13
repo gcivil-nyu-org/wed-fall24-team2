@@ -3,6 +3,7 @@ from django.urls import reverse
 from chatroom.models import Chatroom
 from django.contrib.auth.models import User
 from soundscape.forms import SignupForm
+from unittest.mock import Mock, patch
 import json
 import os
 
@@ -40,15 +41,135 @@ class HomepageViewTest(TestCase):
 
         self.assertEqual(response.context["username"], "")
 
-        """
-        sound_data = json.loads(response.context["sound_data"])
-        self.assertIsInstance(sound_data, list)
-        self.assertEqual(len(sound_data), 2000)
-        """
-
     def tearDown(self):
         Chatroom.objects.all().delete()
 
+class GetNoiseDataTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('soundscape:get_noise_data')
+        self.sample_response_data = [
+            {
+                "complaint_type": "Noise",
+                "created_date": "2024-01-01",
+                "latitude": "40.7128",
+                "longitude": "-74.0060"
+            }
+        ]
+
+    @patch('soundscape.views.requests.get')
+    def test_successful_request(self, mock_get):
+        # Setup mock response
+        mock_response = Mock()
+        mock_response.json.return_value = self.sample_response_data
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
+        # Test data
+        post_data = {
+            'soundType': ['Noise'],
+            'dateFrom': '2024-01-01',
+            'dateTo': '2024-01-31'
+        }
+
+        # Make request
+        response = self.client.post(
+            self.url,
+            data=json.dumps(post_data),
+            content_type='application/json'
+        )
+
+        # Assertions
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.json()['sound_data'])
+        self.assertEqual(response_data, self.sample_response_data)
+
+    @patch('soundscape.views.requests.get')
+    def test_api_error_handling(self, mock_get):
+        # Setup mock to raise an exception
+        mock_get.side_effect = Exception('API Error')
+
+        # Test data
+        post_data = {
+            'soundType': ['Noise'],
+            'dateFrom': None,
+            'dateTo': None
+        }
+
+        # Make request
+        response = self.client.post(
+            self.url,
+            data=json.dumps(post_data),
+            content_type='application/json'
+        )
+
+        # Assertions
+        self.assertEqual(response.status_code, 500)
+        self.assertIn('Error fetching noise data', response.json()['error'])
+
+    def test_invalid_method(self):
+        # Test GET request (should fail)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.json()['error'], 'Invalid request method')
+
+    @patch('soundscape.views.requests.get')
+    def test_empty_sound_type(self, mock_get):
+        # Setup mock response
+        mock_response = Mock()
+        mock_response.json.return_value = self.sample_response_data
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
+        # Test data with empty soundType
+        post_data = {
+            'soundType': [],
+            'dateFrom': None,
+            'dateTo': None
+        }
+
+        # Make request
+        response = self.client.post(
+            self.url,
+            data=json.dumps(post_data),
+            content_type='application/json'
+        )
+
+        # Assertions
+        self.assertEqual(response.status_code, 200)
+        # Verify that default ['Noise'] was used
+        mock_get.assert_called_once()
+        call_args = mock_get.call_args[1]
+        self.assertIn("starts_with(complaint_type, 'Noise')", call_args['params']['$where'])
+
+    @patch('soundscape.views.requests.get')
+    def test_multiple_sound_types(self, mock_get):
+        # Setup mock response
+        mock_response = Mock()
+        mock_response.json.return_value = self.sample_response_data
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
+        # Test data with multiple sound types
+        post_data = {
+            'soundType': ['Noise', 'Music'],
+            'dateFrom': None,
+            'dateTo': None
+        }
+
+        # Make request
+        response = self.client.post(
+            self.url,
+            data=json.dumps(post_data),
+            content_type='application/json'
+        )
+
+        # Assertions
+        self.assertEqual(response.status_code, 200)
+        mock_get.assert_called_once()
+        call_args = mock_get.call_args[1]
+        self.assertIn("starts_with(complaint_type, 'Noise')", call_args['params']['$where'])
+        self.assertIn("starts_with(complaint_type, 'Music')", call_args['params']['$where'])
 
 class SignupViewTest(TestCase):
     def setUp(self):
