@@ -68,7 +68,7 @@ class ChatRoomConsumerTest(TransactionTestCase):
         communicator.scope["user"] = self.user
 
         # Connect to the WebSocket
-        connected, _ = await communicator.connect()
+        connected, _ = await communicator.connect(timeout=10)
         assert connected
 
         # Send an invalid JSON message

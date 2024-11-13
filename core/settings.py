@@ -24,7 +24,6 @@ env = environ.Env()
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-
 # MAPBOX_ACCESS_TOKEN
 MAPBOX_ACCESS_TOKEN = os.getenv("MAPBOX_ACCESS_TOKEN")
 
@@ -42,20 +41,15 @@ else:
     AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
     AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-m10c@k!u5b!y@=n%!9dxmc4#=q)q$)tdu$6$&w#1p_y107=2c_"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
 ALLOWED_HOSTS = ["*"]
 
-
+IS_TESTING = "test" in sys.argv or os.getenv("TRAVIS") == "true"
 # Application definition
 
 INSTALLED_APPS = [
@@ -110,35 +104,34 @@ ASGI_APPLICATION = "core.asgi.application"
 # Debug statements to check environment variables
 print("REDIS_URL from environment:", os.getenv("REDIS_URL"))
 print("REDIS_PORT from environment:", os.getenv("REDIS_PORT"))
-# Channel layer configuration to use Redis
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [
-                (
-                    # Hardcoding the value since the fetch doesnt happen
-                    os.getenv(
-                        "REDIS_URL",
-                        "soundscape-chatroom-redis.cugehm.ng.0001.use1.cache.amazonaws.com",
-                    ),
-                    int(os.getenv("REDIS_PORT", 6379)),
-                )
-            ],
-        },
-    },
-}
 
-# DATABASES = {
-#      'default': {
-#          'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#          'NAME':'postgres',
-#          'USER':'postgres',
-#          'PASSWORD':'postgres',
-#          'HOST':'database-1.c1aisqasc3u5.us-east-1.rds.amazonaws.com',
-#          'PORT':'5440'
-#      }
-# }
+# Channel layer configuration to use Redis in production, InMemory for tests
+if IS_TESTING:
+    # Use InMemoryChannelLayer for testing or CI
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        },
+    }
+else:
+    # Use RedisChannelLayer for production or local development
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [
+                    (
+                        os.getenv(
+                            "REDIS_URL",
+                            "soundscape-chatroom-redis.cugehm.ng.0001.use1.cache.amazonaws.com",
+                        ),
+                        int(os.getenv("REDIS_PORT", 6379)),
+                    )
+                ],
+            },
+        },
+    }
+
 
 if "RDS_DB_NAME" in os.environ:
     DATABASES = {
