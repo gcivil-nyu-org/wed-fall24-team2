@@ -156,10 +156,11 @@ elif "test" in sys.argv:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": os.path.join(
-                BASE_DIR, "db.sqlite3"
+                BASE_DIR, "test_db.sqlite3"
             ),  # This will create a test SQLite database file
         }
     }
+    print("DATABASES setting:", DATABASES)
 else:
     DATABASES = {
         "default": {
