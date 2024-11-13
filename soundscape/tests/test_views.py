@@ -44,20 +44,21 @@ class HomepageViewTest(TestCase):
     def tearDown(self):
         Chatroom.objects.all().delete()
 
+
 class GetNoiseDataTests(TestCase):
     def setUp(self):
         self.client = Client()
-        self.url = reverse('soundscape:get_noise_data')
+        self.url = reverse("soundscape:get_noise_data")
         self.sample_response_data = [
             {
                 "complaint_type": "Noise",
                 "created_date": "2024-01-01",
                 "latitude": "40.7128",
-                "longitude": "-74.0060"
+                "longitude": "-74.0060",
             }
         ]
 
-    @patch('soundscape.views.requests.get')
+    @patch("soundscape.views.requests.get")
     def test_successful_request(self, mock_get):
         # Setup mock response
         mock_response = Mock()
@@ -67,53 +68,45 @@ class GetNoiseDataTests(TestCase):
 
         # Test data
         post_data = {
-            'soundType': ['Noise'],
-            'dateFrom': '2024-01-01',
-            'dateTo': '2024-01-31'
+            "soundType": ["Noise"],
+            "dateFrom": "2024-01-01",
+            "dateTo": "2024-01-31",
         }
 
         # Make request
         response = self.client.post(
-            self.url,
-            data=json.dumps(post_data),
-            content_type='application/json'
+            self.url, data=json.dumps(post_data), content_type="application/json"
         )
 
         # Assertions
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.json()['sound_data'])
+        response_data = json.loads(response.json()["sound_data"])
         self.assertEqual(response_data, self.sample_response_data)
 
-    @patch('soundscape.views.requests.get')
+    @patch("soundscape.views.requests.get")
     def test_api_error_handling(self, mock_get):
         # Setup mock to raise an exception
-        mock_get.side_effect = Exception('API Error')
+        mock_get.side_effect = Exception("API Error")
 
         # Test data
-        post_data = {
-            'soundType': ['Noise'],
-            'dateFrom': None,
-            'dateTo': None
-        }
+        post_data = {"soundType": ["Noise"], "dateFrom": None, "dateTo": None}
 
         # Make request
         response = self.client.post(
-            self.url,
-            data=json.dumps(post_data),
-            content_type='application/json'
+            self.url, data=json.dumps(post_data), content_type="application/json"
         )
 
         # Assertions
         self.assertEqual(response.status_code, 500)
-        self.assertIn('Error fetching noise data', response.json()['error'])
+        self.assertIn("Error fetching noise data", response.json()["error"])
 
     def test_invalid_method(self):
         # Test GET request (should fail)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 405)
-        self.assertEqual(response.json()['error'], 'Invalid request method')
+        self.assertEqual(response.json()["error"], "Invalid request method")
 
-    @patch('soundscape.views.requests.get')
+    @patch("soundscape.views.requests.get")
     def test_empty_sound_type(self, mock_get):
         # Setup mock response
         mock_response = Mock()
@@ -122,17 +115,11 @@ class GetNoiseDataTests(TestCase):
         mock_get.return_value = mock_response
 
         # Test data with empty soundType
-        post_data = {
-            'soundType': [],
-            'dateFrom': None,
-            'dateTo': None
-        }
+        post_data = {"soundType": [], "dateFrom": None, "dateTo": None}
 
         # Make request
         response = self.client.post(
-            self.url,
-            data=json.dumps(post_data),
-            content_type='application/json'
+            self.url, data=json.dumps(post_data), content_type="application/json"
         )
 
         # Assertions
@@ -140,9 +127,11 @@ class GetNoiseDataTests(TestCase):
         # Verify that default ['Noise'] was used
         mock_get.assert_called_once()
         call_args = mock_get.call_args[1]
-        self.assertIn("starts_with(complaint_type, 'Noise')", call_args['params']['$where'])
+        self.assertIn(
+            "starts_with(complaint_type, 'Noise')", call_args["params"]["$where"]
+        )
 
-    @patch('soundscape.views.requests.get')
+    @patch("soundscape.views.requests.get")
     def test_multiple_sound_types(self, mock_get):
         # Setup mock response
         mock_response = Mock()
@@ -151,25 +140,24 @@ class GetNoiseDataTests(TestCase):
         mock_get.return_value = mock_response
 
         # Test data with multiple sound types
-        post_data = {
-            'soundType': ['Noise', 'Music'],
-            'dateFrom': None,
-            'dateTo': None
-        }
+        post_data = {"soundType": ["Noise", "Music"], "dateFrom": None, "dateTo": None}
 
         # Make request
         response = self.client.post(
-            self.url,
-            data=json.dumps(post_data),
-            content_type='application/json'
+            self.url, data=json.dumps(post_data), content_type="application/json"
         )
 
         # Assertions
         self.assertEqual(response.status_code, 200)
         mock_get.assert_called_once()
         call_args = mock_get.call_args[1]
-        self.assertIn("starts_with(complaint_type, 'Noise')", call_args['params']['$where'])
-        self.assertIn("starts_with(complaint_type, 'Music')", call_args['params']['$where'])
+        self.assertIn(
+            "starts_with(complaint_type, 'Noise')", call_args["params"]["$where"]
+        )
+        self.assertIn(
+            "starts_with(complaint_type, 'Music')", call_args["params"]["$where"]
+        )
+
 
 class SignupViewTest(TestCase):
     def setUp(self):
