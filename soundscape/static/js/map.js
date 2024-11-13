@@ -379,27 +379,35 @@ function addChatroomMarkers(map) {
 }
 
 function addHeatmapLayer(map) {
-  map.on('load', () => {
+  map.on('load', async () => {
     document.getElementById("loading-indicator").style.display = "block";
 
-    fetch('/get_noise_data/', {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': csrfToken,
-      },
-      body: JSON.stringify({
-        "soundType": Array.from(document.querySelectorAll("input[name='soundType']:checked")).map(
-          checkbox => checkbox.value
-        ),
-        "dateFrom": document.getElementById("dateFrom").value,
-        "dateTo": document.getElementById("dateTo").value
-      }),
-    }).then((response) => {
-        if (!response.ok) {
-          throw new Error(response.error);
-        }
-        return response.json();
-    }).then((data) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+
+    try {
+      const response = await fetch('/get_noise_data/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({
+          "soundType": Array.from(document.querySelectorAll("input[name='soundType']:checked")).map(
+            checkbox => checkbox.value
+          ),
+          "dateFrom": document.getElementById("dateFrom").value,
+          "dateTo": document.getElementById("dateTo").value
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
       var SOUND_DATA = JSON.parse(data.sound_data);
       var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
 
@@ -407,17 +415,16 @@ function addHeatmapLayer(map) {
         type: 'geojson',
         data: SOUND_GEOJSON_DATA,
       });
-  
+
       map.addLayer({
         id: 'heatmap',
         type: 'heatmap',
         source: 'heatmap-data',
         paint: {
-          // Set the heatmap weight based on the 'weight' property
           'heatmap-weight': [
-            'coalesce', // Use 'coalesce' to provide a default value
-            ['get', 'weight'], // Get the 'weight' property
-            0, // Default weight if 'weight' is not present
+            'coalesce',
+            ['get', 'weight'],
+            0,
           ],
           'heatmap-intensity': {
             stops: [
@@ -456,18 +463,17 @@ function addHeatmapLayer(map) {
         closeButton: false,
         closeOnClick: false
       });
-  
+
       map.on('mouseenter', 'heatmap', (e) => {
-        // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
-  
+
         const coordinates = e.features[0].geometry.coordinates;
         const complaint_type = e.features[0].properties.complaint_type.split(/[ - ]+/).pop();
         const descriptor = e.features[0].properties.descriptor;
         const status = e.features[0].properties.status;
         const created_date = e.features[0].properties.created_date;
         const closed_date = e.features[0].properties.closed_date;
-  
+
         popup.setLngLat(coordinates).setHTML(`
           <div class="sound-information">
             <span>Type: ${complaint_type}</span>
@@ -480,7 +486,6 @@ function addHeatmapLayer(map) {
                 new Date(closed_date)
               )}</span>` : ``
             }
-  
             ${status == "Open"?
               `<span class="open-badge">${status}</span>` :
               (status == "In Progress"?
@@ -489,7 +494,7 @@ function addHeatmapLayer(map) {
           </div>
         `).addTo(map);
       });
-  
+
       map.on('mouseleave', 'heatmap', () => {
         map.getCanvas().style.cursor = '';
         popup.remove();
@@ -497,56 +502,14 @@ function addHeatmapLayer(map) {
 
       document.getElementById("loading-indicator").style.display = "none";
 
-    }).catch((error) => {
+    } catch (error) {
+      clearTimeout(timeoutId);
       document.getElementById("loading-indicator").style.display = "none";
       console.error('Error fetching noise data:', error);
-    });
-
-    const popup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
-
-    map.on('mouseenter', 'heatmap', (e) => {
-      // Change the cursor style as a UI indicator.
-      map.getCanvas().style.cursor = 'pointer';
-
-      const coordinates = e.features[0].geometry.coordinates;
-      const complaint_type = e.features[0].properties.complaint_type.split(/[ - ]+/).pop();
-      const descriptor = e.features[0].properties.descriptor;
-      const status = e.features[0].properties.status;
-      const created_date = e.features[0].properties.created_date;
-      const closed_date = e.features[0].properties.closed_date;
-
-      popup.setLngLat(coordinates).setHTML(`
-        <div class="sound-information">
-          <span>Type: ${complaint_type}</span>
-          <span>Descriptor: ${descriptor}</span>
-          <span>Reported at: ${new Intl.DateTimeFormat('en-US').format(
-            new Date(created_date)
-          )}</span>
-          ${closed_date?
-            `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
-              new Date(closed_date)
-            )}</span>` : ``
-          }
-
-          ${status == "Open"?
-            `<span class="open-badge">${status}</span>` :
-            (status == "In Progress"?
-            `<span class="in-progress-badge">${status}</span>` :
-            `<span class="closed-badge">${status}</span>`)}
-        </div>
-      `).addTo(map);
-    });
-
-    map.on('mouseleave', 'heatmap', () => {
-      map.getCanvas().style.cursor = '';
-      popup.remove();
-    });
+      alert("Oops! Data is on its way, please reload the page.");
+    }
   });
 }
-
 /* MAP */
 function initializeMap(centerCoordinates, map, existingMarkers) {
   if (!map) {
