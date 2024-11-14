@@ -1,35 +1,17 @@
-// function toggleProfile() {
-//   const panel = document.getElementById('profilePanel');
-//   panel.classList.toggle('open');
-// }
+// document.addEventListener('DOMContentLoaded', () => {
+//   console.log(USER_SOUND_DATA);
+//   console.log(USERNAME);
 
-// document.addEventListener('click', function (event) {
-//   const panel = document.getElementById('profilePanel');
-//   const toggle = document.querySelector('.profile-toggle');
+//   if (typeof USER_SOUND_DATA === 'undefined') return;
 
-//   if (panel && toggle && !panel.contains(event.target) && !toggle.contains(event.target)) {
-//     panel.classList.remove('open');
-//   }
+//     fetchSoundUser(USERNAME);
+
 // });
 
-// window.toggleProfile = toggleProfile;
-
-document.addEventListener("DOMContentLoaded", () => {
-
-  // console.log(USER_SOUND_DATA);
-  // console.log(USERNAME);
-
-  if (typeof USER_SOUND_DATA === 'undefined') return;
-  
-  fetchSoundUser(USERNAME);
-
-});
-
-function fetchSoundUser(user_name) {
+function fetchSoundUser(user_name, map) {
   fetch(`/soundscape_user/soundfiles_for_user/${user_name}/`)
     .then((response) => response.json())
     .then((datauser) => {
-      // console.log("Why here")
       if (datauser.sounds && datauser.sounds.length > 0) {
         // Check if there are sounds
         const soundsListPromisesUser = datauser.sounds.map((sounduser) => {
@@ -41,7 +23,7 @@ function fetchSoundUser(user_name) {
               <div class="sound-date">${formattedDateUser}</div>
               <span class="loading"></span>
             </div>
-            
+
           `;
 
           // Create a promise to download the sound file
@@ -62,14 +44,14 @@ function fetchSoundUser(user_name) {
                 </audio>
               `;
 
-              const deleteBtn = isLoggedInUser(sounduser.user_name)? 
-              `<button class="delete-icon" id="delete-sound-${sounduser.sound_name}-user"></button>` : ``;
-
+              const deleteBtn = isLoggedInUser(sounduser.user_name)
+                ? `<button class="delete-icon" id="delete-sound-${sounduser.sound_name}-user"></button>`
+                : ``;
               // Replace the loading message with the audio element
               document.getElementById(
                 `${sounduser.sound_name}-user`
               ).innerHTML = `
-              <div class="sound-listen-panel">
+              <div class="sound-listen-panel" id="user-sound-item">
                 <div class="sound-top-panel">
                   <div class="sound-name-stuff">
                     <div>${sounduser.user_name} - ${sounduser.sound_descriptor}</div>
@@ -81,35 +63,58 @@ function fetchSoundUser(user_name) {
               </div>
               `;
 
-              
-              if (isLoggedInUser(sounduser.user_name)) {
-                document.getElementById("delete-sound-" + sounduser.sound_name + "-user").addEventListener('click', () => {
-                  if (window.confirm("Are you sure you want to delete this sound file?")) {
-                    fetch('/soundscape_user/delete/', {
-                      method: 'POST',
-                      headers: {
-                        'X-CSRFToken': csrfToken,
-                      },
-                      body: JSON.stringify(sounduser),
-                    })
-                    .then((response) => response.json())
-                    .then((data) => {
-                      
-                      if (data.error) {
-                        alert(data.error)
-                      } else {
-                        alert('You have deleted a sound file!');
-                      }
-                      
-                      fetchSoundUser(sounduser.user_name);
-                    })
-                    .catch((error) => {
-                      console.log('Error deleting sound file:', error);
-                    })
+              document
+                .getElementById('user-sound-item')
+                .addEventListener('click', () => {
+                  const userSoundData = USER_SOUND_DATA?.find((soundData) => {
+                    return (
+                      soundData['s3_file_name'] === sounduser['sound_name']
+                    );
+                  });
+
+                  if (userSoundData) {
+                    map.flyTo({
+                      center: [userSoundData.longitude, userSoundData.latitude],
+                      zoom: 18,
+                      speed: 1.2,
+                    });
                   }
                 });
-              }
 
+              if (isLoggedInUser(sounduser.user_name)) {
+                document
+                  .getElementById(
+                    'delete-sound-' + sounduser.sound_name + '-user'
+                  )
+                  .addEventListener('click', () => {
+                    if (
+                      window.confirm(
+                        'Are you sure you want to delete this sound file?'
+                      )
+                    ) {
+                      fetch('/soundscape_user/delete/', {
+                        method: 'POST',
+                        headers: {
+                          'X-CSRFToken': csrfToken,
+                        },
+                        body: JSON.stringify(sounduser),
+                      })
+                        .then((response) => response.json())
+                        .then((data) => {
+                          if (data.error) {
+                            alert(data.error);
+                          } else {
+                            alert('You have deleted a sound file!');
+                          }
+
+                          fetchSoundUser(sounduser.user_name);
+                        })
+                        .catch((error) => {
+                          console.log('Error deleting sound file:', error);
+                        });
+                    }
+                  });
+              }
             })
             .catch((error) => {
               console.error('Error fetching sound file:', error);
@@ -140,7 +145,12 @@ function formatDateTimeUser(dateString) {
   // console.log(dateString)
   const date = new Date(dateString);
 
-  const options = { weekday: 'short', year: 'numeric', month: 'numeric', day: 'numeric' };
+  const options = {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  };
   const formattedDate = date.toLocaleDateString('en-US', options);
 
   let hours = date.getHours();
@@ -149,7 +159,7 @@ function formatDateTimeUser(dateString) {
   hours = hours % 12;
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? '0' + minutes : minutes;
-  
+
   const formattedTime = `${hours}:${minutes} ${ampm}`;
 
   return `${formattedDate} ${formattedTime}`;
@@ -158,8 +168,7 @@ function formatDateTimeUser(dateString) {
 function toggleProfile() {
   const panel = document.getElementById('profilePanel');
   panel.classList.toggle('open');
-  console.log("Toggled profile panel for user:", USERNAME);
+  console.log('Toggled profile panel for user:', USERNAME);
 }
 
 window.toggleProfile = toggleProfile;
-

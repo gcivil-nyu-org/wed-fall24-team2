@@ -23,8 +23,9 @@ function createSoundMarker(lng, lat, map) {
           <label for="sound-descriptor" style="margin-bottom: 5px; display: block;">Sound Descriptor:</label>
           <select id="sound-descriptor" required style="width: 100%; padding: 5px; margin-bottom: 10px;">
             <option value="">Select a descriptor</option>
-            ${SOUND_DESCRIPTORS.map(descriptor => 
-              `<option value="${descriptor.descriptor}">${descriptor.descriptor}</option>`
+            ${SOUND_DESCRIPTORS.map(
+              (descriptor) =>
+                `<option value="${descriptor.descriptor}">${descriptor.descriptor}</option>`
             ).join('')}
           </select>
           <input type="hidden" id="latitude" value="${lat}"/>
@@ -35,7 +36,7 @@ function createSoundMarker(lng, lat, map) {
       </div>
     </div>
   `);
-  
+
   var marker = new mapboxgl.Marker(el)
     .setLngLat([lng, lat])
     .setPopup(popup)
@@ -44,22 +45,27 @@ function createSoundMarker(lng, lat, map) {
   popup.on('open', () => {
     fetchAndDisplaySounds(lat, lng);
 
-    document.getElementById('popup-upload-sound-btn').addEventListener('click', function () {
-      document.getElementById('popup-content').style.display = 'none';
-      document.getElementById('upload-sound-form').style.display = 'block';
-    });
+    document
+      .getElementById('popup-upload-sound-btn')
+      .addEventListener('click', function () {
+        document.getElementById('popup-content').style.display = 'none';
+        document.getElementById('upload-sound-form').style.display = 'block';
+      });
 
-    document.getElementById('close-upload-form-btn').addEventListener('click', function () {
-      document.getElementById('upload-sound-form').style.display = 'none';
-      document.getElementById('popup-content').style.display = 'block';
-    });
+    document
+      .getElementById('close-upload-form-btn')
+      .addEventListener('click', function () {
+        document.getElementById('upload-sound-form').style.display = 'none';
+        document.getElementById('popup-content').style.display = 'block';
+      });
 
     document
       .getElementById('sound-upload-form')
       .addEventListener('submit', function (event) {
         event.preventDefault();
         const soundFile = document.getElementById('sound-file').files[0];
-        if (soundFile.size > 3 *1024 * 1024) {  // 3 MB limit
+        if (soundFile.size > 3 * 1024 * 1024) {
+          // 3 MB limit
           alert('Please limit the sound file size to 3 MB');
           return;
         }
@@ -84,29 +90,29 @@ function createSoundMarker(lng, lat, map) {
           },
           body: formData,
         })
-        .then((response) => response.json())
-        .then((data) => {
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              alert('Sound uploaded successfully!');
+              document.getElementById('upload-sound-form').style.display =
+                'none';
+              document.getElementById('popup-content').style.display = 'block';
 
-          if (data.error) {
-            alert(data.error);
-          } else {
-            alert('Sound uploaded successfully!');
-            document.getElementById('upload-sound-form').style.display = 'none';
-            document.getElementById('popup-content').style.display = 'block';
+              document.getElementById('sound-upload-form').reset();
 
-            document.getElementById('sound-upload-form').reset();
+              fetchAndDisplaySounds(lat, lng);
 
-            fetchAndDisplaySounds(lat, lng);
-
-            // Pop the marker from the list
-            // without removing the marker from the map
-            removeTempMarker(false);
-          }
-        })
-        .catch((error) => {
-          alert('Error uploading sound');
-          console.error('Error:', error);
-        });
+              // Pop the marker from the list
+              // without removing the marker from the map
+              removeTempMarker(false);
+            }
+          })
+          .catch((error) => {
+            alert('Error uploading sound');
+            console.error('Error:', error);
+          });
       });
   });
 
@@ -124,7 +130,6 @@ function fetchAndDisplaySounds(lat, lng) {
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
     .then((response) => response.json())
     .then((data) => {
-
       if (data.sounds && data.sounds.length > 0) {
         // Check if there are sounds
         const soundsListPromises = data.sounds.map((sound) => {
@@ -156,13 +161,12 @@ function fetchAndDisplaySounds(lat, lng) {
                 </audio>
               `;
 
-              const deleteBtn = isLoggedInUser(sound.user_name)? 
-              `<button class="delete-icon" id="delete-sound-${sound.sound_name}"></button>` : ``;
+              const deleteBtn = isLoggedInUser(sound.user_name)
+                ? `<button class="delete-icon" id="delete-sound-${sound.sound_name}"></button>`
+                : ``;
 
               // Replace the loading message with the audio element
-              document.getElementById(
-                sound.sound_name
-              ).innerHTML = `
+              document.getElementById(sound.sound_name).innerHTML = `
               <div class="sound-listen">
   <div class="sound-top">
     <div class="sound-name-stuff">
@@ -175,35 +179,38 @@ function fetchAndDisplaySounds(lat, lng) {
 </div>
 `;
 
-              
               if (isLoggedInUser(sound.user_name)) {
-                document.getElementById("delete-sound-" + sound.sound_name).addEventListener('click', () => {
-                  if (window.confirm("Are you sure you want to delete this sound file?")) {
-                    fetch('/soundscape_user/delete/', {
-                      method: 'POST',
-                      headers: {
-                        'X-CSRFToken': csrfToken,
-                      },
-                      body: JSON.stringify(sound),
-                    })
-                    .then((response) => response.json())
-                    .then((data) => {
-                      
-                      if (data.error) {
-                        alert(data.error)
-                      } else {
-                        alert('You have deleted a sound file!');
-                      }
-                      
-                      fetchAndDisplaySounds(lat, lng);
-                    })
-                    .catch((error) => {
-                      console.log('Error deleting sound file:', error);
-                    })
-                  }
-                });
-              }
+                document
+                  .getElementById('delete-sound-' + sound.sound_name)
+                  .addEventListener('click', () => {
+                    if (
+                      window.confirm(
+                        'Are you sure you want to delete this sound file?'
+                      )
+                    ) {
+                      fetch('/soundscape_user/delete/', {
+                        method: 'POST',
+                        headers: {
+                          'X-CSRFToken': csrfToken,
+                        },
+                        body: JSON.stringify(sound),
+                      })
+                        .then((response) => response.json())
+                        .then((data) => {
+                          if (data.error) {
+                            alert(data.error);
+                          } else {
+                            alert('You have deleted a sound file!');
+                          }
 
+                          fetchAndDisplaySounds(lat, lng);
+                        })
+                        .catch((error) => {
+                          console.log('Error deleting sound file:', error);
+                        });
+                    }
+                  });
+              }
             })
             .catch((error) => {
               console.error('Error fetching sound file:', error);
@@ -247,10 +254,15 @@ function playSound(url) {
 }
 
 function formatDateTime(dateString) {
-  console.log(dateString)
+  console.log(dateString);
   const date = new Date(dateString);
 
-  const options = { weekday: 'short', year: 'numeric', month: 'numeric', day: 'numeric' };
+  const options = {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  };
   const formattedDate = date.toLocaleDateString('en-US', options);
 
   let hours = date.getHours();
@@ -259,7 +271,7 @@ function formatDateTime(dateString) {
   hours = hours % 12;
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? '0' + minutes : minutes;
-  
+
   const formattedTime = `${hours}:${minutes} ${ampm}`;
 
   return `${formattedDate} ${formattedTime}`;
@@ -279,7 +291,7 @@ function addMarker(lng, lat, map) {
   if (currentZoom < MIN_ZOOM_LEVEL || distanceFromUser > 1000) {
     return;
   }
-  
+
   var marker = createSoundMarker(lng, lat, map);
   tempMarker.push(marker);
 }
@@ -301,14 +313,14 @@ function saveMarker(lng, lat, existingMarkers) {
 
 function removeTempMarker(removeFromMap) {
   if (tempMarker != null) {
-    while(tempMarker.length > 0) {
+    while (tempMarker.length > 0) {
       const marker = tempMarker.pop();
-      if(removeFromMap) {
+      if (removeFromMap) {
         // Remove the marker from the map
         marker.remove();
       }
     }
-  } 
+  }
 }
 
 function addControls(map) {
@@ -347,7 +359,7 @@ function isLoggedIn() {
 }
 
 function isLoggedInUser(provided_username) {
-  return username == provided_username
+  return username == provided_username;
 }
 
 function addChatroomMarkers(map) {
@@ -357,7 +369,11 @@ function addChatroomMarkers(map) {
 
     const popup = new mapboxgl.Popup({
       offset: 25,
-    }).setHTML(isLoggedIn() ? getChatroomComponent(neighborhood): getChatroomPublicComponent(neighborhood));
+    }).setHTML(
+      isLoggedIn()
+        ? getChatroomComponent(neighborhood)
+        : getChatroomPublicComponent(neighborhood)
+    );
 
     saveMarker(neighborhood.longitude, neighborhood.latitude, existingMarkers);
 
@@ -380,7 +396,7 @@ function addChatroomMarkers(map) {
 
 function addHeatmapLayer(map) {
   map.on('load', async () => {
-    document.getElementById("loading-indicator").style.display = "block";
+    document.getElementById('loading-indicator').style.display = 'block';
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
@@ -392,13 +408,13 @@ function addHeatmapLayer(map) {
           'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify({
-          "soundType": Array.from(document.querySelectorAll("input[name='soundType']:checked")).map(
-            checkbox => checkbox.value
-          ),
-          "dateFrom": document.getElementById("dateFrom").value,
-          "dateTo": document.getElementById("dateTo").value
+          soundType: Array.from(
+            document.querySelectorAll("input[name='soundType']:checked")
+          ).map((checkbox) => checkbox.value),
+          dateFrom: document.getElementById('dateFrom').value,
+          dateTo: document.getElementById('dateTo').value,
         }),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -421,11 +437,7 @@ function addHeatmapLayer(map) {
         type: 'heatmap',
         source: 'heatmap-data',
         paint: {
-          'heatmap-weight': [
-            'coalesce',
-            ['get', 'weight'],
-            0,
-          ],
+          'heatmap-weight': ['coalesce', ['get', 'weight'], 0],
           'heatmap-intensity': {
             stops: [
               [0, 0],
@@ -461,38 +473,49 @@ function addHeatmapLayer(map) {
 
       const popup = new mapboxgl.Popup({
         closeButton: false,
-        closeOnClick: false
+        closeOnClick: false,
       });
 
       map.on('mouseenter', 'heatmap', (e) => {
         map.getCanvas().style.cursor = 'pointer';
 
         const coordinates = e.features[0].geometry.coordinates;
-        const complaint_type = e.features[0].properties.complaint_type.split(/[ - ]+/).pop();
+        const complaint_type = e.features[0].properties.complaint_type
+          .split(/[ - ]+/)
+          .pop();
         const descriptor = e.features[0].properties.descriptor;
         const status = e.features[0].properties.status;
         const created_date = e.features[0].properties.created_date;
         const closed_date = e.features[0].properties.closed_date;
 
-        popup.setLngLat(coordinates).setHTML(`
+        popup
+          .setLngLat(coordinates)
+          .setHTML(
+            `
           <div class="sound-information">
             <span>Type: ${complaint_type}</span>
             <span>Descriptor: ${descriptor}</span>
             <span>Reported at: ${new Intl.DateTimeFormat('en-US').format(
               new Date(created_date)
             )}</span>
-            ${closed_date?
-              `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
-                new Date(closed_date)
-              )}</span>` : ``
+            ${
+              closed_date
+                ? `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
+                    new Date(closed_date)
+                  )}</span>`
+                : ``
             }
-            ${status == "Open"?
-              `<span class="open-badge">${status}</span>` :
-              (status == "In Progress"?
-              `<span class="in-progress-badge">${status}</span>` :
-              `<span class="closed-badge">${status}</span>`)}
+            ${
+              status == 'Open'
+                ? `<span class="open-badge">${status}</span>`
+                : status == 'In Progress'
+                ? `<span class="in-progress-badge">${status}</span>`
+                : `<span class="closed-badge">${status}</span>`
+            }
           </div>
-        `).addTo(map);
+        `
+          )
+          .addTo(map);
       });
 
       map.on('mouseleave', 'heatmap', () => {
@@ -500,13 +523,12 @@ function addHeatmapLayer(map) {
         popup.remove();
       });
 
-      document.getElementById("loading-indicator").style.display = "none";
-
+      document.getElementById('loading-indicator').style.display = 'none';
     } catch (error) {
       clearTimeout(timeoutId);
-      document.getElementById("loading-indicator").style.display = "none";
+      document.getElementById('loading-indicator').style.display = 'none';
       console.error('Error fetching noise data:', error);
-      alert("Oops! Data is on its way, please reload the page.");
+      alert('Oops! Data is on its way, please reload the page.');
     }
   });
 }
@@ -543,6 +565,7 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
   }
 
   addControls(map);
+  fetchSoundUser(USERNAME, map);
 }
 
 function successLocation(position, map, existingMarkers) {
