@@ -1,13 +1,3 @@
-// document.addEventListener('DOMContentLoaded', () => {
-//   console.log(USER_SOUND_DATA);
-//   console.log(USERNAME);
-
-//   if (typeof USER_SOUND_DATA === 'undefined') return;
-
-//     fetchSoundUser(USERNAME);
-
-// });
-
 function fetchSoundUser(user_name, map) {
   fetch(`/soundscape_user/soundfiles_for_user/${user_name}/`)
     .then((response) => response.json())
