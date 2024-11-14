@@ -1,7 +1,3 @@
-document.addEventListener("DOMContentLoaded", () => {
-  if (typeof USER_SOUND_DATA === 'undefined') return;
-  fetchSoundUser(USERNAME);
-});
 
 function formatDateTimeUser(dateString) {
   const date = new Date(dateString);
