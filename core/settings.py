@@ -199,6 +199,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+SECURE_BROWSER_XSS_FILTER = True
 
 # Tables
 # https://django-tables2.readthedocs.io/en/latest/index.html
