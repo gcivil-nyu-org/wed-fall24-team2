@@ -25,13 +25,16 @@ function initializeChat(neighborhood) {
     }`;
 
     const formattedTimestamp = formatTimestamp(data.timestamp);
+    // Sanitize the username and message content
+    const sanitizedUsername = DOMPurify.sanitize(data.username);
+    const sanitizedMessage = DOMPurify.sanitize(data.message);
 
     messageDiv.innerHTML = `
         <div class="message-header">
-            <span class="username">${data.username}</span>
+            <span class="username">${sanitizedUsername}</span>
             <span class="timestamp">${formattedTimestamp}</span>
         </div>
-        <div class="message-text">${data.message}</div>
+        <div class="message-text">${sanitizedMessage}</div>
     `;
 
     return messageDiv;
@@ -53,7 +56,8 @@ function initializeChat(neighborhood) {
   // Function to send message
   function sendMessage() {
     const messageInput = document.getElementById('messageInput');
-    const message = messageInput.value;
+    let message = messageInput.value;
+    message = DOMPurify.sanitize(message);
     if (message.trim() !== '') {
       const timestamp = new Date().toISOString();
       chatSocket.send(

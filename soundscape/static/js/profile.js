@@ -1,29 +1,33 @@
-// function toggleProfile() {
-//   const panel = document.getElementById('profilePanel');
-//   panel.classList.toggle('open');
-// }
-
-// document.addEventListener('click', function (event) {
-//   const panel = document.getElementById('profilePanel');
-//   const toggle = document.querySelector('.profile-toggle');
-
-//   if (panel && toggle && !panel.contains(event.target) && !toggle.contains(event.target)) {
-//     panel.classList.remove('open');
-//   }
-// });
-
-// window.toggleProfile = toggleProfile;
-
 document.addEventListener("DOMContentLoaded", () => {
-
-  // console.log(USER_SOUND_DATA);
-  // console.log(USERNAME);
-
   if (typeof USER_SOUND_DATA === 'undefined') return;
-  
   fetchSoundUser(USERNAME);
-
 });
+
+function formatDateTimeUser(dateString) {
+  const date = new Date(dateString);
+  const options = { weekday: 'short', year: 'numeric', month: 'numeric', day: 'numeric' };
+  const formattedDate = date.toLocaleDateString('en-US', options);
+
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+
+  return `${formattedDate} ${hours}:${minutes} ${ampm}`;
+}
+
+// Ensure `toggleProfile` is defined and accessible
+function toggleProfile() {
+  const panel = document.getElementById('profilePanel');
+  panel.classList.toggle('open');
+  console.log("Toggled profile panel for user:", USERNAME);
+}
+
+window.toggleProfile = toggleProfile;
+
+let currentAudio = null; // Global variable to track the currently playing audio
 
 function fetchSoundUser(user_name) {
   fetch(`/soundscape_user/soundfiles_for_user/${user_name}/`)
@@ -53,113 +57,92 @@ function fetchSoundUser(user_name) {
               return response.blob(); // Convert to Blob
             })
             .then((blob) => {
-              const audioUrl = URL.createObjectURL(blob); // Create a Blob URL
-              // Update the list item to include the audio element
-              const audioElement = `
-                <audio controls style="width: 100%;">
-                  <source src="${audioUrl}" type="audio/mpeg">
-                  Your browser does not support the audio element.
-                </audio>
-              `;
+              const audioUrl = URL.createObjectURL(blob);
 
-              const deleteBtn = isLoggedInUser(sounduser.user_name)? 
-              `<button class="delete-icon" id="delete-sound-${sounduser.sound_name}-user"></button>` : ``;
+              // Create an audio element with controls
+              const audioElement = document.createElement('audio');
+              audioElement.controls = true;
+              audioElement.style.width = '100%';
 
-              // Replace the loading message with the audio element
-              document.getElementById(
-                `${sounduser.sound_name}-user`
-              ).innerHTML = `
-              <div class="sound-listen-panel">
-                <div class="sound-top-panel">
-                  <div class="sound-name-stuff">
-                    <div>${sounduser.user_name} - ${sounduser.sound_descriptor}</div>
-                    <div class="sound-date">${formattedDateUser}</div>
+              const sourceElement = document.createElement('source');
+              sourceElement.src = audioUrl;
+              sourceElement.type = 'audio/mpeg';
+              audioElement.appendChild(sourceElement);
+
+              // Manage single audio playback
+              audioElement.addEventListener('play', () => {
+                if (currentAudio && currentAudio !== audioElement) {
+                  currentAudio.pause(); // Pause any currently playing audio
+                }
+                currentAudio = audioElement; // Set the current audio to this one
+              });
+
+              const deleteBtn = isLoggedInUser(sounduser.user_name)
+                ? `<button class="delete-icon" id="delete-sound-${sounduser.sound_name}-user"></button>`
+                : '';
+
+              document.getElementById(`${sounduser.sound_name}-user`).innerHTML = `
+                <div class="sound-listen-panel">
+                  <div class="sound-top-panel">
+                    <div class="sound-name-stuff">
+                      <div>${sounduser.user_name} - ${sounduser.sound_descriptor}</div>
+                      <div class="sound-date">${formattedDateUser}</div>
+                    </div>
+                    ${deleteBtn}
                   </div>
-                  ${deleteBtn}
                 </div>
-                ${audioElement}
-              </div>
               `;
 
-              
-              if (isLoggedInUser(sounduser.user_name)) {
-                document.getElementById("delete-sound-" + sounduser.sound_name + "-user").addEventListener('click', () => {
-                  if (window.confirm("Are you sure you want to delete this sound file?")) {
-                    fetch('/soundscape_user/delete/', {
-                      method: 'POST',
-                      headers: {
-                        'X-CSRFToken': csrfToken,
-                      },
-                      body: JSON.stringify(sounduser),
-                    })
-                    .then((response) => response.json())
-                    .then((data) => {
-                      
-                      if (data.error) {
-                        alert(data.error)
-                      } else {
-                        alert('You have deleted a sound file!');
-                      }
-                      
-                      fetchSoundUser(sounduser.user_name);
-                    })
-                    .catch((error) => {
-                      console.log('Error deleting sound file:', error);
-                    })
-                  }
-                });
-              }
+              // Append the audio element to the DOM
+              document.getElementById(`${sounduser.sound_name}-user`).appendChild(audioElement);
 
+              if (isLoggedInUser(sounduser.user_name)) {
+                document
+                  .getElementById(`delete-sound-${sounduser.sound_name}-user`)
+                  .addEventListener('click', () => {
+                    if (window.confirm("Are you sure you want to delete this sound file?")) {
+                      fetch('/soundscape_user/delete/', {
+                        method: 'POST',
+                        headers: {
+                          'X-CSRFToken': csrfToken,
+                        },
+                        body: JSON.stringify(sounduser),
+                      })
+                        .then((response) => response.json())
+                        .then((data) => {
+                          if (data.error) {
+                            alert(data.error);
+                          } else {
+                            alert('You have deleted a sound file!');
+                          }
+                          fetchSoundUser(sounduser.user_name);
+                        })
+                        .catch((error) => {
+                          console.log('Error deleting sound file:', error);
+                        });
+                    }
+                  });
+              }
             })
             .catch((error) => {
               console.error('Error fetching sound file:', error);
-              // Handle error gracefully by showing a message
-              document.getElementById(
-                sounduser.sound_name
-              ).innerHTML = `${sounduser.user_name} - ${sounduser.sound_descriptor} (Error loading sound)`;
+              document.getElementById(`${sounduser.sound_name}-user`).innerHTML = `
+                ${sounduser.user_name} - ${sounduser.sound_descriptor} (Error loading sound)
+              `;
             });
 
-          return Promise.resolve(listItemUser); // Resolve the initial loading item
+          return Promise.resolve(listItemUser);
         });
 
-        // Wait for all sounds to be processed and display them
         Promise.all(soundsListPromisesUser).then((soundsListUser) => {
-          // Set the innerHTML for the list
-          document.getElementById('user-sounds-list').innerHTML =
-            soundsListUser.join('');
+          document.getElementById('user-sounds-list').innerHTML = soundsListUser.join('');
         });
       } else {
-        document.getElementById('user-sounds-list').innerHTML =
-          '<p>No sounds yet.</p>';
+        document.getElementById('user-sounds-list').innerHTML = '<p>No sounds yet.</p>';
       }
     })
     .catch((error) => console.error('Error loading sounds:', error));
 }
 
-function formatDateTimeUser(dateString) {
-  // console.log(dateString)
-  const date = new Date(dateString);
 
-  const options = { weekday: 'short', year: 'numeric', month: 'numeric', day: 'numeric' };
-  const formattedDate = date.toLocaleDateString('en-US', options);
-
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  minutes = minutes < 10 ? '0' + minutes : minutes;
-  
-  const formattedTime = `${hours}:${minutes} ${ampm}`;
-
-  return `${formattedDate} ${formattedTime}`;
-}
-
-function toggleProfile() {
-  const panel = document.getElementById('profilePanel');
-  panel.classList.toggle('open');
-  console.log("Toggled profile panel for user:", USERNAME);
-}
-
-window.toggleProfile = toggleProfile;
 
