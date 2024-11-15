@@ -120,6 +120,8 @@ function addUserSound(map) {
   });
 }
 
+let currAudio = null; // Global variable to track the currently playing audio
+
 function fetchAndDisplaySounds(lat, lng) {
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
     .then((response) => response.json())
@@ -147,37 +149,47 @@ function fetchAndDisplaySounds(lat, lng) {
               return response.blob(); // Convert to Blob
             })
             .then((blob) => {
-              const audioUrl = URL.createObjectURL(blob); // Create a Blob URL
-              // Update the list item to include the audio element
-              const audioElement = `
-                <audio controls style="width: 100%;">
-                  <source src="${audioUrl}" type="audio/mpeg">
-                  Your browser does not support the audio element.
-                </audio>
+              const audioUrl = URL.createObjectURL(blob);
+
+              // Create the audio element
+              const audioElement = document.createElement('audio');
+              audioElement.controls = true;
+              audioElement.style.width = '100%';
+
+              const sourceElement = document.createElement('source');
+              sourceElement.src = audioUrl;
+              sourceElement.type = 'audio/mpeg';
+              audioElement.appendChild(sourceElement);
+
+              // Manage single audio playback
+              audioElement.addEventListener('play', () => {
+                if (currAudio && currAudio !== audioElement) {
+                  currAudio.pause(); // Pause any currently playing audio
+                }
+                currAudio = audioElement; // Set the current audio to this one
+              });
+
+              const deleteBtn = isLoggedInUser(sound.user_name)
+                ? `<button class="delete-icon" id="delete-sound-${sound.sound_name}"></button>`
+                : '';
+
+              document.getElementById(sound.sound_name).innerHTML = `
+                <div class="sound-listen">
+                  <div class="sound-top">
+                    <div class="sound-name-stuff">
+                      <div>${sound.user_name} - ${sound.sound_descriptor}</div>
+                      <div class="sound-date">${formattedDate}</div>
+                    </div>
+                    ${deleteBtn}
+                  </div>
+                </div>
               `;
 
-              const deleteBtn = isLoggedInUser(sound.user_name)? 
-              `<button class="delete-icon" id="delete-sound-${sound.sound_name}"></button>` : ``;
+              // Append the audio element to the DOM
+              document.getElementById(sound.sound_name).appendChild(audioElement);
 
-              // Replace the loading message with the audio element
-              document.getElementById(
-                sound.sound_name
-              ).innerHTML = `
-              <div class="sound-listen">
-  <div class="sound-top">
-    <div class="sound-name-stuff">
-      <div>${sound.user_name} - ${sound.sound_descriptor}</div>
-      <div class="sound-date">${formattedDate}</div>
-    </div>
-    ${deleteBtn}
-  </div>
-  ${audioElement}
-</div>
-`;
-
-              
               if (isLoggedInUser(sound.user_name)) {
-                document.getElementById("delete-sound-" + sound.sound_name).addEventListener('click', () => {
+                document.getElementById(`delete-sound-${sound.sound_name}`).addEventListener('click', () => {
                   if (window.confirm("Are you sure you want to delete this sound file?")) {
                     fetch('/soundscape_user/delete/', {
                       method: 'POST',
@@ -186,31 +198,27 @@ function fetchAndDisplaySounds(lat, lng) {
                       },
                       body: JSON.stringify(sound),
                     })
-                    .then((response) => response.json())
-                    .then((data) => {
-                      
-                      if (data.error) {
-                        alert(data.error)
-                      } else {
-                        alert('You have deleted a sound file!');
-                      }
-                      
-                      fetchAndDisplaySounds(lat, lng);
-                    })
-                    .catch((error) => {
-                      console.log('Error deleting sound file:', error);
-                    })
+                      .then((response) => response.json())
+                      .then((data) => {
+                        if (data.error) {
+                          alert(data.error);
+                        } else {
+                          alert('You have deleted a sound file!');
+                        }
+                        fetchAndDisplaySounds(lat, lng);
+                      })
+                      .catch((error) => {
+                        console.log('Error deleting sound file:', error);
+                      });
                   }
                 });
               }
-
             })
             .catch((error) => {
               console.error('Error fetching sound file:', error);
-              // Handle error gracefully by showing a message
-              document.getElementById(
-                sound.sound_name
-              ).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} (Error loading sound)`;
+              document.getElementById(sound.sound_name).innerHTML = `
+                ${sound.user_name} - ${sound.sound_descriptor} (Error loading sound)
+              `;
             });
 
           return Promise.resolve(listItem); // Resolve the initial loading item
