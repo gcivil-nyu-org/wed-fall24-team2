@@ -174,7 +174,7 @@ function fetchAndDisplaySounds(lat, lng) {
                 : '';
 
               document.getElementById(sound.sound_name).innerHTML = `
-                <div class="sound-listen">
+                <div class="sound-listen" >
                   <div class="sound-top">
                     <div class="sound-name-stuff">
                       <div>${sound.user_name} - ${sound.sound_descriptor}</div>
