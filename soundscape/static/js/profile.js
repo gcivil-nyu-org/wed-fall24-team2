@@ -1,7 +1,11 @@
-
 function formatDateTimeUser(dateString) {
   const date = new Date(dateString);
-  const options = { weekday: 'short', year: 'numeric', month: 'numeric', day: 'numeric' };
+  const options = {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  };
   const formattedDate = date.toLocaleDateString('en-US', options);
 
   let hours = date.getHours();
@@ -18,13 +22,11 @@ function formatDateTimeUser(dateString) {
 function toggleProfile() {
   const panel = document.getElementById('profilePanel');
   panel.classList.toggle('open');
-  console.log("Toggled profile panel for user:", USERNAME);
 }
 
 window.toggleProfile = toggleProfile;
 
 let currentAudio = null; // Global variable to track the currently playing audio
-
 
 function fetchSoundUser(user_name, map) {
   fetch(`/soundscape_user/soundfiles_for_user/${user_name}/`)
@@ -77,8 +79,10 @@ function fetchSoundUser(user_name, map) {
                 ? `<button class="delete-icon" id="delete-sound-${sounduser.sound_name}-user"></button>`
                 : '';
 
-              document.getElementById(`${sounduser.sound_name}-user`).innerHTML = `
-                <div class="sound-listen-panel">
+              document.getElementById(
+                `${sounduser.sound_name}-user`
+              ).innerHTML = `
+                <div class="sound-listen-panel" id=${sounduser.sound_name}-user-sound-item>
                   <div class="sound-top-panel">
                     <div class="sound-name-stuff">
                       <div>${sounduser.user_name} - ${sounduser.sound_descriptor}</div>
@@ -90,9 +94,11 @@ function fetchSoundUser(user_name, map) {
               `;
 
               // Append the audio element to the DOM
-              document.getElementById(`${sounduser.sound_name}-user`).appendChild(audioElement);
-                      document
-                .getElementById('user-sound-item')
+              document
+                .getElementById(`${sounduser.sound_name}-user-sound-item`)
+                .appendChild(audioElement);
+              document
+                .getElementById(`${sounduser.sound_name}-user-sound-item`)
                 .addEventListener('click', () => {
                   const userSoundData = USER_SOUND_DATA?.find((soundData) => {
                     return (
@@ -145,7 +151,9 @@ function fetchSoundUser(user_name, map) {
             })
             .catch((error) => {
               console.error('Error fetching sound file:', error);
-              document.getElementById(`${sounduser.sound_name}-user`).innerHTML = `
+              document.getElementById(
+                `${sounduser.sound_name}-user`
+              ).innerHTML = `
                 ${sounduser.user_name} - ${sounduser.sound_descriptor} (Error loading sound)
               `;
             });
@@ -154,13 +162,13 @@ function fetchSoundUser(user_name, map) {
         });
 
         Promise.all(soundsListPromisesUser).then((soundsListUser) => {
-          document.getElementById('user-sounds-list').innerHTML = soundsListUser.join('');
+          document.getElementById('user-sounds-list').innerHTML =
+            soundsListUser.join('');
         });
       } else {
-        document.getElementById('user-sounds-list').innerHTML = '<p>No sounds yet.</p>';
+        document.getElementById('user-sounds-list').innerHTML =
+          '<p>No sounds yet.</p>';
       }
     })
     .catch((error) => console.error('Error loading sounds:', error));
 }
-
-

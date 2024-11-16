@@ -103,7 +103,7 @@ function createSoundMarker(lng, lat, map) {
           if (data.error) {
             alert(data.error);
           } else {
-            fetchSoundUser(USERNAME)
+            fetchSoundUser(USERNAME, map)
             alert('Sound uploaded successfully!');
             document.getElementById('upload-sound-form').style.display = 'none';
             document.getElementById('popup-content').style.display = 'block';
@@ -185,10 +185,10 @@ function fetchAndDisplaySounds(lat, lng) {
                 : '';
 
               document.getElementById(sound.sound_name).innerHTML = `
-                <div class="sound-listen" id="${sound.sound_name}">
+                <div class="sound-listen" id="${sound.sound_name}-sound-listen">
                   <div class="sound-top">
                     <div class="sound-name-stuff">
-                      <div>${sound.user_name} - ${sound.sound_descriptor}</div>
+                      <div class="sound-name-descriptor">${sound.user_name} - ${sound.sound_descriptor}</div>
                       <div class="sound-date">${formattedDate}</div>
                     </div>
                     ${deleteBtn}
@@ -197,7 +197,9 @@ function fetchAndDisplaySounds(lat, lng) {
               `;
 
               // Append the audio element to the DOM
-              document.getElementById(sound.sound_name).appendChild(audioElement);
+              document
+                .getElementById(`${sound.sound_name}-sound-listen`)
+                .appendChild(audioElement);
 
               if (isLoggedInUser(sound.user_name)) {
                 document.getElementById(`delete-sound-${sound.sound_name}`).addEventListener('click', () => {
@@ -214,7 +216,7 @@ function fetchAndDisplaySounds(lat, lng) {
                         if (data.error) {
                           alert(data.error);
                         } else {
-                          fetchSoundUser(USERNAME)
+                          fetchSoundUser(USERNAME, map)
                           alert('You have deleted a sound file!');
                         }
                         fetchAndDisplaySounds(lat, lng);
