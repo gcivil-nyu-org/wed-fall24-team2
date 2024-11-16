@@ -204,6 +204,7 @@ function fetchAndDisplaySounds(lat, lng) {
                         if (data.error) {
                           alert(data.error);
                         } else {
+                          fetchSoundUser(USERNAME)
                           alert('You have deleted a sound file!');
                         }
                         fetchAndDisplaySounds(lat, lng);
