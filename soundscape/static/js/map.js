@@ -90,6 +90,7 @@ function createSoundMarker(lng, lat, map) {
           if (data.error) {
             alert(data.error);
           } else {
+            fetchSoundUser(USERNAME)
             alert('Sound uploaded successfully!');
             document.getElementById('upload-sound-form').style.display = 'none';
             document.getElementById('popup-content').style.display = 'block';
@@ -174,7 +175,7 @@ function fetchAndDisplaySounds(lat, lng) {
                 : '';
 
               document.getElementById(sound.sound_name).innerHTML = `
-                <div class="sound-listen">
+                <div class="sound-listen" id="${sound.sound_name}">
                   <div class="sound-top">
                     <div class="sound-name-stuff">
                       <div>${sound.user_name} - ${sound.sound_descriptor}</div>
@@ -203,6 +204,7 @@ function fetchAndDisplaySounds(lat, lng) {
                         if (data.error) {
                           alert(data.error);
                         } else {
+                          fetchSoundUser(USERNAME)
                           alert('You have deleted a sound file!');
                         }
                         fetchAndDisplaySounds(lat, lng);
