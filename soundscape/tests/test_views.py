@@ -159,6 +159,39 @@ class GetNoiseDataTests(TestCase):
         )
 
 
+class ProfanityCheckTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_check_profanity_post_clean(self):
+        response = self.client.post(
+            reverse("soundscape:check_profanity"),
+            data="Hello world",
+            content_type="text/plain",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content)["value"], "0")
+
+    def test_check_profanity_post_profane(self):
+        response = self.client.post(
+            reverse("soundscape:check_profanity"),
+            data="pardon my french fuck no",
+            content_type="text/plain",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content)["value"], "1")
+
+    def test_check_profanity_get(self):
+        response = self.client.get(reverse("soundscape:check_profanity"))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(
+            json.loads(response.content)["error"], "Invalid request method"
+        )
+
+
 class SignupViewTest(TestCase):
     def setUp(self):
         self.client = Client()
