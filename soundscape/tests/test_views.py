@@ -176,7 +176,7 @@ class ProfanityCheckTests(TestCase):
     def test_check_profanity_post_profane(self):
         response = self.client.post(
             reverse("soundscape:check_profanity"),
-            data="sorry for my french fuck no",
+            data="pardon my french fuck no",
             content_type="text/plain",
         )
 
