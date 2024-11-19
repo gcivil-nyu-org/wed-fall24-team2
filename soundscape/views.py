@@ -14,6 +14,7 @@ import json
 
 from profanity_check import predict
 
+
 def homepage(request):
     # Query SoundFileUser data
     user_sound_files = SoundFileUser.objects.all()
@@ -109,8 +110,9 @@ def check_profanity(request):
         # The output is a Boolean value True/ 1 or False/0
         value = predict([message])
         return JsonResponse({"value": str(value[0])}, status=200)
-    
+
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 def signup(request):
     if request.user.is_authenticated:
