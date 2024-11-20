@@ -35,7 +35,14 @@ txaio==23.1.1
 zope.interface==7.1.0
 supervisor
 gunicorn
-pytest==8.3.3
 pytest-django==4.9.0
-coverage==7.6.2
+coverage==7.6.1
 coveralls==4.0.1
+pytest
+alt-profanity-check
+joblib
+numpy
+scikit-learn
+scipy
+threadpoolctl
+setuptools

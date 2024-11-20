@@ -1,11 +1,11 @@
-document.addEventListener("DOMContentLoaded", () => {
-  if (typeof USER_SOUND_DATA === 'undefined') return;
-  fetchSoundUser(USERNAME);
-});
-
 function formatDateTimeUser(dateString) {
   const date = new Date(dateString);
-  const options = { weekday: 'short', year: 'numeric', month: 'numeric', day: 'numeric' };
+  const options = {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  };
   const formattedDate = date.toLocaleDateString('en-US', options);
 
   let hours = date.getHours();
@@ -22,18 +22,16 @@ function formatDateTimeUser(dateString) {
 function toggleProfile() {
   const panel = document.getElementById('profilePanel');
   panel.classList.toggle('open');
-  console.log("Toggled profile panel for user:", USERNAME);
 }
 
 window.toggleProfile = toggleProfile;
 
 let currentAudio = null; // Global variable to track the currently playing audio
 
-function fetchSoundUser(user_name) {
+function fetchSoundUser(user_name, map) {
   fetch(`/soundscape_user/soundfiles_for_user/${user_name}/`)
     .then((response) => response.json())
     .then((datauser) => {
-      // console.log("Why here")
       if (datauser.sounds && datauser.sounds.length > 0) {
         // Check if there are sounds
         const soundsListPromisesUser = datauser.sounds.map((sounduser) => {
@@ -45,7 +43,7 @@ function fetchSoundUser(user_name) {
               <div class="sound-date">${formattedDateUser}</div>
               <span class="loading"></span>
             </div>
-            
+
           `;
 
           // Create a promise to download the sound file
@@ -81,8 +79,10 @@ function fetchSoundUser(user_name) {
                 ? `<button class="delete-icon" id="delete-sound-${sounduser.sound_name}-user"></button>`
                 : '';
 
-              document.getElementById(`${sounduser.sound_name}-user`).innerHTML = `
-                <div class="sound-listen-panel">
+              document.getElementById(
+                `${sounduser.sound_name}-user`
+              ).innerHTML = `
+                <div class="sound-listen-panel" id=${sounduser.sound_name}-user-sound-item>
                   <div class="sound-top-panel">
                     <div class="sound-name-stuff">
                       <div>${sounduser.user_name} - ${sounduser.sound_descriptor}</div>
@@ -94,13 +94,38 @@ function fetchSoundUser(user_name) {
               `;
 
               // Append the audio element to the DOM
-              document.getElementById(`${sounduser.sound_name}-user`).appendChild(audioElement);
+              document
+                .getElementById(`${sounduser.sound_name}-user-sound-item`)
+                .appendChild(audioElement);
+              document
+                .getElementById(`${sounduser.sound_name}-user-sound-item`)
+                .addEventListener('click', () => {
+                  const userSoundData = USER_SOUND_DATA?.find((soundData) => {
+                    return (
+                      soundData['s3_file_name'] === sounduser['sound_name']
+                    );
+                  });
+
+                  if (userSoundData) {
+                    map.flyTo({
+                      center: [userSoundData.longitude, userSoundData.latitude],
+                      zoom: 18,
+                      speed: 1.2,
+                    });
+                  }
+                });
 
               if (isLoggedInUser(sounduser.user_name)) {
                 document
-                  .getElementById(`delete-sound-${sounduser.sound_name}-user`)
+                  .getElementById(
+                    'delete-sound-' + sounduser.sound_name + '-user'
+                  )
                   .addEventListener('click', () => {
-                    if (window.confirm("Are you sure you want to delete this sound file?")) {
+                    if (
+                      window.confirm(
+                        'Are you sure you want to delete this sound file?'
+                      )
+                    ) {
                       fetch('/soundscape_user/delete/', {
                         method: 'POST',
                         headers: {
@@ -126,7 +151,9 @@ function fetchSoundUser(user_name) {
             })
             .catch((error) => {
               console.error('Error fetching sound file:', error);
-              document.getElementById(`${sounduser.sound_name}-user`).innerHTML = `
+              document.getElementById(
+                `${sounduser.sound_name}-user`
+              ).innerHTML = `
                 ${sounduser.user_name} - ${sounduser.sound_descriptor} (Error loading sound)
               `;
             });
@@ -135,14 +162,13 @@ function fetchSoundUser(user_name) {
         });
 
         Promise.all(soundsListPromisesUser).then((soundsListUser) => {
-          document.getElementById('user-sounds-list').innerHTML = soundsListUser.join('');
+          document.getElementById('user-sounds-list').innerHTML =
+            soundsListUser.join('');
         });
       } else {
-        document.getElementById('user-sounds-list').innerHTML = '<p>No sounds yet.</p>';
+        document.getElementById('user-sounds-list').innerHTML =
+          '<p>No sounds yet.</p>';
       }
     })
     .catch((error) => console.error('Error loading sounds:', error));
 }
-
-
-

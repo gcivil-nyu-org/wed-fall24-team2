@@ -12,6 +12,8 @@ import requests
 import os
 import json
 
+from profanity_check import predict
+
 
 def homepage(request):
     # Query SoundFileUser data
@@ -97,6 +99,17 @@ def get_noise_data(request):
             return JsonResponse(
                 {"error": f"Error fetching noise data: {str(e)}"}, status=500
             )
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def check_profanity(request):
+    if request.method == "POST":
+        message = request.body
+
+        # The output is a Boolean value True/ 1 or False/0
+        value = predict([message])
+        return JsonResponse({"value": str(value[0])}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 

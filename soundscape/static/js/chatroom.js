@@ -123,6 +123,35 @@ function initializeChat(neighborhood) {
   });
 }
 
+function checkProfanity() {
+  const messageInput = document.getElementById('messageInput').value;
+  
+  fetch('/check_profanity/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken,
+    },
+    body: messageInput,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.error) {
+        alert(data.error);
+      } else {
+        const profanityWarning = document.getElementById('profanity-warning');
+
+        if (data.value == 1) {
+          profanityWarning.style.display = 'block';
+        } else {
+          profanityWarning.style.display = 'none';
+        }
+      }
+    })
+    .catch((error) => {
+      console.log('Error checking message profanity:', error);
+    });
+}
+
 function getChatroomComponent(neighborhood) {
   return `
     <div class="chat-container">
@@ -132,8 +161,11 @@ function getChatroomComponent(neighborhood) {
         <div class="chat-messages" id="chat-messages">
         </div>
         <div class="chat-input">
-            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
-            <button id="send-message">Send</button>
+            <div class="chat-input-row">
+              <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" onkeyup="checkProfanity()">
+              <button id="send-message">Send</button>
+            </div>
+            <div id="profanity-warning" style="display: none; color: red; font-size: 1em; margin-top: 5px;">Warning: This message may contain inappropriate content</div>
         </div>
     </div>`;
 }

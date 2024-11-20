@@ -8,8 +8,9 @@ install:
 env:
   global:
     - AWS_DEFAULT_REGION="us-east-1"
-    - MAIN_EB_APP_NAME="soundscape-explorer-main"
-    - MAIN_EB_ENV_NAME="soundscape-explorer-main-env-1"
+    - EB_APP_NAME="soundscape-explorer-newyorkcity"
+    - EB_ENV_NAME="Soundscape-explorer-newyorkcity-env"
+
 before_script:
   - black --check .
   - flake8 --max-line-length=88 --ignore=E501,E203
@@ -21,11 +22,11 @@ deploy:
   access_key_id: $AWS_ACCESS_KEY_ID
   secret_access_key: $AWS_SECRET_ACCESS_KEY
   region: "us-east-1"
-  app: $MAIN_EB_APP_NAME
-  env: $MAIN_EB_ENV_NAME
+  app: $EB_APP_NAME
+  env: $EB_ENV_NAME
   bucket_name: "elasticbeanstalk-us-east-1-783764603041"
   on:
-    branch: main
+    branch: develop
 
 after_success:
   - coveralls

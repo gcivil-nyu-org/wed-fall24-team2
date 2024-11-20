@@ -83,7 +83,7 @@
         text-align: center;
         border-radius: 5px;
       }
-      
+
       .in-progress-badge {
         background-color: rgb(232, 35, 35);
         color: white;
@@ -176,6 +176,12 @@
         padding: 10px;
         background-color: #ffffff;
         box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        flex-direction: column;
+      }
+      .chat-input-row {
+        display: flex;
+        gap: 8px;
+        width: 100%;
       }
       .chat-input input {
         flex: 1;
@@ -317,6 +323,11 @@
 
 .sound-name-stuff div {
   margin: 2px 0;
+}
+
+.sound-name-descriptor{
+  overflow-wrap: break-word;
+  width: 200px;
 }
 
 .sound-date {
