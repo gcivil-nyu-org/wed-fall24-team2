@@ -8,8 +8,8 @@ install:
 env:
   global:
     - AWS_DEFAULT_REGION="us-east-1"
-    - EB_APP_NAME="soundscape-explorer-ny"
-    - EB_ENV_NAME="Soundscape-explorer-ny-env "
+    - EB_APP_NAME="soundscape-explorer-newyorkcity"
+    - EB_ENV_NAME="Soundscape-explorer-newyorkcity-env"
 
 before_script:
   - black --check .
