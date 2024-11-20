@@ -10,6 +10,9 @@ env:
     - AWS_DEFAULT_REGION="us-east-1"
     - EB_APP_NAME="soundscape-explorer-ny"
     - EB_ENV_NAME="Soundscape-explorer-ny-env "
+    - REDIS_URL="soundscape-chatroom-redis.cugehm.ng.0001.use1.cache.amazonaws.com"
+    - REDIS_PORT="6379"
+
 before_script:
   - black --check .
   - flake8 --max-line-length=88 --ignore=E501,E203
