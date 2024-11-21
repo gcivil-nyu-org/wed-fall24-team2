@@ -92,14 +92,6 @@ function createSoundMarker(lng, lat, map) {
         })
           .then((response) => response.json())
           .then((data) => {
-            if (data.error) {
-              alert(data.error);
-            } else {
-              alert('Sound uploaded successfully!');
-              document.getElementById('upload-sound-form').style.display =
-                'none';
-              document.getElementById('popup-content').style.display = 'block';
-            }
           if (data.error) {
             alert(data.error);
           } else {
@@ -185,11 +177,7 @@ function fetchAndDisplaySounds(lat, lng) {
                 : '';
 
               document.getElementById(sound.sound_name).innerHTML = `
-<<<<<<< HEAD
-                <div class="sound-listen" id="${sound.sound_name}">
-=======
                 <div class="sound-listen" id="${sound.sound_name}-sound-listen">
->>>>>>> 7b2398d5f3e40058a3b38a448ad651b2bff71fed
                   <div class="sound-top">
                     <div class="sound-name-stuff">
                       <div class="sound-name-descriptor">${sound.user_name} - ${sound.sound_descriptor}</div>
