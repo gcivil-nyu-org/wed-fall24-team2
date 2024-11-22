@@ -92,14 +92,6 @@ function createSoundMarker(lng, lat, map) {
         })
           .then((response) => response.json())
           .then((data) => {
-            if (data.error) {
-              alert(data.error);
-            } else {
-              alert('Sound uploaded successfully!');
-              document.getElementById('upload-sound-form').style.display =
-                'none';
-              document.getElementById('popup-content').style.display = 'block';
-            }
           if (data.error) {
             alert(data.error);
           } else {
