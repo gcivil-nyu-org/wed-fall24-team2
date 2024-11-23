@@ -81,7 +81,7 @@ function createSoundMarker(lng, lat, map) {
           return;
         }
 
-        if(!isValidS3Key(soundFile.name)){
+        if (!isValidS3Key(soundFile.name)) {
           alert(
             `"${soundFile.name}" contains invalid characters.\n\n` +
               'Only the following characters are allowed:\n' +
@@ -332,7 +332,7 @@ function addMarker(lng, lat, map) {
 }
 
 function isDuplicateMarker(lng, lat, existingMarkers) {
-  const threshold = 0.0005;
+  const threshold = 0.00001;
   return existingMarkers.some((marker) => {
     return (
       Math.abs(marker.lng - lng) < threshold &&
@@ -352,6 +352,13 @@ function removeTempMarker(removeFromMap) {
       const marker = tempMarker.pop();
       if (removeFromMap) {
         // Remove the marker from the map
+        existingMarkers = existingMarkers.filter((existingMarker) => {
+          return (
+            existingMarker.lng !== marker.longitude &&
+            existingMarker.lat !== marker.latitude
+          );
+        });
+        localStorage.setItem('markers', JSON.stringify(existingMarkers));
         marker.remove();
       }
     }
@@ -370,7 +377,6 @@ function addControls(map) {
       marker: true,
     };
     map.addControl(search);
-
 
     /* NAVIGATION CONTROL */
     map.addControl(new mapboxgl.NavigationControl());
@@ -569,10 +575,15 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
     // Register onClick function on map
     map.on('click', function (e) {
       const coordinates = e.lngLat;
-
+      if (
+        isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)
+      ) {
+        return;
+      }
 
       removeTempMarker(true);
       addMarker(coordinates.lng, coordinates.lat, map);
+      saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
     });
   }
 
