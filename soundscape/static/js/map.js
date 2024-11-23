@@ -2,6 +2,17 @@ const MIN_ZOOM_LEVEL = 13;
 
 /* MARKERS */
 
+function isValidS3Key(key) {
+  if (typeof key !== 'string') {
+    return false;
+  }
+
+  // Regex pattern for explicitly allowed characters
+  const allowedPattern = /^[a-zA-Z0-9!\-_.*'()]+$/;
+
+  return allowedPattern.test(key);
+}
+
 function createSoundMarker(lng, lat, map) {
   const el = document.createElement('div');
   el.className = 'sound-marker';
@@ -70,6 +81,17 @@ function createSoundMarker(lng, lat, map) {
           return;
         }
 
+        if(!isValidS3Key(soundFile.name)){
+          alert(
+            `"${soundFile.name}" contains invalid characters.\n\n` +
+              'Only the following characters are allowed:\n' +
+              '• Letters (A-Z, a-z)\n' +
+              '• Numbers (0-9)\n' +
+              "• Special characters: ! - _ . * ' ( )\n\n"
+          );
+          return;
+        }
+
         const latitude = document.getElementById('latitude').value;
         const longitude = document.getElementById('longitude').value;
         const soundDescriptor =
@@ -92,13 +114,14 @@ function createSoundMarker(lng, lat, map) {
         })
           .then((response) => response.json())
           .then((data) => {
-          if (data.error) {
-            alert(data.error);
-          } else {
-            fetchSoundUser(USERNAME, map)
-            alert('Sound uploaded successfully!');
-            document.getElementById('upload-sound-form').style.display = 'none';
-            document.getElementById('popup-content').style.display = 'block';
+            if (data.error) {
+              alert(data.error);
+            } else {
+              fetchSoundUser(USERNAME, map);
+              alert('Sound uploaded successfully!');
+              document.getElementById('upload-sound-form').style.display =
+                'none';
+              document.getElementById('popup-content').style.display = 'block';
 
               fetchAndDisplaySounds(lat, lng);
 
@@ -194,30 +217,36 @@ function fetchAndDisplaySounds(lat, lng) {
                 .appendChild(audioElement);
 
               if (isLoggedInUser(sound.user_name)) {
-                document.getElementById(`delete-sound-${sound.sound_name}`).addEventListener('click', () => {
-                  if (window.confirm("Are you sure you want to delete this sound file?")) {
-                    fetch('/soundscape_user/delete/', {
-                      method: 'POST',
-                      headers: {
-                        'X-CSRFToken': csrfToken,
-                      },
-                      body: JSON.stringify(sound),
-                    })
-                      .then((response) => response.json())
-                      .then((data) => {
-                        if (data.error) {
-                          alert(data.error);
-                        } else {
-                          fetchSoundUser(USERNAME, map);
-                          alert('You have deleted a sound file!');
-                        }
-                        fetchAndDisplaySounds(lat, lng);
+                document
+                  .getElementById(`delete-sound-${sound.sound_name}`)
+                  .addEventListener('click', () => {
+                    if (
+                      window.confirm(
+                        'Are you sure you want to delete this sound file?'
+                      )
+                    ) {
+                      fetch('/soundscape_user/delete/', {
+                        method: 'POST',
+                        headers: {
+                          'X-CSRFToken': csrfToken,
+                        },
+                        body: JSON.stringify(sound),
                       })
-                      .catch((error) => {
-                        console.log('Error deleting sound file:', error);
-                      });
-                  }
-                });
+                        .then((response) => response.json())
+                        .then((data) => {
+                          if (data.error) {
+                            alert(data.error);
+                          } else {
+                            fetchSoundUser(USERNAME, map);
+                            alert('You have deleted a sound file!');
+                          }
+                          fetchAndDisplaySounds(lat, lng);
+                        })
+                        .catch((error) => {
+                          console.log('Error deleting sound file:', error);
+                        });
+                    }
+                  });
               }
             })
             .catch((error) => {
@@ -261,7 +290,6 @@ function playSound(url) {
 }
 
 function formatDateTime(dateString) {
-  console.log(dateString);
   const date = new Date(dateString);
 
   const options = {
@@ -343,18 +371,6 @@ function addControls(map) {
     };
     map.addControl(search);
 
-    /* GEOLOCATION */
-    // map.addControl(
-    //   new mapboxgl.GeolocateControl({
-    //     positionOptions: {
-    //       enableHighAccuracy: true,
-    //     },
-    //     // When active the map will receive updates to the device's location as it changes.
-    //     trackUserLocation: true,
-    //     // Draw an arrow next to the location dot to indicate which direction the device is heading.
-    //     showUserHeading: true,
-    //   })
-    // );
 
     /* NAVIGATION CONTROL */
     map.addControl(new mapboxgl.NavigationControl());
@@ -553,15 +569,10 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
     // Register onClick function on map
     map.on('click', function (e) {
       const coordinates = e.lngLat;
-      if (
-        isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)
-      ) {
-        return;
-      }
+
 
       removeTempMarker(true);
       addMarker(coordinates.lng, coordinates.lat, map);
-      saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
     });
   }
 
@@ -581,10 +592,5 @@ function successLocation(position, map, existingMarkers) {
 }
 
 function errorLocation(error, map, existingMarkers) {
-  // alert(
-  //   'Unable to retrieve your location. Initializing map at default location. ' +
-  //     error
-  // );
-  // Optional: Set a default location (e.g., NYC) if geolocation fails
   initializeMap([-74.006, 40.7128], map, existingMarkers); // Default center (New York City)
 }
