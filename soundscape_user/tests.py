@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock
 import json
 from datetime import datetime
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth.models import User  # For creating test users
 
 
 class SoundscapeViewsTest(TestCase):
@@ -11,9 +12,16 @@ class SoundscapeViewsTest(TestCase):
         self.client = Client()
         self.mock_datetime = datetime(2024, 1, 1, 12, 0, 0)
 
+        # Create a test user
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword"
+        )
+
     @patch("soundscape_user.views.s3")
     @patch("soundscape_user.views.datetime")
     def test_upload_sound_file_success(self, mock_datetime, mock_s3):
+        self.client.force_login(self.user)  # Simulate logged-in user
+
         # Mock datetime
         mock_datetime.now.return_value = self.mock_datetime
 
@@ -44,6 +52,8 @@ class SoundscapeViewsTest(TestCase):
         mock_s3.put_object.assert_called_once()
 
     def test_upload_sound_file_large_file(self):
+        self.client.force_login(self.user)  # Simulate logged-in user
+
         # Create large test file (4MB)
         large_file = SimpleUploadedFile(
             "large.mp3", b"0" * (4 * 1024 * 1024), content_type="audio/mpeg"
@@ -118,3 +128,58 @@ class SoundscapeViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)
         self.assertEqual(len(response_data["sounds"]), 1)
+
+    def test_upload_sound_file_unauthorized(self):
+        # Do not log in the client
+        test_file = SimpleUploadedFile(
+            "test.mp3", b"file_content", content_type="audio/mpeg"
+        )
+        form_data = {
+            "username": "testuser",
+            "latitude": "40.7128",
+            "longitude": "-74.0060",
+            "sound_descriptor": "test sound",
+        }
+        file_data = {"sound_file": test_file}
+
+        response = self.client.post(
+            reverse("upload_sound_file"), {**form_data, **file_data}
+        )
+        self.assertEqual(response.status_code, 302)  # Redirect to login page
+
+    def test_upload_sound_file_invalid_method(self):
+        self.client.force_login(self.user)  # Simulate logged-in user
+        response = self.client.get(reverse("upload_sound_file"))
+        self.assertEqual(response.status_code, 405)  # Method Not Allowed
+
+    @patch("soundscape_user.views.s3.put_object")
+    def test_upload_sound_file_s3_failure(self, mock_s3):
+        self.client.force_login(self.user)  # Simulate logged-in user
+        mock_s3.side_effect = Exception("S3 Error")
+
+        test_file = SimpleUploadedFile(
+            "test.mp3", b"file_content", content_type="audio/mpeg"
+        )
+        form_data = {
+            "username": "testuser",
+            "latitude": "40.7128",
+            "longitude": "-74.0060",
+            "sound_descriptor": "test sound",
+        }
+        file_data = {"sound_file": test_file}
+
+        response = self.client.post(
+            reverse("upload_sound_file"), {**form_data, **file_data}
+        )
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("Error uploading to S3", json.loads(response.content)["error"])
+
+    @patch("soundscape_user.views.SoundFileUser.objects")
+    def test_sounds_at_location_no_sounds(self, mock_sounds):
+        mock_sounds.filter.return_value = []  # No sounds in this location
+
+        response = self.client.get(
+            reverse("sounds_at_location", kwargs={"lat": "40.7128", "lng": "-74.0060"})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content)["sounds"], [])
