@@ -2,6 +2,17 @@ const MIN_ZOOM_LEVEL = 13;
 
 /* MARKERS */
 
+function isValidS3Key(key) {
+  if (typeof key !== 'string') {
+    return false;
+  }
+
+  // Regex pattern for explicitly allowed characters
+  const allowedPattern = /^[a-zA-Z0-9!\-_.*'()]+$/;
+
+  return allowedPattern.test(key);
+}
+
 function createSoundMarker(lng, lat, map) {
   const el = document.createElement('div');
   el.className = 'sound-marker';
@@ -23,8 +34,9 @@ function createSoundMarker(lng, lat, map) {
           <label for="sound-descriptor" style="margin-bottom: 5px; display: block;">Sound Descriptor:</label>
           <select id="sound-descriptor" required style="width: 100%; padding: 5px; margin-bottom: 10px;">
             <option value="">Select a descriptor</option>
-            ${SOUND_DESCRIPTORS.map(descriptor => 
-              `<option value="${descriptor.descriptor}">${descriptor.descriptor}</option>`
+            ${SOUND_DESCRIPTORS.map(
+              (descriptor) =>
+                `<option value="${descriptor.descriptor}">${descriptor.descriptor}</option>`
             ).join('')}
           </select>
           <input type="hidden" id="latitude" value="${lat}"/>
@@ -35,7 +47,7 @@ function createSoundMarker(lng, lat, map) {
       </div>
     </div>
   `);
-  
+
   var marker = new mapboxgl.Marker(el)
     .setLngLat([lng, lat])
     .setPopup(popup)
@@ -44,23 +56,39 @@ function createSoundMarker(lng, lat, map) {
   popup.on('open', () => {
     fetchAndDisplaySounds(lat, lng);
 
-    document.getElementById('popup-upload-sound-btn').addEventListener('click', function () {
-      document.getElementById('popup-content').style.display = 'none';
-      document.getElementById('upload-sound-form').style.display = 'block';
-    });
+    document
+      .getElementById('popup-upload-sound-btn')
+      .addEventListener('click', function () {
+        document.getElementById('popup-content').style.display = 'none';
+        document.getElementById('upload-sound-form').style.display = 'block';
+      });
 
-    document.getElementById('close-upload-form-btn').addEventListener('click', function () {
-      document.getElementById('upload-sound-form').style.display = 'none';
-      document.getElementById('popup-content').style.display = 'block';
-    });
+    document
+      .getElementById('close-upload-form-btn')
+      .addEventListener('click', function () {
+        document.getElementById('upload-sound-form').style.display = 'none';
+        document.getElementById('popup-content').style.display = 'block';
+      });
 
     document
       .getElementById('sound-upload-form')
       .addEventListener('submit', function (event) {
         event.preventDefault();
         const soundFile = document.getElementById('sound-file').files[0];
-        if (soundFile.size > 3 *1024 * 1024) {  // 3 MB limit
+        if (soundFile.size > 3 * 1024 * 1024) {
+          // 3 MB limit
           alert('Please limit the sound file size to 3 MB');
+          return;
+        }
+
+        if (!isValidS3Key(soundFile.name)) {
+          alert(
+            `"${soundFile.name}" contains invalid characters.\n\n` +
+              'Only the following characters are allowed:\n' +
+              '• Letters (A-Z, a-z)\n' +
+              '• Numbers (0-9)\n' +
+              "• Special characters: ! - _ . * ' ( )\n\n"
+          );
           return;
         }
 
@@ -84,29 +112,28 @@ function createSoundMarker(lng, lat, map) {
           },
           body: formData,
         })
-        .then((response) => response.json())
-        .then((data) => {
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              fetchSoundUser(USERNAME, map);
+              alert('Sound uploaded successfully!');
+              document.getElementById('upload-sound-form').style.display =
+                'none';
+              document.getElementById('popup-content').style.display = 'block';
 
-          if (data.error) {
-            alert(data.error);
-          } else {
-            alert('Sound uploaded successfully!');
-            document.getElementById('upload-sound-form').style.display = 'none';
-            document.getElementById('popup-content').style.display = 'block';
+              fetchAndDisplaySounds(lat, lng);
 
-            document.getElementById('sound-upload-form').reset();
-
-            fetchAndDisplaySounds(lat, lng);
-
-            // Pop the marker from the list
-            // without removing the marker from the map
-            removeTempMarker(false);
-          }
-        })
-        .catch((error) => {
-          alert('Error uploading sound');
-          console.error('Error:', error);
-        });
+              // Pop the marker from the list
+              // without removing the marker from the map
+              removeTempMarker(false);
+            }
+          })
+          .catch((error) => {
+            alert('Error uploading sound');
+            console.error('Error:', error);
+          });
       });
   });
 
@@ -120,11 +147,12 @@ function addUserSound(map) {
   });
 }
 
+let currAudio = null; // Global variable to track the currently playing audio
+
 function fetchAndDisplaySounds(lat, lng) {
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
     .then((response) => response.json())
     .then((data) => {
-
       if (data.sounds && data.sounds.length > 0) {
         // Check if there are sounds
         const soundsListPromises = data.sounds.map((sound) => {
@@ -147,70 +175,85 @@ function fetchAndDisplaySounds(lat, lng) {
               return response.blob(); // Convert to Blob
             })
             .then((blob) => {
-              const audioUrl = URL.createObjectURL(blob); // Create a Blob URL
-              // Update the list item to include the audio element
-              const audioElement = `
-                <audio controls style="width: 100%;">
-                  <source src="${audioUrl}" type="audio/mpeg">
-                  Your browser does not support the audio element.
-                </audio>
+              const audioUrl = URL.createObjectURL(blob);
+
+              // Create the audio element
+              const audioElement = document.createElement('audio');
+              audioElement.controls = true;
+              audioElement.style.width = '100%';
+
+              const sourceElement = document.createElement('source');
+              sourceElement.src = audioUrl;
+              sourceElement.type = 'audio/mpeg';
+              audioElement.appendChild(sourceElement);
+
+              // Manage single audio playback
+              audioElement.addEventListener('play', () => {
+                if (currAudio && currAudio !== audioElement) {
+                  currAudio.pause(); // Pause any currently playing audio
+                }
+                currAudio = audioElement; // Set the current audio to this one
+              });
+
+              const deleteBtn = isLoggedInUser(sound.user_name)
+                ? `<button class="delete-icon" id="delete-sound-${sound.sound_name}"></button>`
+                : '';
+
+              document.getElementById(sound.sound_name).innerHTML = `
+                <div class="sound-listen" id="${sound.sound_name}-sound-listen">
+                  <div class="sound-top">
+                    <div class="sound-name-stuff">
+                      <div class="sound-name-descriptor">${sound.user_name} - ${sound.sound_descriptor}</div>
+                      <div class="sound-date">${formattedDate}</div>
+                    </div>
+                    ${deleteBtn}
+                  </div>
+                </div>
               `;
 
-              const deleteBtn = isLoggedInUser(sound.user_name)? 
-              `<button class="delete-icon" id="delete-sound-${sound.sound_name}"></button>` : ``;
+              // Append the audio element to the DOM
+              document
+                .getElementById(`${sound.sound_name}-sound-listen`)
+                .appendChild(audioElement);
 
-              // Replace the loading message with the audio element
-              document.getElementById(
-                sound.sound_name
-              ).innerHTML = `
-              <div class="sound-listen">
-  <div class="sound-top">
-    <div class="sound-name-stuff">
-      <div>${sound.user_name} - ${sound.sound_descriptor}</div>
-      <div class="sound-date">${formattedDate}</div>
-    </div>
-    ${deleteBtn}
-  </div>
-  ${audioElement}
-</div>
-`;
-
-              
               if (isLoggedInUser(sound.user_name)) {
-                document.getElementById("delete-sound-" + sound.sound_name).addEventListener('click', () => {
-                  if (window.confirm("Are you sure you want to delete this sound file?")) {
-                    fetch('/soundscape_user/delete/', {
-                      method: 'POST',
-                      headers: {
-                        'X-CSRFToken': csrfToken,
-                      },
-                      body: JSON.stringify(sound),
-                    })
-                    .then((response) => response.json())
-                    .then((data) => {
-                      
-                      if (data.error) {
-                        alert(data.error)
-                      } else {
-                        alert('You have deleted a sound file!');
-                      }
-                      
-                      fetchAndDisplaySounds(lat, lng);
-                    })
-                    .catch((error) => {
-                      console.log('Error deleting sound file:', error);
-                    })
-                  }
-                });
+                document
+                  .getElementById(`delete-sound-${sound.sound_name}`)
+                  .addEventListener('click', () => {
+                    if (
+                      window.confirm(
+                        'Are you sure you want to delete this sound file?'
+                      )
+                    ) {
+                      fetch('/soundscape_user/delete/', {
+                        method: 'POST',
+                        headers: {
+                          'X-CSRFToken': csrfToken,
+                        },
+                        body: JSON.stringify(sound),
+                      })
+                        .then((response) => response.json())
+                        .then((data) => {
+                          if (data.error) {
+                            alert(data.error);
+                          } else {
+                            fetchSoundUser(USERNAME, map);
+                            alert('You have deleted a sound file!');
+                          }
+                          fetchAndDisplaySounds(lat, lng);
+                        })
+                        .catch((error) => {
+                          console.log('Error deleting sound file:', error);
+                        });
+                    }
+                  });
               }
-
             })
             .catch((error) => {
               console.error('Error fetching sound file:', error);
-              // Handle error gracefully by showing a message
-              document.getElementById(
-                sound.sound_name
-              ).innerHTML = `${sound.user_name} - ${sound.sound_descriptor} (Error loading sound)`;
+              document.getElementById(sound.sound_name).innerHTML = `
+                ${sound.user_name} - ${sound.sound_descriptor} (Error loading sound)
+              `;
             });
 
           return Promise.resolve(listItem); // Resolve the initial loading item
@@ -247,10 +290,14 @@ function playSound(url) {
 }
 
 function formatDateTime(dateString) {
-  console.log(dateString)
   const date = new Date(dateString);
 
-  const options = { weekday: 'short', year: 'numeric', month: 'numeric', day: 'numeric' };
+  const options = {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  };
   const formattedDate = date.toLocaleDateString('en-US', options);
 
   let hours = date.getHours();
@@ -259,7 +306,7 @@ function formatDateTime(dateString) {
   hours = hours % 12;
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? '0' + minutes : minutes;
-  
+
   const formattedTime = `${hours}:${minutes} ${ampm}`;
 
   return `${formattedDate} ${formattedTime}`;
@@ -279,13 +326,13 @@ function addMarker(lng, lat, map) {
   if (currentZoom < MIN_ZOOM_LEVEL || distanceFromUser > 1000) {
     return;
   }
-  
+
   var marker = createSoundMarker(lng, lat, map);
   tempMarker.push(marker);
 }
 
 function isDuplicateMarker(lng, lat, existingMarkers) {
-  const threshold = 0.0005;
+  const threshold = 0.00001;
   return existingMarkers.some((marker) => {
     return (
       Math.abs(marker.lng - lng) < threshold &&
@@ -301,14 +348,21 @@ function saveMarker(lng, lat, existingMarkers) {
 
 function removeTempMarker(removeFromMap) {
   if (tempMarker != null) {
-    while(tempMarker.length > 0) {
+    while (tempMarker.length > 0) {
       const marker = tempMarker.pop();
-      if(removeFromMap) {
+      if (removeFromMap) {
         // Remove the marker from the map
+        existingMarkers = existingMarkers.filter((existingMarker) => {
+          return (
+            existingMarker.lng !== marker.longitude &&
+            existingMarker.lat !== marker.latitude
+          );
+        });
+        localStorage.setItem('markers', JSON.stringify(existingMarkers));
         marker.remove();
       }
     }
-  } 
+  }
 }
 
 function addControls(map) {
@@ -324,19 +378,6 @@ function addControls(map) {
     };
     map.addControl(search);
 
-    /* GEOLOCATION */
-    // map.addControl(
-    //   new mapboxgl.GeolocateControl({
-    //     positionOptions: {
-    //       enableHighAccuracy: true,
-    //     },
-    //     // When active the map will receive updates to the device's location as it changes.
-    //     trackUserLocation: true,
-    //     // Draw an arrow next to the location dot to indicate which direction the device is heading.
-    //     showUserHeading: true,
-    //   })
-    // );
-
     /* NAVIGATION CONTROL */
     map.addControl(new mapboxgl.NavigationControl());
   }
@@ -347,7 +388,7 @@ function isLoggedIn() {
 }
 
 function isLoggedInUser(provided_username) {
-  return username == provided_username
+  return username == provided_username;
 }
 
 function addChatroomMarkers(map) {
@@ -357,7 +398,11 @@ function addChatroomMarkers(map) {
 
     const popup = new mapboxgl.Popup({
       offset: 25,
-    }).setHTML(isLoggedIn() ? getChatroomComponent(neighborhood): getChatroomPublicComponent(neighborhood));
+    }).setHTML(
+      isLoggedIn()
+        ? getChatroomComponent(neighborhood)
+        : getChatroomPublicComponent(neighborhood)
+    );
 
     saveMarker(neighborhood.longitude, neighborhood.latitude, existingMarkers);
 
@@ -380,7 +425,7 @@ function addChatroomMarkers(map) {
 
 function addHeatmapLayer(map) {
   map.on('load', async () => {
-    document.getElementById("loading-indicator").style.display = "block";
+    document.getElementById('loading-indicator').style.display = 'block';
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
@@ -392,13 +437,13 @@ function addHeatmapLayer(map) {
           'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify({
-          "soundType": Array.from(document.querySelectorAll("input[name='soundType']:checked")).map(
-            checkbox => checkbox.value
-          ),
-          "dateFrom": document.getElementById("dateFrom").value,
-          "dateTo": document.getElementById("dateTo").value
+          soundType: Array.from(
+            document.querySelectorAll("input[name='soundType']:checked")
+          ).map((checkbox) => checkbox.value),
+          dateFrom: document.getElementById('dateFrom').value,
+          dateTo: document.getElementById('dateTo').value,
         }),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -421,11 +466,7 @@ function addHeatmapLayer(map) {
         type: 'heatmap',
         source: 'heatmap-data',
         paint: {
-          'heatmap-weight': [
-            'coalesce',
-            ['get', 'weight'],
-            0,
-          ],
+          'heatmap-weight': ['coalesce', ['get', 'weight'], 0],
           'heatmap-intensity': {
             stops: [
               [0, 0],
@@ -461,38 +502,49 @@ function addHeatmapLayer(map) {
 
       const popup = new mapboxgl.Popup({
         closeButton: false,
-        closeOnClick: false
+        closeOnClick: false,
       });
 
       map.on('mouseenter', 'heatmap', (e) => {
         map.getCanvas().style.cursor = 'pointer';
 
         const coordinates = e.features[0].geometry.coordinates;
-        const complaint_type = e.features[0].properties.complaint_type.split(/[ - ]+/).pop();
+        const complaint_type = e.features[0].properties.complaint_type
+          .split(/[ - ]+/)
+          .pop();
         const descriptor = e.features[0].properties.descriptor;
         const status = e.features[0].properties.status;
         const created_date = e.features[0].properties.created_date;
         const closed_date = e.features[0].properties.closed_date;
 
-        popup.setLngLat(coordinates).setHTML(`
+        popup
+          .setLngLat(coordinates)
+          .setHTML(
+            `
           <div class="sound-information">
             <span>Type: ${complaint_type}</span>
             <span>Descriptor: ${descriptor}</span>
             <span>Reported at: ${new Intl.DateTimeFormat('en-US').format(
               new Date(created_date)
             )}</span>
-            ${closed_date?
-              `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
-                new Date(closed_date)
-              )}</span>` : ``
+            ${
+              closed_date
+                ? `<span>Closed at: ${new Intl.DateTimeFormat('en-US').format(
+                    new Date(closed_date)
+                  )}</span>`
+                : ``
             }
-            ${status == "Open"?
-              `<span class="open-badge">${status}</span>` :
-              (status == "In Progress"?
-              `<span class="in-progress-badge">${status}</span>` :
-              `<span class="closed-badge">${status}</span>`)}
+            ${
+              status == 'Open'
+                ? `<span class="open-badge">${status}</span>`
+                : status == 'In Progress'
+                ? `<span class="in-progress-badge">${status}</span>`
+                : `<span class="closed-badge">${status}</span>`
+            }
           </div>
-        `).addTo(map);
+        `
+          )
+          .addTo(map);
       });
 
       map.on('mouseleave', 'heatmap', () => {
@@ -500,13 +552,12 @@ function addHeatmapLayer(map) {
         popup.remove();
       });
 
-      document.getElementById("loading-indicator").style.display = "none";
-
+      document.getElementById('loading-indicator').style.display = 'none';
     } catch (error) {
       clearTimeout(timeoutId);
-      document.getElementById("loading-indicator").style.display = "none";
+      document.getElementById('loading-indicator').style.display = 'none';
       console.error('Error fetching noise data:', error);
-      alert("Oops! Data is on its way, please reload the page.");
+      alert('Oops! Data is on its way, please reload the page.');
     }
   });
 }
@@ -543,6 +594,7 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
   }
 
   addControls(map);
+  fetchSoundUser(USERNAME, map);
 }
 
 function successLocation(position, map, existingMarkers) {
@@ -551,10 +603,5 @@ function successLocation(position, map, existingMarkers) {
 }
 
 function errorLocation(error, map, existingMarkers) {
-  // alert(
-  //   'Unable to retrieve your location. Initializing map at default location. ' +
-  //     error
-  // );
-  // Optional: Set a default location (e.g., NYC) if geolocation fails
   initializeMap([-74.006, 40.7128], map, existingMarkers); // Default center (New York City)
 }
