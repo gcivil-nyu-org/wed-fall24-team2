@@ -54,36 +54,42 @@ function initializeChat(neighborhood) {
   }
 
   // Function to send message
-  function sendMessage() {
-    const messageInput = document.getElementById('messageInput');
-    let message = messageInput.value;
-    message = DOMPurify.sanitize(message);
-    if (message.trim() !== '') {
-      const timestamp = new Date().toISOString();
-      chatSocket.send(
-        JSON.stringify({
-          message,
-          username,
-          timestamp,
-        })
-      );
-      messageInput.value = '';
-    }
-  }
+    async function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        let message = messageInput.value;
+        message = DOMPurify.sanitize(message);
 
-  // Handle incoming WebSocket messages
-  chatSocket.onmessage = function (e) {
-    const data = JSON.parse(e.data);
-    const chatMessages = document.getElementById('chat-messages');
-
-    if (data.history) {
-      displayChatHistory(data.history);
-    } else if (data.message) {
-      const messageElement = createMessageElement(data);
-      chatMessages.appendChild(messageElement);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (message.trim() !== '') {
+            const isValidSession = await validateSession();
+            if (isValidSession) {
+                const timestamp = new Date().toISOString();
+                chatSocket.send(
+                    JSON.stringify({
+                        message,
+                        username,
+                        timestamp,
+                    })
+                );
+                messageInput.value = '';
+            }
+        }
     }
-  };
+
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+
+        if (data.error === 'Unauthorized') {
+            alert('Your session has expired. Redirecting to login.');
+            window.location.href = '/login/';
+        } else if (data.history) {
+            displayChatHistory(data.history);
+        } else if (data.message) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = createMessageElement(data);
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    };
 
   // Handle WebSocket connection errors
   chatSocket.onerror = function (error) {
@@ -96,16 +102,20 @@ function initializeChat(neighborhood) {
     chatMessages.appendChild(errorDiv);
   };
 
-  // Handle WebSocket disconnection
-  chatSocket.onclose = function (e) {
-    console.log('Chat socket closed unexpectedly');
-    const chatMessages = document.getElementById('chat-messages');
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'chat-message error';
-    errorDiv.textContent =
-      'Connection lost. Please refresh the page to reconnect.';
-    chatMessages.appendChild(errorDiv);
-  };
+    chatSocket.onclose = function (e) {
+        if (e.code === 4001) { // Custom close code for unauthenticated
+            alert('Session expired. Redirecting to login.');
+            window.location.href = '/login/';
+        } else {
+            console.log('WebSocket closed:', e);
+            const chatMessages = document.getElementById('chat-messages');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'chat-message error';
+            errorDiv.textContent =
+                'Your session has been terminated. Please refresh the page to reconnect.';
+            chatMessages.appendChild(errorDiv);
+        }
+    };
 
   setTimeout(() => {
     document

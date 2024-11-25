@@ -65,17 +65,14 @@ function createSoundMarker(lng, lat, map) {
         event.preventDefault();
         const soundFile = document.getElementById('sound-file').files[0];
         if (soundFile.size > 3 * 1024 * 1024) {
-          // 3 MB limit
           alert('Please limit the sound file size to 3 MB');
           return;
         }
 
         const latitude = document.getElementById('latitude').value;
         const longitude = document.getElementById('longitude').value;
-        const soundDescriptor =
-          document.getElementById('sound-descriptor').value;
+        const soundDescriptor = document.getElementById('sound-descriptor').value;
 
-        // Handle the file upload and form data submission
         const formData = new FormData();
         formData.append('username', username);
         formData.append('sound_file', soundFile);
@@ -90,32 +87,51 @@ function createSoundMarker(lng, lat, map) {
           },
           body: formData,
         })
-          .then((response) => response.json())
+          .then((response) => {
+            console.log('Fetch response object:', response);
+
+            if (response.redirected) {
+              console.warn('Redirection detected. Redirecting to login.');
+              console.log('Redirect URL:', response.url);
+              alert('Your session has expired. Redirecting to login.');
+              window.location.href = response.url;
+              return;
+            }
+
+            console.log('Response status:', response.status);
+            console.log('Response statusText:', response.statusText);
+
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            }
+          })
           .then((data) => {
-          if (data.error) {
-            alert(data.error);
-          } else {
-            fetchSoundUser(USERNAME, map)
-            alert('Sound uploaded successfully!');
-            document.getElementById('upload-sound-form').style.display = 'none';
-            document.getElementById('popup-content').style.display = 'block';
+            console.log('Parsed response data:', data);
+
+            if (data && data.error) {
+              alert(data.error);
+            } else if (data) {
+              fetchSoundUser(USERNAME, map);
+              alert('Sound uploaded successfully!');
+              document.getElementById('upload-sound-form').style.display = 'none';
+              document.getElementById('popup-content').style.display = 'block';
 
               fetchAndDisplaySounds(lat, lng);
-
-              // Pop the marker from the list
-              // without removing the marker from the map
               removeTempMarker(false);
             }
           })
           .catch((error) => {
+            console.error('Error during upload:', error);
             alert('Error uploading sound');
-            console.error('Error:', error);
           });
       });
   });
 
   return marker;
 }
+
 
 function addUserSound(map) {
   USER_SOUND_DATA.forEach((sound) => {
