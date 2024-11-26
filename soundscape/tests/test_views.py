@@ -165,61 +165,55 @@ class ProfanityViewsTests(TestCase):
 
     def test_check_profanity_with_clean_text(self):
         response = self.client.post(
-            reverse('soundscape:check_profanity'),
-            data='Hello world',
-            content_type='text/plain'
+            reverse("soundscape:check_profanity"),
+            data="Hello world",
+            content_type="text/plain",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content), {'value': '0'})
+        self.assertEqual(json.loads(response.content), {"value": "0"})
 
     def test_check_profanity_with_profane_text(self):
         response = self.client.post(
-            reverse('soundscape:check_profanity'),
-            data='This is a damn test',
-            content_type='text/plain'
+            reverse("soundscape:check_profanity"),
+            data="This is a damn test",
+            content_type="text/plain",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content), {'value': '1'})
+        self.assertEqual(json.loads(response.content), {"value": "1"})
 
     def test_check_profanity_with_get_method(self):
-        response = self.client.get(reverse('soundscape:check_profanity'))
+        response = self.client.get(reverse("soundscape:check_profanity"))
         self.assertEqual(response.status_code, 405)
         self.assertEqual(
-            json.loads(response.content),
-            {'error': 'Invalid request method'}
+            json.loads(response.content), {"error": "Invalid request method"}
         )
 
     def test_filter_profanity_with_clean_text(self):
-        test_text = 'Hello world'
+        test_text = "Hello world"
         response = self.client.post(
-            reverse('soundscape:filter_profanity'),
+            reverse("soundscape:filter_profanity"),
             data=test_text,
-            content_type='text/plain'
+            content_type="text/plain",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            json.loads(response.content),
-            {'message': test_text}
-        )
+        self.assertEqual(json.loads(response.content), {"message": test_text})
 
     def test_filter_profanity_with_profane_text(self):
         response = self.client.post(
-            reverse('soundscape:filter_profanity'),
-            data='This is a damn test',
-            content_type='text/plain'
+            reverse("soundscape:filter_profanity"),
+            data="This is a damn test",
+            content_type="text/plain",
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            json.loads(response.content),
-            {'message': 'This is a **** test'}
+            json.loads(response.content), {"message": "This is a **** test"}
         )
 
     def test_filter_profanity_with_get_method(self):
-        response = self.client.get(reverse('soundscape:filter_profanity'))
+        response = self.client.get(reverse("soundscape:filter_profanity"))
         self.assertEqual(response.status_code, 405)
         self.assertEqual(
-            json.loads(response.content),
-            {'error': 'Invalid request method'}
+            json.loads(response.content), {"error": "Invalid request method"}
         )
 
 
