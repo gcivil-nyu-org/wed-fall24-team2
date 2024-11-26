@@ -103,9 +103,9 @@ function initializeChat(neighborhood) {
   };
 
     chatSocket.onclose = function (e) {
-        if (e.code === 4001) { // Custom close code for unauthenticated
-            alert('Session expired. Redirecting to login.');
-            window.location.href = '/login/';
+        if (e.code === 4001) { // Custom close code for logout
+            //alert('Session expired. Redirecting ....');
+            window.location.href = '/';
         } else {
             console.log('WebSocket closed:', e);
             const chatMessages = document.getElementById('chat-messages');
@@ -132,6 +132,34 @@ function initializeChat(neighborhood) {
     }
   });
 }
+
+
+async function validateSession() {
+    try {
+        const response = await fetch('/validate_session/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.authenticated;
+        } else if (response.status === 401) {
+            alert('Your session has expired. Logging you out');
+            window.location.href = '/';
+            return false;
+        } else {
+            console.error('Unexpected response:', response);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error validating session:', error);
+        return false;
+    }
+}
+
 
 function checkProfanity() {
   const messageInput = document.getElementById('messageInput').value;
