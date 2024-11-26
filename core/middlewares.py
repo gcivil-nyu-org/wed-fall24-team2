@@ -10,13 +10,13 @@ class CheckSessionMiddleware:
     def __call__(self, request):
         # Define paths to exclude
         exempt_paths = [
-            reverse("soundscape:login"),  # Login page
-            reverse("soundscape:signup"),  # Signup page
-            reverse("soundscape:logout"),  # Logout endpoint
-            reverse("soundscape:homepage"),  # Homepage
-            reverse("soundscape:validate_session"),  # Session validation
-            "/static/",  # Static files
-            "/media/",  # Media files
+            reverse("soundscape:login"),
+            reverse("soundscape:signup"),
+            reverse("soundscape:logout"),
+            reverse("soundscape:homepage"),
+            reverse("soundscape:validate_session"),
+            "/static/",
+            "/media/",
         ]
 
         # Allow paths that start with any exempt path (e.g., static/media)
