@@ -429,7 +429,7 @@ function addChatroomMarkers(map) {
 
     marker.getElement().addEventListener('click', () => {
       if (!chatInitialized && isLoggedIn()) {
-        console.log('initializing chat for:', neighborhood);
+        console.log('initializing chat for:', neighborhood.name);
         initializeChat(neighborhood);
         chatInitialized = true;
       }

@@ -10,6 +10,7 @@ urlpatterns = [
     path("", views.homepage, name="homepage"),
     path("get_noise_data/", views.get_noise_data, name="get_noise_data"),
     path("check_profanity/", views.check_profanity, name="check_profanity"),
+    path("filter_profanity/", views.filter_profanity, name="filter_profanity"),
     path("signup/", views.signup, name="signup"),
     path(
         "login/",
