@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "data_collection",
     "sounddata_s3",
     "soundscape_user",
+    "channels",
 ]
 
 MIDDLEWARE = [
