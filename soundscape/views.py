@@ -116,6 +116,7 @@ def check_profanity(request):
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+
 def filter_profanity(request):
     if request.method == "POST":
         message = request.body.decode("utf-8")
@@ -127,6 +128,7 @@ def filter_profanity(request):
             return JsonResponse({"message": str(message)}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 def signup(request):
     if request.user.is_authenticated:
