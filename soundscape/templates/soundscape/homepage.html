@@ -381,7 +381,12 @@
         <ul>
           {% if user.is_authenticated %}
           <li>{% include 'soundscape/profile_panel.html' %}</li>
-          <li><a href="{% url 'soundscape:logout' %}">Logout</a></li>
+          <li>
+            <form id="logout-form" action="{% url 'soundscape:logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit">Logout</button>
+            </form>
+          </li>
           <script>
             username = "{{ username }}"; // Storing the username in a JavaScript variable
           </script>
@@ -431,6 +436,37 @@
           }
         );
       }
+    </script>
+    <script>
+      document.getElementById('logout-button').addEventListener('click', function (event) {
+          event.preventDefault();
+
+          // Fetch API for logout
+          fetch("{% url 'soundscape:logout' %}", {
+              method: 'POST',
+              headers: {
+                  'X-CSRFToken': "{{ csrf_token }}"
+              },
+              credentials: 'include'
+          }).then(response => {
+              if (response.ok) {
+                  localStorage.removeItem('auth');
+                  window.location.href = "{% url 'soundscape:login' %}";
+              } else {
+                  console.error('Logout failed');
+              }
+          }).catch(error => {
+              console.error('Error during logout:', error);
+          });
+      });
+
+      // Listen for logout notifications from other tabs
+      window.addEventListener('storage', function (event) {
+          if (event.key === 'auth' && event.newValue === null) {
+              console.log("User logged out in another tab. Redirecting...");
+              window.location.reload();
+          }
+      });
     </script>
   </body>
 </html>

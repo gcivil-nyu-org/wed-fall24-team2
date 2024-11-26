@@ -14,6 +14,15 @@ import json
 
 from better_profanity import profanity
 
+from django.views import View
+from django.contrib.auth import logout
+from django.contrib.sessions.models import Session
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 
 def homepage(request):
     # Query SoundFileUser data
@@ -145,3 +154,25 @@ def signup(request):
         form = SignupForm()
 
     return render(request, "soundscape/signup.html", {"form": form})
+
+
+class CustomLogoutView(View):
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            user = request.user
+            # Notify WebSocket consumers to disconnect
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f"user_{user.id}", {"type": "logout_message"}
+            )
+
+            Session.objects.filter(session_key=request.session.session_key).delete()
+            logout(request)
+
+        return HttpResponseRedirect(reverse("soundscape:homepage"))
+
+
+def validate_session(request):
+    if request.user.is_authenticated:
+        return JsonResponse({"authenticated": True})
+    return JsonResponse({"authenticated": False}, status=401)
