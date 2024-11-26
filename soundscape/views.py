@@ -107,12 +107,26 @@ def check_profanity(request):
     if request.method == "POST":
         message = request.body.decode("utf-8")
 
-        # The output is a Boolean value True or False
-        value = profanity.contains_profanity(message)
-        return JsonResponse({"value": str(int(value))}, status=200)
+        try:
+            # The output is a Boolean value True or False
+            value = profanity.contains_profanity(message)
+            return JsonResponse({"value": str(int(value))}, status=200)
+        except Exception:
+            return JsonResponse({"value": str(1)}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+def filter_profanity(request):
+    if request.method == "POST":
+        message = request.body.decode("utf-8")
+
+        try:
+            censored_message = profanity.censor(message)
+            return JsonResponse({"message": str(censored_message)}, status=200)
+        except Exception:
+            return JsonResponse({"message": str(message)}, status=200)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 def signup(request):
     if request.user.is_authenticated:
