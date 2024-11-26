@@ -12,7 +12,7 @@ import requests
 import os
 import json
 
-from profanity_check import predict
+from better_profanity import profanity
 
 from django.views import View
 from django.contrib.auth import logout
@@ -114,11 +114,27 @@ def get_noise_data(request):
 
 def check_profanity(request):
     if request.method == "POST":
-        message = request.body
+        message = request.body.decode("utf-8")
 
-        # The output is a Boolean value True/ 1 or False/0
-        value = predict([message])
-        return JsonResponse({"value": str(value[0])}, status=200)
+        try:
+            # The output is a Boolean value True or False
+            value = profanity.contains_profanity(message)
+            return JsonResponse({"value": str(int(value))}, status=200)
+        except Exception:
+            return JsonResponse({"value": str(1)}, status=200)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def filter_profanity(request):
+    if request.method == "POST":
+        message = request.body.decode("utf-8")
+
+        try:
+            censored_message = profanity.censor(message)
+            return JsonResponse({"message": str(censored_message)}, status=200)
+        except Exception:
+            return JsonResponse({"message": str(message)}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
