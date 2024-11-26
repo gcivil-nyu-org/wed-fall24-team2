@@ -59,12 +59,20 @@ function initializeChat(neighborhood) {
   // Function to display chat history
   async function displayChatHistory(history) {
     const chatMessages = document.getElementById('chat-messages');
-    chatMessages.innerHTML = ''; // Clear existing messages
+    chatMessages.innerHTML = `
+        <div style="height: 100%; display: flex; justify-content: center; align-items: center;">
+          <div id="loading-messages" style="display: none;" class="message-loader"></div>
+        </div>
+      `; // Clear existing messages
+
+    document.getElementById('loading-messages').style.display = 'block';
 
     for (const item of history.reverse()) {
       const messageElement = await createMessageElement(item);
       chatMessages.appendChild(messageElement);
     }
+
+    document.getElementById('loading-messages').style.display = 'none';
 
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
