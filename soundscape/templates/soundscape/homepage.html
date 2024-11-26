@@ -438,33 +438,40 @@
       }
     </script>
     <script>
-      document.getElementById('logout-button').addEventListener('click', function (event) {
+      document.getElementById("logout-form").addEventListener("submit", function (event) {
           event.preventDefault();
 
-          // Fetch API for logout
           fetch("{% url 'soundscape:logout' %}", {
-              method: 'POST',
+              method: "POST",
               headers: {
-                  'X-CSRFToken': "{{ csrf_token }}"
+                  "X-CSRFToken": csrfToken,
               },
-              credentials: 'include'
-          }).then(response => {
-              if (response.ok) {
-                  localStorage.removeItem('auth');
-                  window.location.href = "{% url 'soundscape:login' %}";
-              } else {
-                  console.error('Logout failed');
-              }
-          }).catch(error => {
-              console.error('Error during logout:', error);
-          });
+              credentials: "include",
+          })
+              .then((response) => {
+                  if (response.ok) {
+                      // Notify other tabs about logout
+                      localStorage.setItem("user_logged_out", "true");
+                      setTimeout(() => localStorage.removeItem("user_logged_out"), 1000);
+
+                      // Redirect to login page
+                      window.location.href = "{% url 'soundscape:login' %}";
+                  } else {
+                      console.error("Logout failed");
+                      alert("Failed to log out. Please try again.");
+                  }
+              })
+              .catch((error) => {
+                  console.error("Error during logout:", error);
+                  alert("An error occurred during logout.");
+              });
       });
 
-      // Listen for logout notifications from other tabs
-      window.addEventListener('storage', function (event) {
-          if (event.key === 'auth' && event.newValue === null) {
-              console.log("User logged out in another tab. Redirecting...");
-              window.location.reload();
+      // Listen for logout notification from other tabs
+      window.addEventListener("storage", function (event) {
+          if (event.key === "user_logged_out" && event.newValue === "true") {
+              alert("You have been logged out from another tab.");
+              window.location.href = "{% url 'soundscape:homepage' %}";
           }
       });
     </script>
