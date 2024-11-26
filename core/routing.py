@@ -1,6 +1,6 @@
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from django.urls import path, include
+from django.urls import path
 
 from core.consumers import NotificationConsumer
 from chatroom.routing import websocket_urlpatterns as chatroom_websocket_patterns

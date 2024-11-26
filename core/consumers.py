@@ -1,5 +1,4 @@
 import logging
-from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 logger = logging.getLogger(__name__)
