@@ -16,6 +16,7 @@ s3 = boto3.client(
     region_name=settings.AWS_S3_REGION_NAME,
 )
 
+
 @login_required
 def upload_sound_file(request):
     print(f"Is user authenticated? {request.user.is_authenticated}")
@@ -35,19 +36,22 @@ def upload_sound_file(request):
             api_key = os.getenv("VIRUS_SCAN_API")
             if not api_key:
                 return JsonResponse(
-                    {"error": "API key not found. Please set the VIRUS_SCAN_API environment variable."}, status=500
+                    {
+                        "error": "API key not found. Please set the VIRUS_SCAN_API environment variable."
+                    },
+                    status=500,
                 )
 
             sound_data = sound_file.read()
             is_malware = scan_file_with_virustotal(sound_data, api_key)
-            print(is_malware,"malware")
+            print(is_malware, "malware")
             if is_malware:
                 return JsonResponse(
                     {
                         "error": "Malware detected in the uploaded file.",
-                        "alert": "Malware detected! Please upload a safe file."
-                    }, 
-                    status=400
+                        "alert": "Malware detected! Please upload a safe file.",
+                    },
+                    status=400,
                 )
 
             latitude = form.cleaned_data["latitude"]
@@ -100,6 +104,8 @@ def upload_sound_file(request):
             return JsonResponse({"errors": form.errors}, status=400)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
 def sounds_at_location(request, lat, lng):
     if request.method == "GET":
         sounds = SoundFileUser.objects.filter(latitude=lat, longitude=lng)
