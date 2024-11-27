@@ -493,10 +493,51 @@
       // Listen for logout notification from other tabs
       window.addEventListener("storage", function (event) {
           if (event.key === "user_logged_out" && event.newValue === "true") {
+              if (window.notificationSocket) {
+                  window.notificationSocket.close(); // Close the WebSocket
+              }
               alert("You have been logged out from another tab.");
               window.location.href = "{% url 'soundscape:homepage' %}";
           }
       });
     </script>
+    {% if user.is_authenticated %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+                // Determine the protocol
+          const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+
+          // Get the host (domain and port)
+          const wsHost = window.location.host; // Includes hostname and port (if any)
+
+          // Construct the WebSocket URL
+          const socket = new WebSocket(`${wsProtocol}${wsHost}/ws/notifications/`);
+
+          socket.onopen = function () {
+              console.log('WebSocket connection established.');
+          };
+
+          socket.onmessage = function (event) {
+              console.log('Notification received:', event.data);
+              // Optionally display notifications to the user
+          };
+
+          socket.onclose = function (event) {
+              console.log('WebSocket connection closed. Code:', event.code);
+              if (event.code === 4001) {
+                  alert("You have been logged out. Please log in again.");
+                  window.location.href = "{% url 'soundscape:login' %}";
+              }
+          };
+
+          socket.onerror = function (error) {
+              console.error('WebSocket error:', error);
+          };
+
+          // Save the socket for use elsewhere, if needed
+          window.notificationSocket = socket;
+      });
+    </script>
+    {% endif %}
   </body>
 </html>
