@@ -1,3 +1,4 @@
+import os
 import boto3
 import json
 from django.conf import settings
@@ -6,7 +7,7 @@ from .forms import SoundFileUploadForm
 from .models import SoundFileUser
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
-
+from .virus_scan import scan_file_with_virustotal  # Import the virus scan function
 
 s3 = boto3.client(
     "s3",
@@ -14,7 +15,6 @@ s3 = boto3.client(
     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
     region_name=settings.AWS_S3_REGION_NAME,
 )
-
 
 @login_required
 def upload_sound_file(request):
@@ -31,6 +31,25 @@ def upload_sound_file(request):
                     {"error": "Please limit the sound file size to 3 MB"}, status=400
                 )
 
+            # Scan the file for malware
+            api_key = os.getenv("VIRUS_SCAN_API")
+            if not api_key:
+                return JsonResponse(
+                    {"error": "API key not found. Please set the VIRUS_SCAN_API environment variable."}, status=500
+                )
+
+            sound_data = sound_file.read()
+            is_malware = scan_file_with_virustotal(sound_data, api_key)
+            print(is_malware,"malware")
+            if is_malware:
+                return JsonResponse(
+                    {
+                        "error": "Malware detected in the uploaded file.",
+                        "alert": "Malware detected! Please upload a safe file."
+                    }, 
+                    status=400
+                )
+
             latitude = form.cleaned_data["latitude"]
             sound_descriptor = form.cleaned_data["sound_descriptor"]
             longitude = form.cleaned_data["longitude"]
@@ -41,7 +60,6 @@ def upload_sound_file(request):
                 # Upload file to S3
                 # s3.upload_fileobj(sound_file, settings.AWS_STORAGE_BUCKET_NAME, s3_file_name)
                 print("inside s3?")
-                sound_data = sound_file.read()
                 # s3_file_name = f"user_sounds/{user_name}_{sound_file.name}"
                 s3_file_name = (
                     f"user_sounds/{user_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -82,8 +100,6 @@ def upload_sound_file(request):
             return JsonResponse({"errors": form.errors}, status=400)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
-
-
 def sounds_at_location(request, lat, lng):
     if request.method == "GET":
         sounds = SoundFileUser.objects.filter(latitude=lat, longitude=lng)

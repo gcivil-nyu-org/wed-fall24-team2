@@ -126,31 +126,43 @@ function createSoundMarker(lng, lat, map) {
 
             if (response.ok) {
               return response.json();
+            } else if (response.status === 400) {
+                return response.json().then(data => {
+                    // Reset the file input field to allow the user to upload a new file
+                    document.getElementById('sound-file').value = '';
+                    // Optionally, reset other form fields if needed
+                    document.getElementById('sound-descriptor').value = '';
+                    throw new Error(data.alert || data.error || 'Malware detected! Please upload a safe file.');
+                });
             } else {
-              throw new Error(
-                `Error: ${response.status} - ${response.statusText}`
-              );
-            }
+                  return response.json().then(data => {
+                      throw new Error(data.error || `Error: ${response.status} - ${response.statusText}`);
+                  });
+              }
           })
           .then((data) => {
             console.log('Parsed response data:', data);
 
             if (data && data.error) {
-              alert(data.error);
+              alert(data.alert || data.error);
+              // Reset the file input field to allow the user to upload a new file
+              document.getElementById('sound-file').value = '';
+              // Optionally, reset other form fields if needed
+              document.getElementById('sound-descriptor').value = '';
             } else if (data) {
-              fetchSoundUser(USERNAME, map);
-              alert('Sound uploaded successfully!');
-              document.getElementById('upload-sound-form').style.display =
-                'none';
-              document.getElementById('popup-content').style.display = 'block';
-
-              fetchAndDisplaySounds(lat, lng);
-              removeTempMarker(false);
+                fetchSoundUser(USERNAME, map);
+                alert('Sound uploaded successfully!');
+                document.getElementById('upload-sound-form').style.display = 'none';
+                document.getElementById('popup-content').style.display = 'block';
+      
+                fetchAndDisplaySounds(lat, lng);
+                removeTempMarker(false);
             }
           })
           .catch((error) => {
             console.error('Error during upload:', error);
-            alert('Error uploading sound');
+            alert(error.message || 'Error uploading sound');
+            //alert('Error uploading sound');
           });
       });
   });
