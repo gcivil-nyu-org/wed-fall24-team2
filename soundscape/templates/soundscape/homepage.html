@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Soundscape Explorer</title>
-    <link rel="icon" type="image/x-icon" href="./static/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="./static/images/favicon.ico" />
     <meta
       name="viewport"
       content="initial-scale=1,maximum-scale=1,user-scalable=no"
@@ -262,6 +262,21 @@
         transition: background-color 0.3s, color 0.3s;
       }
 
+      #logout-button {
+        color: #a527cf;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 12px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      #logout-button:hover {
+        background-color: #f0f0f0;
+        color: #9370db;
+      }
+
       .navbar a:hover {
         background-color: #f0f0f0;
         color: #9370db;
@@ -325,7 +340,7 @@
         margin: 2px 0;
       }
 
-      .sound-name-descriptor{
+      .sound-name-descriptor {
         overflow-wrap: break-word;
         width: 200px;
       }
@@ -365,8 +380,12 @@
       }
 
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
@@ -382,19 +401,23 @@
           {% if user.is_authenticated %}
           <li>{% include 'soundscape/profile_panel.html' %}</li>
           <li>
-            <form id="logout-form" action="{% url 'soundscape:logout' %}" method="post">
+            <form
+              id="logout-form"
+              action="{% url 'soundscape:logout' %}"
+              method="post"
+            >
               {% csrf_token %}
-              <button type="submit">Logout</button>
+              <button id="logout-button" type="submit">Logout</button>
             </form>
           </li>
           <script>
-            username = "{{ username }}"; // Storing the username in a JavaScript variable
+            username = '{{ username }}'; // Storing the username in a JavaScript variable
           </script>
           {% else %}
           <li><a href="{% url 'soundscape:signup' %}">Signup</a></li>
           <li><a href="{% url 'soundscape:login' %}">Login</a></li>
           <script>
-            username = "Anonymous"; // If the user is not logged in, set username to null
+            username = 'Anonymous'; // If the user is not logged in, set username to null
           </script>
           {% endif %}
           <li>{% include 'soundscape/filter_panel.html' %}</li>
@@ -404,10 +427,10 @@
 
     <div class="app-container">
       <div id="map"></div>
-      <div id="loading-indicator" style="display: none;" class="loader"></div>
+      <div id="loading-indicator" style="display: none" class="loader"></div>
     </div>
     <script>
-      const csrfToken = "{{ csrf_token }}";
+      const csrfToken = '{{ csrf_token }}';
     </script>
     <script src="{% static 'js/mapUtils.js'%}"></script>
     <script src="{% static 'js/chatroom.js'%}"></script>

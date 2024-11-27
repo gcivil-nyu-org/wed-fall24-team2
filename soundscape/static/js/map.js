@@ -93,7 +93,8 @@ function createSoundMarker(lng, lat, map) {
 
         const latitude = document.getElementById('latitude').value;
         const longitude = document.getElementById('longitude').value;
-        const soundDescriptor = document.getElementById('sound-descriptor').value;
+        const soundDescriptor =
+          document.getElementById('sound-descriptor').value;
 
         const formData = new FormData();
         formData.append('username', username);
@@ -126,7 +127,9 @@ function createSoundMarker(lng, lat, map) {
             if (response.ok) {
               return response.json();
             } else {
-              throw new Error(`Error: ${response.status} - ${response.statusText}`);
+              throw new Error(
+                `Error: ${response.status} - ${response.statusText}`
+              );
             }
           })
           .then((data) => {
@@ -137,7 +140,8 @@ function createSoundMarker(lng, lat, map) {
             } else if (data) {
               fetchSoundUser(USERNAME, map);
               alert('Sound uploaded successfully!');
-              document.getElementById('upload-sound-form').style.display = 'none';
+              document.getElementById('upload-sound-form').style.display =
+                'none';
               document.getElementById('popup-content').style.display = 'block';
 
               fetchAndDisplaySounds(lat, lng);
@@ -587,18 +591,23 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
     });
 
     // Register onClick function on map
-    map.on('click', function (e) {
-      const coordinates = e.lngLat;
-      if (
-        isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)
-      ) {
-        return;
-      }
+    if (isLoggedIn()) {
+      map.on('click', function (e) {
+        if(e.originalEvent.srcElement.className.includes('chatroom') || e.originalEvent.srcElement.className.includes('sound')){
+          return;
+        }
+        const coordinates = e.lngLat;
+        if (
+          isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)
+        ) {
+          return;
+        }
 
-      removeTempMarker(true);
-      addMarker(coordinates.lng, coordinates.lat, map);
-      saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
-    });
+        removeTempMarker(true);
+        addMarker(coordinates.lng, coordinates.lat, map);
+        saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
+      });
+    }
   }
 
   addHeatmapLayer(map);
