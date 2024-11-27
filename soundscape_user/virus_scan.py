@@ -1,15 +1,12 @@
 import requests
 import os
 
+
 def scan_file_with_virustotal(file_data, api_key):
-    #return True
+    # return True
     url = "https://www.virustotal.com/api/v3/files"
-    headers = {
-        "x-apikey": os.getenv("VIRUS_SCAN_API")
-    }
-    files = {
-        "file": file_data
-    }
+    headers = {"x-apikey": os.getenv("VIRUS_SCAN_API")}
+    files = {"file": file_data}
     response = requests.post(url, headers=headers, files=files)
     if response.status_code == 200:
         analysis_id = response.json()["data"]["id"]
@@ -26,7 +23,10 @@ def scan_file_with_virustotal(file_data, api_key):
                 print("Analysis not completed yet.")
                 return False
         else:
-            print("Failed to retrieve file analysis. Status code:", analysis_response.status_code)
+            print(
+                "Failed to retrieve file analysis. Status code:",
+                analysis_response.status_code,
+            )
             return False
     else:
         print("VirusTotal scan failed. Status code:", response.status_code)
