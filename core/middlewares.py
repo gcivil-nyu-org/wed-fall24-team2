@@ -17,6 +17,7 @@ class CheckSessionMiddleware:
             reverse("soundscape:validate_session"),
             "/static/",
             "/media/",
+            "/ws/",
         ]
 
         # Allow paths that start with any exempt path (e.g., static/media)
