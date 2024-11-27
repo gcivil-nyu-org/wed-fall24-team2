@@ -3,7 +3,7 @@ import os
 
 
 def scan_file_with_virustotal(file_data, api_key):
-    #dummy test malware (hardcoded)
+    # dummy test malware (hardcoded)
     # return True
     url = "https://www.virustotal.com/api/v3/files"
     headers = {"x-apikey": os.getenv("VIRUS_SCAN_API")}
