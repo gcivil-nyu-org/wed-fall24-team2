@@ -94,7 +94,7 @@ def get_noise_data(request):
         APP_TOKEN = os.environ.get("NYC_OPEN_DATA_APP_TOKEN")
         headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
 
-        TOTAL_RECORDS = 2500  
+        TOTAL_RECORDS = 2500
         BATCH_SIZE = 500
         MAX_WORKERS = 5  # Number of concurrent requests
 
