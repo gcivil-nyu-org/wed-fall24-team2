@@ -73,13 +73,22 @@ def get_noise_data(request):
         conditions = json.loads(request.body)
 
         # Generate a unique cache key based on the request conditions
-        cache_key = f"noise_data_{json.dumps(conditions, sort_keys=True)}"
+        cache_key = f"noise_data_full_{json.dumps(conditions, sort_keys=True)}"
 
         # Try to get cached data first
         from django.core.cache import cache
         cached_data = cache.get(cache_key)
         if cached_data:
-            return JsonResponse(cached_data, status=200, safe=False)
+            print(f"Retrieved data from cache for key: {cache_key}")
+            
+            # Ensure the response matches the original API response structure
+            response_data = {
+                "sound_data": cached_data.get("sound_data", []),
+                "total_records": cached_data.get("total_records", 0),
+                "records_requested": cached_data.get("records_requested", 0)
+            }
+            
+            return JsonResponse(response_data, status=200, safe=False)
 
         # Constants
         API_URL = "https://data.cityofnewyork.us/resource/hbc2-s6te.json"
@@ -139,8 +148,9 @@ def get_noise_data(request):
             "records_requested": TOTAL_RECORDS
         }
 
-        # Cache the response for 1 hour
+        # Cache the entire response for 1 hour
         cache.set(cache_key, response_data, timeout=3600)
+        print(f"Cached data for key: {cache_key}")
 
         return JsonResponse(response_data, status=200, safe=False)
 
@@ -159,7 +169,6 @@ def get_noise_data(request):
             {"error": f"Internal server error: {str(e)}"},
             status=500
         )
-
 
 def check_profanity(request):
     if request.method == "POST":
