@@ -446,7 +446,7 @@ function addHeatmapLayer(map) {
     document.getElementById('loading-indicator').style.display = 'block';
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+    const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 seconds timeout
 
     try {
       const response = await fetch('/get_noise_data/', {
@@ -473,7 +473,7 @@ function addHeatmapLayer(map) {
       const data = await response.json();
       var SOUND_DATA = data.sound_data
       var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
-
+      console.log(data);
       map.addSource('heatmap-data', {
         type: 'geojson',
         data: SOUND_GEOJSON_DATA,
