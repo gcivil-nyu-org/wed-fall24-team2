@@ -27,7 +27,6 @@ from asgiref.sync import async_to_sync
 from django.core.cache import cache
 
 
-
 def homepage(request):
     # Query SoundFileUser data
     user_sound_files = SoundFileUser.objects.all()
@@ -78,17 +77,18 @@ def get_noise_data(request):
 
         # Try to get cached data first
         from django.core.cache import cache
+
         cached_data = cache.get(cache_key)
         if cached_data:
             print(f"Retrieved data from cache for key: {cache_key}")
-            
+
             # Ensure the response matches the original API response structure
             response_data = {
                 "sound_data": cached_data.get("sound_data", []),
                 "total_records": cached_data.get("total_records", 0),
-                "records_requested": cached_data.get("records_requested", 0)
+                "records_requested": cached_data.get("records_requested", 0),
             }
-            
+
             return JsonResponse(response_data, status=200, safe=False)
 
         # Constants
@@ -97,8 +97,8 @@ def get_noise_data(request):
         headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
 
         TOTAL_RECORDS = 1000  # Total records we want to fetch
-        BATCH_SIZE = 200      # API's default/maximum limit per request
-        MAX_WORKERS = 5        # Number of concurrent requests
+        BATCH_SIZE = 200  # API's default/maximum limit per request
+        MAX_WORKERS = 5  # Number of concurrent requests
 
         # Build the where clause
         sound_type = conditions.get("soundType") or ["Noise"]
@@ -112,14 +112,13 @@ def get_noise_data(request):
         if date_to := conditions.get("dateTo"):
             where_clause += f" AND created_date <= '{date_to}'"
 
-
         # Prepare batch parameters for parallel requests
         batch_params = [
             {
                 "$limit": BATCH_SIZE,
                 "$offset": offset,
                 "$where": where_clause,
-                "$order": "created_date DESC"  # Consistent ordering
+                "$order": "created_date DESC",  # Consistent ordering
             }
             for offset in range(0, TOTAL_RECORDS, BATCH_SIZE)
         ]
@@ -144,7 +143,7 @@ def get_noise_data(request):
         response_data = {
             "sound_data": all_data,
             "total_records": len(all_data),
-            "records_requested": TOTAL_RECORDS
+            "records_requested": TOTAL_RECORDS,
         }
 
         # Cache the entire response for 1 day
@@ -156,18 +155,16 @@ def get_noise_data(request):
     except requests.exceptions.RequestException as e:
         return JsonResponse(
             {"error": f"API request failed: {str(e)}"},
-            status=503  # Service Unavailable
+            status=503,  # Service Unavailable
         )
     except json.JSONDecodeError as e:
         return JsonResponse(
             {"error": f"Invalid JSON in request body - {str(e)}"},
-            status=400  # Bad Request
+            status=400,  # Bad Request
         )
     except Exception as e:
-        return JsonResponse(
-            {"error": f"Internal server error: {str(e)}"},
-            status=500
-        )
+        return JsonResponse({"error": f"Internal server error: {str(e)}"}, status=500)
+
 
 def check_profanity(request):
     if request.method == "POST":
