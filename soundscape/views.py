@@ -24,6 +24,7 @@ from django.http import HttpResponseRedirect
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.core.cache import cache
 
 
 def homepage(request):
@@ -71,6 +72,15 @@ def get_noise_data(request):
     try:
         conditions = json.loads(request.body)
 
+        # Generate a unique cache key based on the request conditions
+        cache_key = f"noise_data_{json.dumps(conditions, sort_keys=True)}"
+
+        # Try to get cached data first
+        from django.core.cache import cache
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return JsonResponse(cached_data, status=200, safe=False)
+
         # Constants
         API_URL = "https://data.cityofnewyork.us/resource/hbc2-s6te.json"
         APP_TOKEN = os.environ.get("NYC_OPEN_DATA_APP_TOKEN")
@@ -93,7 +103,7 @@ def get_noise_data(request):
             where_clause += f" AND created_date <= '{date_to}'"
 
         borough = "MANHATTAN"
-        where_clause+= f" AND borough = '{borough}'"
+        where_clause += f" AND borough = '{borough}'"
 
         # Prepare batch parameters for parallel requests
         batch_params = [
@@ -122,11 +132,17 @@ def get_noise_data(request):
                     break
                 all_data.extend(batch_data)
 
-        return JsonResponse({
+        # Prepare response data
+        response_data = {
             "sound_data": all_data,
             "total_records": len(all_data),
             "records_requested": TOTAL_RECORDS
-        }, status=200, safe=False)
+        }
+
+        # Cache the response for 1 hour
+        cache.set(cache_key, response_data, timeout=3600)
+
+        return JsonResponse(response_data, status=200, safe=False)
 
     except requests.exceptions.RequestException as e:
         return JsonResponse(
