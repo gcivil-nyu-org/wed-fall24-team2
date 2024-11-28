@@ -149,8 +149,8 @@ def get_noise_data(request):
             "records_requested": TOTAL_RECORDS
         }
 
-        # Cache the entire response for 5 days
-        cache.set(cache_key, response_data, timeout=432000)
+        # Cache the entire response for 1 day
+        cache.set(cache_key, response_data, timeout=86400)
         print(f"Cached data for key: {cache_key}")
 
         return JsonResponse(response_data, status=200, safe=False)
