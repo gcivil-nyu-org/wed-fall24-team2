@@ -471,7 +471,7 @@ function addHeatmapLayer(map) {
       }
 
       const data = await response.json();
-      var SOUND_DATA = JSON.parse(data.sound_data);
+      var SOUND_DATA = data.sound_data
       var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
 
       map.addSource('heatmap-data', {
