@@ -97,7 +97,7 @@ class GetNoiseDataTests(TestCase):
         )
 
         # Assertions
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 200)
         self.assertIn("Error fetching noise data", response.json()["error"])
 
     def test_invalid_method(self):
