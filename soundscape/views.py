@@ -112,8 +112,6 @@ def get_noise_data(request):
         if date_to := conditions.get("dateTo"):
             where_clause += f" AND created_date <= '{date_to}'"
 
-        borough = "MANHATTAN"
-        where_clause += f" AND borough = '{borough}'"
 
         # Prepare batch parameters for parallel requests
         batch_params = [
