@@ -93,9 +93,8 @@ def get_noise_data(request):
         API_URL = "https://data.cityofnewyork.us/resource/hbc2-s6te.json"
         APP_TOKEN = os.environ.get("NYC_OPEN_DATA_APP_TOKEN")
         headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
-
-        TOTAL_RECORDS = 2500
-        BATCH_SIZE = 500
+        TOTAL_RECORDS = 5000
+        BATCH_SIZE = 1000
         MAX_WORKERS = 5  # Number of concurrent requests
 
         # Build the where clause
