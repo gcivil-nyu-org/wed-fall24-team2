@@ -12,7 +12,16 @@ import requests
 import os
 import json
 
-from profanity_check import predict
+from better_profanity import profanity
+
+from django.views import View
+from django.contrib.auth import logout
+from django.contrib.sessions.models import Session
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 def homepage(request):
@@ -105,11 +114,27 @@ def get_noise_data(request):
 
 def check_profanity(request):
     if request.method == "POST":
-        message = request.body
+        message = request.body.decode("utf-8")
 
-        # The output is a Boolean value True/ 1 or False/0
-        value = predict([message])
-        return JsonResponse({"value": str(value[0])}, status=200)
+        try:
+            # The output is a Boolean value True or False
+            value = profanity.contains_profanity(message)
+            return JsonResponse({"value": str(int(value))}, status=200)
+        except Exception:
+            return JsonResponse({"value": str(1)}, status=200)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def filter_profanity(request):
+    if request.method == "POST":
+        message = request.body.decode("utf-8")
+
+        try:
+            censored_message = profanity.censor(message)
+            return JsonResponse({"message": str(censored_message)}, status=200)
+        except Exception:
+            return JsonResponse({"message": str(message)}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
@@ -129,3 +154,25 @@ def signup(request):
         form = SignupForm()
 
     return render(request, "soundscape/signup.html", {"form": form})
+
+
+class CustomLogoutView(View):
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            user = request.user
+            # Notify WebSocket consumers to disconnect
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f"user_{user.id}", {"type": "logout_message"}
+            )
+
+            Session.objects.filter(session_key=request.session.session_key).delete()
+            logout(request)
+
+        return HttpResponseRedirect(reverse("soundscape:homepage"))
+
+
+def validate_session(request):
+    if request.user.is_authenticated:
+        return JsonResponse({"authenticated": True})
+    return JsonResponse({"authenticated": False}, status=401)

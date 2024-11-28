@@ -14,38 +14,83 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
         self.chatroom_name = urllib.parse.unquote(
             self.scope["url_route"]["kwargs"]["chatroom_name"]
         )
-
         self.room_group_name = f"chat_{self.chatroom_name.replace(' ', '_')}"
 
+        # Validate user session
+        user = self.scope.get("user")
+        if not user or not user.is_authenticated:
+            logger.warning("Unauthenticated user attempted to connect.")
+            await self.close(code=4001)  # Custom WebSocket close code
+            return
+
+        # Add the user to their personal group for logout handling
+        self.user_group_name = f"user_{user.id}"
+        await self.channel_layer.group_add(self.user_group_name, self.channel_name)
+
+        # Add user to the chatroom group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        logger.info(
-            f"Connected to room: {self.chatroom_name}, Group Name: {self.room_group_name}"
-        )
-        print(
-            f"Connected to room: {self.chatroom_name}, Group Name: {self.room_group_name}"
-        )
+        logger.info(f"Connected to room: {self.chatroom_name}")
         await self.send_chat_history()
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-        logger.info(f"Disconnected from room: {self.chatroom_name}, Code: {close_code}")
+        try:
+            # Notify the room that the user has disconnected
+            if self.scope.get("user") and self.scope["user"].is_authenticated:
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "chat_message",
+                        "message": f"{self.scope['user'].username} has left the chat.",
+                        "username": "System",
+                        "timestamp": "N/A",
+                    },
+                )
+
+            # Remove from groups
+            await self.channel_layer.group_discard(
+                self.room_group_name, self.channel_name
+            )
+            if hasattr(self, "user_group_name"):
+                await self.channel_layer.group_discard(
+                    self.user_group_name, self.channel_name
+                )
+
+            # Handle close code specifics
+            if close_code == 4001:
+                logger.warning("Disconnected due to session expiry.")
+            elif close_code == 1000:
+                logger.info("Normal WebSocket closure.")
+            else:
+                logger.debug(f"Disconnected with code: {close_code}")
+
+            logger.info(
+                f"Disconnected from room: {self.chatroom_name}, Code: {close_code}"
+            )
+        except Exception as e:
+            logger.error(f"Error during disconnect: {e}")
+
+    async def logout_message(self, event):
+        # Handle logout notification
+        logger.info("Received logout message. Closing WebSocket connection.")
+        await self.close(code=4001)
 
     async def receive(self, text_data):
         logger.info(f"Text data received: {text_data}")
+        user = self.scope.get("user")
+        if not user or not user.is_authenticated:
+            logger.error("Unauthenticated user cannot send messages.")
+            await self.send(
+                text_data=json.dumps(
+                    {"error": "Unauthenticated. Redirecting to login."}
+                )
+            )
+            await self.close(code=4001)  # Close connection for unauthenticated user
+            return
+
         try:
             text_data_json = json.loads(text_data)
             message = text_data_json.get("message", "")
-            user = self.scope.get("user")
-
-            # Check if user is authenticated and exists
-            if user is None or not user.is_authenticated:
-                logger.error("Unauthenticated user cannot send messages.")
-                await self.send(
-                    text_data=json.dumps({"error": "User not authenticated"})
-                )
-                return
-
             username = user.username
             timestamp = text_data_json.get("timestamp", "N/A")
 
@@ -75,9 +120,9 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
 
     async def chat_message(self, event):
         logger.info(f"Chat message event received: {event}")
-        message = event["message"]  # Added to fix the undefined 'message'
-        username = event["username"]
-        timestamp = event["timestamp"]
+        message = event.get("message", "")
+        username = event.get("username", "Unknown")
+        timestamp = event.get("timestamp", "Unknown")
 
         # Send message to WebSocket
         await self.send(
@@ -88,27 +133,31 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
         logger.info(f"Sent message: {message} from {username} at {timestamp}")
 
     async def send_chat_history(self, page=1, messages_per_page=50):
-        chatroom = await Chatroom.objects.aget(name=self.chatroom_name)
+        try:
+            chatroom = await Chatroom.objects.aget(name=self.chatroom_name)
 
-        offset = (page - 1) * messages_per_page
-        # Use sync_to_async to make the ORM query async-compatible
-        recent_messages = await sync_to_async(
-            lambda: list(
-                ChatMessage.objects.filter(chatroom=chatroom)
-                .order_by("-timestamp")[offset : offset + messages_per_page]
-                .values("message", "user__username", "timestamp")
-            )
-        )()
+            offset = (page - 1) * messages_per_page
+            recent_messages = await sync_to_async(
+                lambda: list(
+                    ChatMessage.objects.filter(chatroom=chatroom)
+                    .order_by("-timestamp")[offset : offset + messages_per_page]
+                    .values("message", "user__username", "timestamp")
+                )
+            )()
 
-        # Process the messages to create the history list
-        history = [
-            {
-                "message": msg["message"],
-                "username": msg["user__username"],
-                "timestamp": msg["timestamp"].isoformat(),
-            }
-            for msg in recent_messages
-        ]
+            # Process messages for the chat history
+            history = [
+                {
+                    "message": msg["message"],
+                    "username": msg["user__username"],
+                    "timestamp": msg["timestamp"].isoformat(),
+                }
+                for msg in recent_messages
+            ]
 
-        # Send the chat history to the WebSocket
-        await self.send(text_data=json.dumps({"history": history, "page": page}))
+            # Send chat history to WebSocket
+            await self.send(text_data=json.dumps({"history": history, "page": page}))
+        except Chatroom.DoesNotExist:
+            logger.error(f"Chatroom {self.chatroom_name} does not exist.")
+            await self.send(text_data=json.dumps({"error": "Chatroom does not exist"}))
+            await self.close()

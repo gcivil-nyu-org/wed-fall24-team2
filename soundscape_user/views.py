@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from .forms import SoundFileUploadForm
 from .models import SoundFileUser
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
 
 
 s3 = boto3.client(
@@ -15,7 +16,9 @@ s3 = boto3.client(
 )
 
 
+@login_required
 def upload_sound_file(request):
+    print(f"Is user authenticated? {request.user.is_authenticated}")
     if request.method == "POST":
         form = SoundFileUploadForm(request.POST, request.FILES)
         print("here")

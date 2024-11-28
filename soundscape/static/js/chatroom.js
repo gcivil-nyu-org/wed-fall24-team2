@@ -18,7 +18,7 @@ function initializeChat(neighborhood) {
     return date.toLocaleString(undefined, options);
   }
 
-  function createMessageElement(data) {
+  async function createMessageElement(data) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `chat-message ${
       data.username === username ? 'user' : ''
@@ -29,61 +29,91 @@ function initializeChat(neighborhood) {
     const sanitizedUsername = DOMPurify.sanitize(data.username);
     const sanitizedMessage = DOMPurify.sanitize(data.message);
 
+    // Filter profanity
+    let censoredMessage = sanitizedMessage;
+    try {
+      const response = await fetch('/filter_profanity/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+        },
+        body: sanitizedMessage,
+      });
+      const data = await response.json();
+      censoredMessage = data.message;
+    } catch (error) {
+      console.error('Error filtering profanity:', error);
+  }
+
     messageDiv.innerHTML = `
         <div class="message-header">
             <span class="username">${sanitizedUsername}</span>
             <span class="timestamp">${formattedTimestamp}</span>
         </div>
-        <div class="message-text">${sanitizedMessage}</div>
+        <div class="message-text">${censoredMessage}</div>
     `;
 
     return messageDiv;
   }
 
   // Function to display chat history
-  function displayChatHistory(history) {
+  async function displayChatHistory(history) {
     const chatMessages = document.getElementById('chat-messages');
-    chatMessages.innerHTML = ''; // Clear existing messages
+    chatMessages.innerHTML = `
+        <div style="height: 100%; display: flex; justify-content: center; align-items: center;">
+          <div id="loading-messages" style="display: none;" class="message-loader"></div>
+        </div>
+      `; // Clear existing messages
 
-    history.reverse().forEach((item) => {
-      const messageElement = createMessageElement(item);
+    document.getElementById('loading-messages').style.display = 'block';
+
+    for (const item of history.reverse()) {
+      const messageElement = await createMessageElement(item);
       chatMessages.appendChild(messageElement);
-    });
+    }
+
+    document.getElementById('loading-messages').style.display = 'none';
 
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
   // Function to send message
-  function sendMessage() {
-    const messageInput = document.getElementById('messageInput');
-    let message = messageInput.value;
-    message = DOMPurify.sanitize(message);
-    if (message.trim() !== '') {
-      const timestamp = new Date().toISOString();
-      chatSocket.send(
-        JSON.stringify({
-          message,
-          username,
-          timestamp,
-        })
-      );
-      messageInput.value = '';
-    }
-  }
+    async function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        let message = messageInput.value;
+        message = DOMPurify.sanitize(message);
 
-  // Handle incoming WebSocket messages
-  chatSocket.onmessage = function (e) {
-    const data = JSON.parse(e.data);
-    const chatMessages = document.getElementById('chat-messages');
-
-    if (data.history) {
-      displayChatHistory(data.history);
-    } else if (data.message) {
-      const messageElement = createMessageElement(data);
-      chatMessages.appendChild(messageElement);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (message.trim() !== '') {
+            const isValidSession = await validateSession();
+            if (isValidSession) {
+                const timestamp = new Date().toISOString();
+                chatSocket.send(
+                    JSON.stringify({
+                        message,
+                        username,
+                        timestamp,
+                    })
+                );
+                messageInput.value = '';
+            }
+        }
     }
-  };
+
+    chatSocket.onmessage = async function (e) {
+        const data = JSON.parse(e.data);
+
+        if (data.error === 'Unauthorized') {
+            alert('Your session has expired. Redirecting to login.');
+            window.location.href = '/login/';
+        } else if (data.history) {
+          await displayChatHistory(data.history);
+        } else if (data.message) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = await createMessageElement(data);
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    };
 
   // Handle WebSocket connection errors
   chatSocket.onerror = function (error) {
@@ -96,16 +126,20 @@ function initializeChat(neighborhood) {
     chatMessages.appendChild(errorDiv);
   };
 
-  // Handle WebSocket disconnection
-  chatSocket.onclose = function (e) {
-    console.log('Chat socket closed unexpectedly');
-    const chatMessages = document.getElementById('chat-messages');
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'chat-message error';
-    errorDiv.textContent =
-      'Connection lost. Please refresh the page to reconnect.';
-    chatMessages.appendChild(errorDiv);
-  };
+    chatSocket.onclose = function (e) {
+        if (e.code === 4001) { // Custom close code for logout
+            //alert('Session expired. Redirecting ....');
+            window.location.href = '/';
+        } else {
+            console.log('WebSocket closed:', e);
+            const chatMessages = document.getElementById('chat-messages');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'chat-message error';
+            errorDiv.textContent =
+                'Your session has been terminated. Please refresh the page to reconnect.';
+            chatMessages.appendChild(errorDiv);
+        }
+    };
 
   setTimeout(() => {
     document
@@ -122,6 +156,34 @@ function initializeChat(neighborhood) {
     }
   });
 }
+
+
+async function validateSession() {
+    try {
+        const response = await fetch('/validate_session/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.authenticated;
+        } else if (response.status === 401) {
+            alert('Your session has expired. Logging you out');
+            window.location.href = '/';
+            return false;
+        } else {
+            console.error('Unexpected response:', response);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error validating session:', error);
+        return false;
+    }
+}
+
 
 function checkProfanity() {
   const messageInput = document.getElementById('messageInput').value;
