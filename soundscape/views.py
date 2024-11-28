@@ -27,6 +27,7 @@ from asgiref.sync import async_to_sync
 from django.core.cache import cache
 
 
+
 def homepage(request):
     # Query SoundFileUser data
     user_sound_files = SoundFileUser.objects.all()
@@ -95,8 +96,8 @@ def get_noise_data(request):
         APP_TOKEN = os.environ.get("NYC_OPEN_DATA_APP_TOKEN")
         headers = {"X-App-Token": APP_TOKEN} if APP_TOKEN else {}
 
-        TOTAL_RECORDS = 5000  # Total records we want to fetch
-        BATCH_SIZE = 1000      # API's default/maximum limit per request
+        TOTAL_RECORDS = 1000  # Total records we want to fetch
+        BATCH_SIZE = 200      # API's default/maximum limit per request
         MAX_WORKERS = 5        # Number of concurrent requests
 
         # Build the where clause
@@ -148,8 +149,8 @@ def get_noise_data(request):
             "records_requested": TOTAL_RECORDS
         }
 
-        # Cache the entire response for 1 hour
-        cache.set(cache_key, response_data, timeout=3600)
+        # Cache the entire response for 5 days
+        cache.set(cache_key, response_data, timeout=432000)
         print(f"Cached data for key: {cache_key}")
 
         return JsonResponse(response_data, status=200, safe=False)

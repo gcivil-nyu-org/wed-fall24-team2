@@ -233,3 +233,5 @@ LOGIN_REDIRECT_URL = "/"
 USE_TZ = True
 TIME_ZONE = "UTC"
 LOGIN_URL = "/login/"
+
+
