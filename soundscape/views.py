@@ -75,9 +75,7 @@ def get_noise_data(request):
         # Generate a unique cache key based on the request conditions
         cache_key = f"noise_data_full_{json.dumps(conditions, sort_keys=True)}"
 
-        # Try to get cached data first
-        from django.core.cache import cache
-
+        # Try to get cached first
         cached_data = cache.get(cache_key)
         if cached_data:
             print(f"Retrieved data from cache for key: {cache_key}")
