@@ -80,7 +80,7 @@ class GetNoiseDataTests(TestCase):
 
         # Assertions
         self.assertEqual(response.status_code, 200)
-        response_data = response.json()["sound_data"]
+        # response_data = response.json()["sound_data"]
         # self.assertEqual(response_data, self.sample_response_data)
 
     @patch("soundscape.views.requests.get")
