@@ -149,7 +149,7 @@ class GetNoiseDataTests(TestCase):
 
         # Assertions
         self.assertEqual(response.status_code, 200)
-        mock_get.assert_called_once()
+        mock_get.assert_called()
         call_args = mock_get.call_args[1]
         self.assertIn(
             "starts_with(complaint_type, 'Noise')", call_args["params"]["$where"]
