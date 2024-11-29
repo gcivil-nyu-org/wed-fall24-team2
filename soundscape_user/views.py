@@ -18,14 +18,14 @@ s3 = boto3.client(
 
 @login_required
 def upload_sound_file(request):
-    print(f"Is user authenticated? {request.user.is_authenticated}")
+    # print(f"Is user authenticated? {request.user.is_authenticated}")
     if request.method == "POST":
         form = SoundFileUploadForm(request.POST, request.FILES)
-        print("here")
+        # print("here")
         if form.is_valid():
             user_name = form.cleaned_data["username"]
             sound_file = request.FILES["sound_file"]
-            print(sound_file.size)
+            # print(sound_file.size)
             if sound_file.size > 3 * 1024 * 1024:  # 3 MB
                 return JsonResponse(
                     {"error": "Please limit the sound file size to 3 MB"}, status=400
