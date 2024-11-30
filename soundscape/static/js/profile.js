@@ -22,6 +22,11 @@ function formatDateTimeUser(dateString) {
 function toggleProfile() {
   const panel = document.getElementById('profilePanel');
   panel.classList.toggle('open');
+
+  if (panel.classList.contains('open')) {
+    // Call fetchSoundUser after 2 seconds
+    fetchSoundUser(USERNAME, map);
+  }
 }
 
 window.toggleProfile = toggleProfile;
