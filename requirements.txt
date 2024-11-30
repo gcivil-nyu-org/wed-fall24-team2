@@ -39,10 +39,4 @@ pytest-django==4.9.0
 coverage==7.6.1
 coveralls==4.0.1
 pytest
-alt-profanity-check
-joblib
-numpy
-scikit-learn
-scipy
-threadpoolctl
-setuptools
+better-profanity

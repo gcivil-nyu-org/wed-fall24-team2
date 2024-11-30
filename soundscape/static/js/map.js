@@ -2,6 +2,17 @@ const MIN_ZOOM_LEVEL = 13;
 
 /* MARKERS */
 
+function isValidS3Key(key) {
+  if (typeof key !== 'string') {
+    return false;
+  }
+
+  // Regex pattern for explicitly allowed characters
+  const allowedPattern = /^[a-zA-Z0-9!\-_.*'()]+$/;
+
+  return allowedPattern.test(key);
+}
+
 function createSoundMarker(lng, lat, map) {
   const el = document.createElement('div');
   el.className = 'sound-marker';
@@ -65,8 +76,18 @@ function createSoundMarker(lng, lat, map) {
         event.preventDefault();
         const soundFile = document.getElementById('sound-file').files[0];
         if (soundFile.size > 3 * 1024 * 1024) {
-          // 3 MB limit
           alert('Please limit the sound file size to 3 MB');
+          return;
+        }
+
+        if (!isValidS3Key(soundFile.name)) {
+          alert(
+            `"${soundFile.name}" contains invalid characters.\n\n` +
+              'Only the following characters are allowed:\n' +
+              '• Letters (A-Z, a-z)\n' +
+              '• Numbers (0-9)\n' +
+              "• Special characters: ! - _ . * ' ( )\n\n"
+          );
           return;
         }
 
@@ -75,7 +96,6 @@ function createSoundMarker(lng, lat, map) {
         const soundDescriptor =
           document.getElementById('sound-descriptor').value;
 
-        // Handle the file upload and form data submission
         const formData = new FormData();
         formData.append('username', username);
         formData.append('sound_file', soundFile);
@@ -90,26 +110,47 @@ function createSoundMarker(lng, lat, map) {
           },
           body: formData,
         })
-          .then((response) => response.json())
+          .then((response) => {
+            console.log('Fetch response object:', response);
+
+            if (response.redirected) {
+              console.warn('Redirection detected. Redirecting to login.');
+              console.log('Redirect URL:', response.url);
+              alert('Your session has expired. Redirecting to login.');
+              window.location.href = response.url;
+              return;
+            }
+
+            console.log('Response status:', response.status);
+            console.log('Response statusText:', response.statusText);
+
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error(
+                `Error: ${response.status} - ${response.statusText}`
+              );
+            }
+          })
           .then((data) => {
-          if (data.error) {
-            alert(data.error);
-          } else {
-            fetchSoundUser(USERNAME, map)
-            alert('Sound uploaded successfully!');
-            document.getElementById('upload-sound-form').style.display = 'none';
-            document.getElementById('popup-content').style.display = 'block';
+            console.log('Parsed response data:', data);
+
+            if (data && data.error) {
+              alert(data.error);
+            } else if (data) {
+              fetchSoundUser(USERNAME, map);
+              alert('Sound uploaded successfully!');
+              document.getElementById('upload-sound-form').style.display =
+                'none';
+              document.getElementById('popup-content').style.display = 'block';
 
               fetchAndDisplaySounds(lat, lng);
-
-              // Pop the marker from the list
-              // without removing the marker from the map
               removeTempMarker(false);
             }
           })
           .catch((error) => {
+            console.error('Error during upload:', error);
             alert('Error uploading sound');
-            console.error('Error:', error);
           });
       });
   });
@@ -194,30 +235,36 @@ function fetchAndDisplaySounds(lat, lng) {
                 .appendChild(audioElement);
 
               if (isLoggedInUser(sound.user_name)) {
-                document.getElementById(`delete-sound-${sound.sound_name}`).addEventListener('click', () => {
-                  if (window.confirm("Are you sure you want to delete this sound file?")) {
-                    fetch('/soundscape_user/delete/', {
-                      method: 'POST',
-                      headers: {
-                        'X-CSRFToken': csrfToken,
-                      },
-                      body: JSON.stringify(sound),
-                    })
-                      .then((response) => response.json())
-                      .then((data) => {
-                        if (data.error) {
-                          alert(data.error);
-                        } else {
-                          fetchSoundUser(USERNAME, map);
-                          alert('You have deleted a sound file!');
-                        }
-                        fetchAndDisplaySounds(lat, lng);
+                document
+                  .getElementById(`delete-sound-${sound.sound_name}`)
+                  .addEventListener('click', () => {
+                    if (
+                      window.confirm(
+                        'Are you sure you want to delete this sound file?'
+                      )
+                    ) {
+                      fetch('/soundscape_user/delete/', {
+                        method: 'POST',
+                        headers: {
+                          'X-CSRFToken': csrfToken,
+                        },
+                        body: JSON.stringify(sound),
                       })
-                      .catch((error) => {
-                        console.log('Error deleting sound file:', error);
-                      });
-                  }
-                });
+                        .then((response) => response.json())
+                        .then((data) => {
+                          if (data.error) {
+                            alert(data.error);
+                          } else {
+                            fetchSoundUser(USERNAME, map);
+                            alert('You have deleted a sound file!');
+                          }
+                          fetchAndDisplaySounds(lat, lng);
+                        })
+                        .catch((error) => {
+                          console.log('Error deleting sound file:', error);
+                        });
+                    }
+                  });
               }
             })
             .catch((error) => {
@@ -261,7 +308,6 @@ function playSound(url) {
 }
 
 function formatDateTime(dateString) {
-  console.log(dateString);
   const date = new Date(dateString);
 
   const options = {
@@ -304,7 +350,7 @@ function addMarker(lng, lat, map) {
 }
 
 function isDuplicateMarker(lng, lat, existingMarkers) {
-  const threshold = 0.0005;
+  const threshold = 0.00001;
   return existingMarkers.some((marker) => {
     return (
       Math.abs(marker.lng - lng) < threshold &&
@@ -324,6 +370,13 @@ function removeTempMarker(removeFromMap) {
       const marker = tempMarker.pop();
       if (removeFromMap) {
         // Remove the marker from the map
+        existingMarkers = existingMarkers.filter((existingMarker) => {
+          return (
+            existingMarker.lng !== marker.longitude &&
+            existingMarker.lat !== marker.latitude
+          );
+        });
+        localStorage.setItem('markers', JSON.stringify(existingMarkers));
         marker.remove();
       }
     }
@@ -342,19 +395,6 @@ function addControls(map) {
       marker: true,
     };
     map.addControl(search);
-
-    /* GEOLOCATION */
-    // map.addControl(
-    //   new mapboxgl.GeolocateControl({
-    //     positionOptions: {
-    //       enableHighAccuracy: true,
-    //     },
-    //     // When active the map will receive updates to the device's location as it changes.
-    //     trackUserLocation: true,
-    //     // Draw an arrow next to the location dot to indicate which direction the device is heading.
-    //     showUserHeading: true,
-    //   })
-    // );
 
     /* NAVIGATION CONTROL */
     map.addControl(new mapboxgl.NavigationControl());
@@ -393,7 +433,7 @@ function addChatroomMarkers(map) {
 
     marker.getElement().addEventListener('click', () => {
       if (!chatInitialized && isLoggedIn()) {
-        console.log('initializing chat for:', neighborhood);
+        console.log('initializing chat for:', neighborhood.name);
         initializeChat(neighborhood);
         chatInitialized = true;
       }
@@ -401,12 +441,110 @@ function addChatroomMarkers(map) {
   });
 }
 
+function convertToGeoJSON(soundData) {
+  return {
+    type: 'FeatureCollection',
+    features: soundData.map((point) => ({
+      type: 'Feature',
+      properties: {
+        ...point,
+        weight: calculateCombinedWeight(point),
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [parseFloat(point.longitude), parseFloat(point.latitude)],
+      },
+    })),
+  };
+}
+
+function calculateCombinedWeight(point) {
+  let weight = 1.0;
+
+  // Time-based weight (keeping this as noise impact varies by time)
+  const date = new Date(point.created_date);
+  const hour = date.getHours();
+
+  if (hour >= 22 || hour <= 7) {
+    weight *= 1.5; // Higher impact during quiet hours
+  } else if ((hour > 7 && hour <= 9) || (hour >= 19 && hour < 22)) {
+    weight *= 1.2; // Medium impact during transition hours
+  }
+
+  // Status-based weight
+  if (point.status === 'Open') {
+    weight *= 1.3;
+  }
+
+  // Descriptor-based weight - using actual NYC noise complaint descriptors
+  const highImpactDescriptors = [
+    'Jack Hammering',
+    'Construction Equipment',
+    'Jackhammer',
+    'Pile Driver',
+    'Bulldozer',
+    'Private Carting Noise',
+    'Industrial Equipment',
+    'Manufacturing Noise',
+    'Generator',
+    'Air Compressor',
+    'Machinery',
+    'Ventilation Equipment',
+    'Demolition',
+    'Heavy Equipment',
+    'Construction Before/After Hours',
+  ];
+
+  const mediumImpactDescriptors = [
+    'Loud Music/Party',
+    'Car/Truck Music',
+    'Car/Truck Horn',
+    'Engine Idling',
+    'Truck Loading/Unloading',
+    'Ice Cream Truck',
+    'Commercial Music',
+    'Air Condition/Ventilation Equipment',
+    'Alarms',
+    'Car/Truck/Bus Horn',
+    'Car/Truck/Bus Engine Idling',
+  ];
+
+  const lowImpactDescriptors = [
+    'Noise, Other',
+    'Noise, Unspecified',
+    'People Noise',
+    'Barking Dog',
+    'Mobile Food Vendor',
+    'PA System',
+    'After Hours Work - Licensed',
+  ];
+
+  const descriptor = point.descriptor || '';
+
+  if (highImpactDescriptors.some((type) => descriptor.includes(type))) {
+    weight *= 1.5;
+  } else if (
+    mediumImpactDescriptors.some((type) => descriptor.includes(type))
+  ) {
+    weight *= 1.2;
+  } else if (lowImpactDescriptors.some((type) => descriptor.includes(type))) {
+    weight *= 1.0;
+  } else {
+    weight *= 0.8; // Default lower weight for unclassified descriptors
+  }
+
+  // Also consider complaint type for additional context
+  if (point.complaint_type?.includes('Construction')) {
+    weight *= 1.2; // Additional weight for construction-related complaints
+  }
+
+  // Cap maximum weight to avoid extreme values
+  return Math.min(weight, 3.0);
+}
+
 function addHeatmapLayer(map) {
   map.on('load', async () => {
     document.getElementById('loading-indicator').style.display = 'block';
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
 
     try {
       const response = await fetch('/get_noise_data/', {
@@ -421,19 +559,15 @@ function addHeatmapLayer(map) {
           dateFrom: document.getElementById('dateFrom').value,
           dateTo: document.getElementById('dateTo').value,
         }),
-        signal: controller.signal,
       });
-
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
 
       const data = await response.json();
-      var SOUND_DATA = JSON.parse(data.sound_data);
+      var SOUND_DATA = data.sound_data;
       var SOUND_GEOJSON_DATA = convertToGeoJSON(SOUND_DATA);
-
       map.addSource('heatmap-data', {
         type: 'geojson',
         data: SOUND_GEOJSON_DATA,
@@ -444,13 +578,38 @@ function addHeatmapLayer(map) {
         type: 'heatmap',
         source: 'heatmap-data',
         paint: {
-          'heatmap-weight': ['coalesce', ['get', 'weight'], 0],
-          'heatmap-intensity': {
-            stops: [
-              [0, 0],
-              [6, 2],
-            ],
-          },
+          // Aggressive weight scaling for better contrast
+          'heatmap-weight': [
+            'interpolate',
+            ['linear'],
+            ['get', 'weight'],
+            0,
+            0,
+            1,
+            0.7,
+            1.5,
+            1.4,
+            2,
+            2.0,
+            3,
+            2.8,
+          ],
+
+          // Higher intensity values for better visibility
+          'heatmap-intensity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            0,
+            0.3,
+            9,
+            0.9,
+            13,
+            2.2,
+            15,
+            3.5,
+          ],
+
           'heatmap-color': [
             'interpolate',
             ['linear'],
@@ -458,23 +617,46 @@ function addHeatmapLayer(map) {
             0,
             'rgba(0,0,0,0)',
             0.2,
-            'rgba(255,237,160,0.5)',
+            'rgba(2,136,209,0.7)', // Material Blue
             0.4,
-            'rgba(255,217,105,0.7)',
+            'rgba(0,172,193,0.8)', // Material Cyan
             0.6,
-            'rgba(255,182,72,0.8)',
+            'rgba(0,191,165,0.85)', // Material Teal
             0.8,
-            'rgba(255,120,50,1)',
-            1,
-            'rgba(255,50,0,1)',
+            'rgba(255,160,0,0.9)', // Material Orange
+            1.0,
+            'rgba(255,61,0,0.95)', // Material Deep Orange
           ],
-          'heatmap-radius': {
-            stops: [
-              [10, 30],
-              [20, 50],
-            ],
-          },
-          'heatmap-opacity': 0.8,
+
+          // Larger radius for better coverage
+          'heatmap-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            0,
+            3, 
+            9,
+            20,
+            13,
+            25,
+            15,
+            30,
+          ],
+
+          // Adjusted opacity for better layering
+          'heatmap-opacity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            7,
+            0.95,
+            9,
+            0.9,
+            13,
+            0.85,
+            15,
+            0.8,
+          ],
         },
       });
 
@@ -532,7 +714,6 @@ function addHeatmapLayer(map) {
 
       document.getElementById('loading-indicator').style.display = 'none';
     } catch (error) {
-      clearTimeout(timeoutId);
       document.getElementById('loading-indicator').style.display = 'none';
       console.error('Error fetching noise data:', error);
       alert('Oops! Data is on its way, please reload the page.');
@@ -551,18 +732,26 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
     });
 
     // Register onClick function on map
-    map.on('click', function (e) {
-      const coordinates = e.lngLat;
-      if (
-        isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)
-      ) {
-        return;
-      }
+    if (isLoggedIn()) {
+      map.on('click', function (e) {
+        if (
+          e.originalEvent.srcElement.className.includes('chatroom') ||
+          e.originalEvent.srcElement.className.includes('sound')
+        ) {
+          return;
+        }
+        const coordinates = e.lngLat;
+        if (
+          isDuplicateMarker(coordinates.lng, coordinates.lat, existingMarkers)
+        ) {
+          return;
+        }
 
-      removeTempMarker(true);
-      addMarker(coordinates.lng, coordinates.lat, map);
-      saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
-    });
+        removeTempMarker(true);
+        addMarker(coordinates.lng, coordinates.lat, map);
+        saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
+      });
+    }
   }
 
   addHeatmapLayer(map);
@@ -581,10 +770,5 @@ function successLocation(position, map, existingMarkers) {
 }
 
 function errorLocation(error, map, existingMarkers) {
-  // alert(
-  //   'Unable to retrieve your location. Initializing map at default location. ' +
-  //     error
-  // );
-  // Optional: Set a default location (e.g., NYC) if geolocation fails
   initializeMap([-74.006, 40.7128], map, existingMarkers); // Default center (New York City)
 }

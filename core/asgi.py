@@ -10,13 +10,13 @@ application = get_asgi_application()
 def get_application():
     from channels.routing import ProtocolTypeRouter, URLRouter
     from channels.auth import AuthMiddlewareStack
-    import chatroom.routing
+    import core.routing
 
     return ProtocolTypeRouter(
         {
             "http": get_asgi_application(),
             "websocket": AuthMiddlewareStack(
-                URLRouter(chatroom.routing.websocket_urlpatterns)
+                URLRouter(core.routing.websocket_urlpatterns)
             ),
         }
     )

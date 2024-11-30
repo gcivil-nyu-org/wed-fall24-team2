@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "data_collection",
     "sounddata_s3",
     "soundscape_user",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -76,6 +77,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middlewares.CheckSessionMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -230,3 +232,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/"
 USE_TZ = True
 TIME_ZONE = "UTC"
+LOGIN_URL = "/login/"
