@@ -1,4 +1,4 @@
-var ifFirstTimeOpen = true;
+// var ifFirstTimeOpen = true;
 
 function formatDateTimeUser(dateString) {
   const date = new Date(dateString);
@@ -25,16 +25,16 @@ function toggleProfile() {
   const panel = document.getElementById('profilePanel');
   panel.classList.toggle('open');
 
-  if (panel.classList.contains('open') && ifFirstTimeOpen == true) {
-    // Call fetchSoundUser after 2 seconds
-    ifFirstTimeOpen = false;
-    fetchSoundUser(USERNAME, map);
-  }
+  // if (panel.classList.contains('open') && ifFirstTimeOpen == true) {
+  //   // Call fetchSoundUser after 2 seconds
+  //   ifFirstTimeOpen = false;
+  //   fetchSoundUser(USERNAME, map);
+  // }
 }
 
 window.toggleProfile = toggleProfile;
 
-let currentAudio = null; // Global variable to track the currently playing audio
+currentAudio = null; // Global variable to track the currently playing audio
 
 function fetchSoundUser(user_name, map) {
   fetch(`/soundscape_user/soundfiles_for_user/${user_name}/`)

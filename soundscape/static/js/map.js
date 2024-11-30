@@ -761,9 +761,7 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
   }
 
   addControls(map);
-  // setTimeout(() => {
-  //   fetchSoundUser(USERNAME, map);
-  // }, 2000); 
+  fetchSoundUser(USERNAME, map);
 }
 
 function successLocation(position, map, existingMarkers) {
