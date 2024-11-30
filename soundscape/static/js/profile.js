@@ -1,3 +1,5 @@
+var ifFirstTimeOpen = true;
+
 function formatDateTimeUser(dateString) {
   const date = new Date(dateString);
   const options = {
@@ -22,6 +24,12 @@ function formatDateTimeUser(dateString) {
 function toggleProfile() {
   const panel = document.getElementById('profilePanel');
   panel.classList.toggle('open');
+
+  if (panel.classList.contains('open') && ifFirstTimeOpen == true) {
+    // Call fetchSoundUser after 2 seconds
+    ifFirstTimeOpen = false;
+    fetchSoundUser(USERNAME, map);
+  }
 }
 
 window.toggleProfile = toggleProfile;
