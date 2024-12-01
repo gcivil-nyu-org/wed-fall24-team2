@@ -26,7 +26,7 @@ function toggleProfile() {
 
 window.toggleProfile = toggleProfile;
 
-currentAudio = null; // Global variable to track the currently playing audio
+let currentAudio = null; // Global variable to track the currently playing audio
 
 function fetchSoundUser(user_name, map) {
   fetch(`/soundscape_user/soundfiles_for_user/${user_name}/`)
