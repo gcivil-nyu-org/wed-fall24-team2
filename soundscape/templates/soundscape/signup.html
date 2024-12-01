@@ -145,6 +145,7 @@
       const formGroups = document.querySelectorAll('.form-group');
       this.submitButton = document.getElementById('submit-button');
 
+      this.usernameInput = formGroups[0].querySelector('input');
       this.emailInput = formGroups[1].querySelector('input');
       this.password1Input = formGroups[2].querySelector('input');
       this.password2Input = formGroups[3].querySelector('input');
@@ -154,6 +155,11 @@
     },
 
     attachEventListeners() {
+      this.usernameInput.addEventListener('input', () => {
+        this.validateUsername();
+        this.updateSubmitButtonState();
+      });
+
       this.emailInput.addEventListener('input', () => {
         this.validateEmail();
         this.updateSubmitButtonState();
@@ -171,6 +177,19 @@
       });
 
       this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+    },
+
+    validateUsername() {
+      const username = this.usernameInput.value;
+      const isValid = /^[a-zA-Z][a-zA-Z0-9_]{2,30}$/.test(username);
+
+      this.updateValidation(
+        this.usernameInput,
+        isValid,
+        isValid? 'Username is valid' :
+        'This value must start with a letter, be 3-30 characters long, and may contain only letters, numbers, and underscore (_).'
+      );
+      return isValid;
     },
 
     validateEmail() {
@@ -233,6 +252,7 @@
 
     updateSubmitButtonState() {
       const isFormValid =
+        this.validateUsername() &&
         this.validateEmail() &&
         this.validatePassword() &&
         this.validatePasswordMatch();
@@ -241,11 +261,12 @@
     },
 
     handleSubmit(e) {
+      const isUsernameValid = this.validateUsername();
       const isEmailValid = this.validateEmail();
       const isPasswordValid = this.validatePassword();
       const isPasswordMatchValid = this.validatePasswordMatch();
 
-      if (!(isEmailValid && isPasswordValid && isPasswordMatchValid)) {
+      if (!(isUsernameValid && isEmailValid && isPasswordValid && isPasswordMatchValid)) {
         e.preventDefault();
       }
     }
