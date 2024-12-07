@@ -8,6 +8,7 @@ app_name = "soundscape"
 
 urlpatterns = [
     path("", views.homepage, name="homepage"),
+    path("get_user_sound_data/", views.get_user_sound_data, name="get_user_sound_data"),
     path("get_noise_data/", views.get_noise_data, name="get_noise_data"),
     path("check_profanity/", views.check_profanity, name="check_profanity"),
     path("filter_profanity/", views.filter_profanity, name="filter_profanity"),

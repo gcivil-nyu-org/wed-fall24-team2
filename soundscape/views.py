@@ -54,6 +54,18 @@ def homepage(request):
     )
 
 
+def get_user_sound_data(request):
+    if request.method == "GET":
+
+        user_sound_files = SoundFileUser.objects.all()
+        user_sound_files_data = json.dumps(
+            [model_to_dict(sound) for sound in user_sound_files]
+        )
+
+        return JsonResponse({"user_sound_data": user_sound_files_data}, status=200)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
 def fetch_batch(url: str, params: Dict, headers: Dict) -> List[Dict]:
     """Fetch a single batch of data"""
     try:
