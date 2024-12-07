@@ -28,7 +28,28 @@ window.toggleProfile = toggleProfile;
 
 let currentAudio = null; // Global variable to track the currently playing audio
 
+function fetchUserSoundData() {
+  fetch('/get_user_sound_data/')
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error(
+          `Error: ${response.status} - ${response.statusText}`
+        );
+      }
+    })
+    .then((data) => {
+        USER_SOUND_DATA = JSON.parse(data.user_sound_data);
+    })
+    .catch((error) => {
+      console.error('Error fetching USER_SOUND_DATA:', error);
+    });
+}
+
 function fetchSoundUser(user_name, map) {
+  fetchUserSoundData();
+
   fetch(`/soundscape_user/soundfiles_for_user/${user_name}/`)
     .then((response) => response.json())
     .then((datauser) => {
@@ -82,7 +103,7 @@ function fetchSoundUser(user_name, map) {
               document.getElementById(
                 `${sounduser.sound_name}-user`
               ).innerHTML = `
-                <div class="sound-listen-panel" id=${sounduser.sound_name}-user-sound-item>
+                <div class="sound-listen-panel" id=${sounduser.sound_name}-user-sound-item style="cursor: pointer">
                   <div class="sound-top-panel">
                     <div class="sound-name-stuff">
                       <div>${sounduser.user_name} - ${sounduser.sound_descriptor}</div>
@@ -93,6 +114,12 @@ function fetchSoundUser(user_name, map) {
                 </div>
               `;
 
+              const userSoundData = USER_SOUND_DATA?.find((soundData) => {
+                return (
+                  soundData['s3_file_name'] === sounduser['sound_name']
+                );
+              });
+
               // Append the audio element to the DOM
               document
                 .getElementById(`${sounduser.sound_name}-user-sound-item`)
@@ -100,12 +127,6 @@ function fetchSoundUser(user_name, map) {
               document
                 .getElementById(`${sounduser.sound_name}-user-sound-item`)
                 .addEventListener('click', () => {
-                  const userSoundData = USER_SOUND_DATA?.find((soundData) => {
-                    return (
-                      soundData['s3_file_name'] === sounduser['sound_name']
-                    );
-                  });
-
                   if (userSoundData) {
                     map.flyTo({
                       center: [userSoundData.longitude, userSoundData.latitude],
@@ -140,7 +161,8 @@ function fetchSoundUser(user_name, map) {
                           } else {
                             alert('You have deleted a sound file!');
                           }
-                          fetchSoundUser(sounduser.user_name);
+                          fetchSoundUser(sounduser.user_name, map);
+                          fetchAndDisplaySounds(userSoundData.latitude, userSoundData.longitude);
                         })
                         .catch((error) => {
                           console.log('Error deleting sound file:', error);

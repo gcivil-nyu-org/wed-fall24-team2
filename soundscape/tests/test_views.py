@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from chatroom.models import Chatroom
+from soundscape_user.models import SoundFileUser
 from django.contrib.auth.models import User
 from soundscape.forms import SignupForm
 from unittest.mock import Mock, patch
@@ -43,6 +44,32 @@ class HomepageViewTest(TestCase):
 
     def tearDown(self):
         Chatroom.objects.all().delete()
+
+
+class GetUserSoundDataTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.sound_file_user = SoundFileUser.objects.create(
+            user_name="Test User Name",
+            sound_descriptor="descriptor",
+            s3_file_name="test/path",
+            latitude=40.72,
+            longitude=-74.02,
+        )
+
+    def test_get_user_sound_data(self):
+        response = self.client.get(reverse("soundscape:get_user_sound_data"))
+
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content)
+        self.assertIn("user_sound_data", response_data)
+        self.assertTrue(
+            len(json.loads(response_data["user_sound_data"])) > 0
+        )  # Ensure data is returned
+
+    def tearDown(self):
+        SoundFileUser.objects.all().delete()
 
 
 class GetNoiseDataTests(TestCase):
@@ -279,3 +306,24 @@ class SignupViewTest(TestCase):
         response = self.client.get(self.signup_url)
 
         self.assertContains(response, "csrfmiddlewaretoken")
+
+
+class CustomLogoutViewTest(TestCase):
+    def setUp(self):
+        # Create test user
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword"
+        )
+        self.client = Client()
+        self.logout_url = reverse("soundscape:logout")
+
+    def test_unauthenticated_user_logout(self):
+        """Test that an unauthenticated user accessing logout redirects to homepage."""
+        # Attempt to logout without being logged in
+        response = self.client.post(self.logout_url)
+
+        # Ensure the user is redirected to the homepage
+        self.assertRedirects(response, reverse("soundscape:homepage"))
+
+    def tearDown(self):
+        patch.stopall()

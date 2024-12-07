@@ -83,6 +83,12 @@ function initializeChat(neighborhood) {
         let message = messageInput.value;
         message = DOMPurify.sanitize(message);
 
+        const maxLength = 256;
+        if (message.length > maxLength) {
+            alert(`Message exceeds the ${maxLength} character limit.`);
+            return;
+        }
+
         if (message.trim() !== '') {
             const isValidSession = await validateSession();
             if (isValidSession) {
@@ -224,12 +230,28 @@ function getChatroomComponent(neighborhood) {
         </div>
         <div class="chat-input">
             <div class="chat-input-row">
-              <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" onkeyup="checkProfanity()">
+              <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" maxlength="256" onkeyup="updateCharacterCount(); checkProfanity()">
               <button id="send-message">Send</button>
             </div>
+            <div id="charCount" style="font-size: 0.9em; color: #666;">256 characters remaining</div>
             <div id="profanity-warning" style="display: none; color: red; font-size: 1em; margin-top: 5px;">Warning: This message may contain inappropriate content</div>
         </div>
     </div>`;
+}
+
+function updateCharacterCount() {
+  const maxChars = 256;
+  const messageInput = document.getElementById('messageInput');
+  const charCount = document.getElementById('charCount');
+  const remaining = maxChars - messageInput.value.length;
+
+  charCount.textContent = `${remaining} characters remaining`;
+
+  if (remaining < 0) {
+    charCount.style.color = 'red';
+  } else {
+    charCount.style.color = '#666';
+  }
 }
 
 function getChatroomPublicComponent(neighborhood) {

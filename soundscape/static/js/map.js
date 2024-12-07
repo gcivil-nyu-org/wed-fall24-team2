@@ -25,7 +25,7 @@ function createSoundMarker(lng, lat, map) {
           <button id="popup-upload-sound-btn" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Upload</button>
         </div>
         <h4 style="font-size: 16px; margin: 10px 0;">Uploaded Sounds:</h4>
-        <ul id="sounds-list" style="list-style-type: none; padding-left: 0; margin: 0;"></ul>
+        <ul id="sounds-list" style="list-style-type: none; padding-left: 0; margin: 0; max-height: 300px; overflow-y: auto;"></ul>
       </div>
       <div id="upload-sound-form" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
         <form id="sound-upload-form">
@@ -52,107 +52,114 @@ function createSoundMarker(lng, lat, map) {
     .setLngLat([lng, lat])
     .setPopup(popup)
     .addTo(map);
+  
+  // Flag to track if listeners are attached
+  let listenersAttached = false;
 
   popup.on('open', () => {
-    fetchAndDisplaySounds(lat, lng);
+    fetchAndDisplaySounds(lat, lng, map);
 
-    document
-      .getElementById('popup-upload-sound-btn')
-      .addEventListener('click', function () {
-        document.getElementById('popup-content').style.display = 'none';
-        document.getElementById('upload-sound-form').style.display = 'block';
-      });
+    if (!listenersAttached) {
+      document
+        .getElementById('popup-upload-sound-btn')
+        .addEventListener('click', function () {
+          document.getElementById('popup-content').style.display = 'none';
+          document.getElementById('upload-sound-form').style.display = 'block';
+        });
 
-    document
-      .getElementById('close-upload-form-btn')
-      .addEventListener('click', function () {
-        document.getElementById('upload-sound-form').style.display = 'none';
-        document.getElementById('popup-content').style.display = 'block';
-      });
+      document
+        .getElementById('close-upload-form-btn')
+        .addEventListener('click', function () {
+          document.getElementById('upload-sound-form').style.display = 'none';
+          document.getElementById('popup-content').style.display = 'block';
+        });
 
-    document
-      .getElementById('sound-upload-form')
-      .addEventListener('submit', function (event) {
-        event.preventDefault();
-        const soundFile = document.getElementById('sound-file').files[0];
-        if (soundFile.size > 3 * 1024 * 1024) {
-          alert('Please limit the sound file size to 3 MB');
-          return;
-        }
+      document
+        .getElementById('sound-upload-form')
+        .addEventListener('submit', function (event) {
+          event.preventDefault();
+          const soundFile = document.getElementById('sound-file').files[0];
+          if (soundFile.size > 3 * 1024 * 1024) {
+            alert('Please limit the sound file size to 3 MB');
+            return;
+          }
 
-        if (!isValidS3Key(soundFile.name)) {
-          alert(
-            `"${soundFile.name}" contains invalid characters.\n\n` +
-              'Only the following characters are allowed:\n' +
-              '• Letters (A-Z, a-z)\n' +
-              '• Numbers (0-9)\n' +
-              "• Special characters: ! - _ . * ' ( )\n\n"
-          );
-          return;
-        }
+          if (!isValidS3Key(soundFile.name)) {
+            alert(
+              `"${soundFile.name}" contains invalid characters.\n\n` +
+                'Only the following characters are allowed:\n' +
+                '• Letters (A-Z, a-z)\n' +
+                '• Numbers (0-9)\n' +
+                "• Special characters: ! - _ . * ' ( )\n\n"
+            );
+            return;
+          }
 
-        const latitude = document.getElementById('latitude').value;
-        const longitude = document.getElementById('longitude').value;
-        const soundDescriptor =
-          document.getElementById('sound-descriptor').value;
+          const latitude = document.getElementById('latitude').value;
+          const longitude = document.getElementById('longitude').value;
+          const soundDescriptor =
+            document.getElementById('sound-descriptor').value;
 
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('sound_file', soundFile);
-        formData.append('latitude', latitude);
-        formData.append('longitude', longitude);
-        formData.append('sound_descriptor', soundDescriptor);
+          const formData = new FormData();
+          formData.append('username', username);
+          formData.append('sound_file', soundFile);
+          formData.append('latitude', latitude);
+          formData.append('longitude', longitude);
+          formData.append('sound_descriptor', soundDescriptor);
 
-        fetch('/soundscape_user/upload/', {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': csrfToken,
-          },
-          body: formData,
-        })
-          .then((response) => {
-            console.log('Fetch response object:', response);
-
-            if (response.redirected) {
-              console.warn('Redirection detected. Redirecting to login.');
-              console.log('Redirect URL:', response.url);
-              alert('Your session has expired. Redirecting to login.');
-              window.location.href = response.url;
-              return;
-            }
-
-            console.log('Response status:', response.status);
-            console.log('Response statusText:', response.statusText);
-
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error(
-                `Error: ${response.status} - ${response.statusText}`
-              );
-            }
+          fetch('/soundscape_user/upload/', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrfToken,
+            },
+            body: formData,
           })
-          .then((data) => {
-            console.log('Parsed response data:', data);
+            .then((response) => {
+              console.log('Fetch response object:', response);
 
-            if (data && data.error) {
-              alert(data.error);
-            } else if (data) {
-              fetchSoundUser(USERNAME, map);
-              alert('Sound uploaded successfully!');
-              document.getElementById('upload-sound-form').style.display =
-                'none';
-              document.getElementById('popup-content').style.display = 'block';
+              if (response.redirected) {
+                console.warn('Redirection detected. Redirecting to login.');
+                console.log('Redirect URL:', response.url);
+                alert('Your session has expired. Redirecting to login.');
+                window.location.href = response.url;
+                return;
+              }
 
-              fetchAndDisplaySounds(lat, lng);
-              removeTempMarker(false);
-            }
-          })
-          .catch((error) => {
-            console.error('Error during upload:', error);
-            alert('Error uploading sound');
-          });
-      });
+              console.log('Response status:', response.status);
+              console.log('Response statusText:', response.statusText);
+
+              if (response.ok) {
+                return response.json();
+              } else {
+                throw new Error(
+                  `Error: ${response.status} - ${response.statusText}`
+                );
+              }
+            })
+            .then((data) => {
+              console.log('Parsed response data:', data);
+
+              if (data && data.error) {
+                alert(data.error);
+              } else if (data) {
+                alert('Sound uploaded successfully!');
+                document.getElementById('upload-sound-form').style.display =
+                  'none';
+                document.getElementById('popup-content').style.display = 'block';
+                
+                fetchSoundUser(USERNAME, map);
+                fetchAndDisplaySounds(lat, lng, map);
+                removeTempMarker(false);
+              }
+            })
+            .catch((error) => {
+              console.error('Error during upload:', error);
+              alert('Error uploading sound');
+            });
+        });
+      
+        listenersAttached = true;
+      }
   });
 
   return marker;
@@ -167,12 +174,23 @@ function addUserSound(map) {
 
 let currAudio = null; // Global variable to track the currently playing audio
 
-function fetchAndDisplaySounds(lat, lng) {
+function fetchAndDisplaySounds(lat, lng, map) {
+  // Ensure the sounds list element exists before proceeding; exit if it doesn'ts
+  const soundsList = document.getElementById('sounds-list');
+  const latitude = document.getElementById('latitude');
+  const longitude = document.getElementById('longitude');
+  if (!soundsList || !latitude || !longitude || 
+    (lat != latitude.value && lng !=longitude.value))
+    return;
+
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
     .then((response) => response.json())
     .then((data) => {
       if (data.sounds && data.sounds.length > 0) {
         // Check if there are sounds
+        // Sort sounds by created_at in descending order
+        data.sounds.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
         const soundsListPromises = data.sounds.map((sound) => {
           // Create the initial loading list item
           const formattedDate = formatDateTime(sound.created_at);
@@ -224,7 +242,9 @@ function fetchAndDisplaySounds(lat, lng) {
                       <div class="sound-name-descriptor">${sound.user_name} - ${sound.sound_descriptor}</div>
                       <div class="sound-date">${formattedDate}</div>
                     </div>
-                    ${deleteBtn}
+                    <div>
+                      ${deleteBtn}
+                    </div>
                   </div>
                 </div>
               `;
@@ -255,10 +275,11 @@ function fetchAndDisplaySounds(lat, lng) {
                           if (data.error) {
                             alert(data.error);
                           } else {
-                            fetchSoundUser(USERNAME, map);
                             alert('You have deleted a sound file!');
                           }
-                          fetchAndDisplaySounds(lat, lng);
+                          
+                          fetchSoundUser(USERNAME, map);
+                          fetchAndDisplaySounds(lat, lng, map);
                         })
                         .catch((error) => {
                           console.log('Error deleting sound file:', error);
@@ -750,6 +771,10 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
         removeTempMarker(true);
         addMarker(coordinates.lng, coordinates.lat, map);
         saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
+      });
+
+      map.on('contextmenu', function (e) {
+        removeTempMarker(true);
       });
     }
   }
