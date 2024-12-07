@@ -54,7 +54,7 @@ function createSoundMarker(lng, lat, map) {
     .addTo(map);
 
   popup.on('open', () => {
-    fetchAndDisplaySounds(lat, lng);
+    fetchAndDisplaySounds(lat, lng, map);
 
     document
       .getElementById('popup-upload-sound-btn')
@@ -138,13 +138,13 @@ function createSoundMarker(lng, lat, map) {
             if (data && data.error) {
               alert(data.error);
             } else if (data) {
-              fetchSoundUser(USERNAME, map);
               alert('Sound uploaded successfully!');
               document.getElementById('upload-sound-form').style.display =
                 'none';
               document.getElementById('popup-content').style.display = 'block';
-
-              fetchAndDisplaySounds(lat, lng);
+              
+              fetchSoundUser(USERNAME, map);
+              fetchAndDisplaySounds(lat, lng, map);
               removeTempMarker(false);
             }
           })
@@ -167,7 +167,7 @@ function addUserSound(map) {
 
 let currAudio = null; // Global variable to track the currently playing audio
 
-function fetchAndDisplaySounds(lat, lng) {
+function fetchAndDisplaySounds(lat, lng, map) {
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
     .then((response) => response.json())
     .then((data) => {
@@ -255,10 +255,11 @@ function fetchAndDisplaySounds(lat, lng) {
                           if (data.error) {
                             alert(data.error);
                           } else {
-                            fetchSoundUser(USERNAME, map);
                             alert('You have deleted a sound file!');
                           }
-                          fetchAndDisplaySounds(lat, lng);
+                          
+                          fetchSoundUser(USERNAME, map);
+                          fetchAndDisplaySounds(lat, lng, map);
                         })
                         .catch((error) => {
                           console.log('Error deleting sound file:', error);
