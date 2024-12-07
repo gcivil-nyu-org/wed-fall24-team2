@@ -279,3 +279,24 @@ class SignupViewTest(TestCase):
         response = self.client.get(self.signup_url)
 
         self.assertContains(response, "csrfmiddlewaretoken")
+
+
+class CustomLogoutViewTest(TestCase):
+    def setUp(self):
+        # Create test user
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword"
+        )
+        self.client = Client()
+        self.logout_url = reverse("soundscape:logout")
+
+    def test_unauthenticated_user_logout(self):
+        """Test that an unauthenticated user accessing logout redirects to homepage."""
+        # Attempt to logout without being logged in
+        response = self.client.post(self.logout_url)
+
+        # Ensure the user is redirected to the homepage
+        self.assertRedirects(response, reverse("soundscape:homepage"))
+
+    def tearDown(self):
+        patch.stopall()
