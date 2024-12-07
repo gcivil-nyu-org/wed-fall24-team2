@@ -60,7 +60,6 @@ function createSoundMarker(lng, lat, map) {
     fetchAndDisplaySounds(lat, lng, map);
 
     if (!listenersAttached) {
-      console.log("attach listener")
       document
         .getElementById('popup-upload-sound-btn')
         .addEventListener('click', function () {
@@ -176,6 +175,14 @@ function addUserSound(map) {
 let currAudio = null; // Global variable to track the currently playing audio
 
 function fetchAndDisplaySounds(lat, lng, map) {
+  // Ensure the sounds list element exists before proceeding; exit if it doesn'ts
+  const soundsList = document.getElementById('sounds-list');
+  const latitude = document.getElementById('latitude');
+  const longitude = document.getElementById('longitude');
+  if (!soundsList || !latitude || !longitude || 
+    (lat != latitude.value && lng !=longitude.value))
+    return;
+
   fetch(`/soundscape_user/soundfiles_at_location/${lat}/${lng}/`)
     .then((response) => response.json())
     .then((data) => {
