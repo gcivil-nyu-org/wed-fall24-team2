@@ -25,7 +25,7 @@ function createSoundMarker(lng, lat, map) {
           <button id="popup-upload-sound-btn" style="background-color: #007BFF; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px;">Upload</button>
         </div>
         <h4 style="font-size: 16px; margin: 10px 0;">Uploaded Sounds:</h4>
-        <ul id="sounds-list" style="list-style-type: none; padding-left: 0; margin: 0;"></ul>
+        <ul id="sounds-list" style="list-style-type: none; padding-left: 0; margin: 0; max-height: 300px; overflow-y: auto;"></ul>
       </div>
       <div id="upload-sound-form" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
         <form id="sound-upload-form">
@@ -173,6 +173,9 @@ function fetchAndDisplaySounds(lat, lng, map) {
     .then((data) => {
       if (data.sounds && data.sounds.length > 0) {
         // Check if there are sounds
+        // Sort sounds by created_at in descending order
+        data.sounds.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
         const soundsListPromises = data.sounds.map((sound) => {
           // Create the initial loading list item
           const formattedDate = formatDateTime(sound.created_at);
@@ -224,7 +227,9 @@ function fetchAndDisplaySounds(lat, lng, map) {
                       <div class="sound-name-descriptor">${sound.user_name} - ${sound.sound_descriptor}</div>
                       <div class="sound-date">${formattedDate}</div>
                     </div>
-                    ${deleteBtn}
+                    <div>
+                      ${deleteBtn}
+                    </div>
                   </div>
                 </div>
               `;
@@ -751,6 +756,10 @@ function initializeMap(centerCoordinates, map, existingMarkers) {
         removeTempMarker(true);
         addMarker(coordinates.lng, coordinates.lat, map);
         saveMarker(coordinates.lng, coordinates.lat, existingMarkers);
+      });
+
+      map.on('contextmenu', function (e) {
+        removeTempMarker(true);
       });
     }
   }
