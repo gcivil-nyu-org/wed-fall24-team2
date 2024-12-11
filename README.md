@@ -12,7 +12,7 @@ Develop branch
 
 ## Description
 
-The NYC Soundscape Explorer is an interactive web application that allows users to explore and experience the diverse soundscape of New York City. 
+The NYC Soundscape Explorer is an interactive web application that allows users to explore and experience the diverse soundscape of New York City.
 
 ## Features
 
@@ -119,7 +119,6 @@ Enter your AWS credentials when prompted:
 - AWS Secret Access Key
 - Default region name (e.g., us-east-1)
 - Default output format (json recommended)
-  
 
 **Configure environment files:**
 
@@ -199,4 +198,8 @@ coverage run --source='src' src/manage.py test
 - Manav Parikh
 - Thejaswini D M
 - Tzu-Yi(Belle) Chang
+<<<<<<< HEAD
 - Yashwanth Alapati
+=======
+- Yashwanth Alapati
+>>>>>>> 6f0ee29fd520e259bd6dc0075f5d915287201231
