@@ -35,17 +35,8 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         try:
-            # Notify the room that the user has disconnected
             if self.scope.get("user") and self.scope["user"].is_authenticated:
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        "type": "chat_message",
-                        "message": f"{self.scope['user'].username} has left the chat.",
-                        "username": "System",
-                        "timestamp": "N/A",
-                    },
-                )
+                logger.info(f"User {self.scope['user'].username} disconnected.")
 
             # Remove from groups
             await self.channel_layer.group_discard(
